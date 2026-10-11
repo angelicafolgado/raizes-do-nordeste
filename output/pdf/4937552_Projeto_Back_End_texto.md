@@ -23,7 +23,7 @@ Relatório técnico da implementação Java 21 e Spring Boot 3.5.
 
 Disciplina: Projeto Multidisciplinar - Trilha Back-end. Curso, polo, semestre e docente: a informar.
 
-A discente indicou os documentos locais da pasta uninter como referência. Os próprios arquivos contêm aviso de edição para estudo, conteúdo omitido e prevalência do original; a adoção registra sua orientação, sem autenticação independente no AVA.
+A discente indicou os documentos fornecidos para estudo como referência. Os próprios arquivos contêm aviso de edição para estudo, conteúdo omitido e prevalência do original; a adoção registra sua orientação, sem autenticação independente no AVA.
 
 O sistema é uma demonstração acadêmica local. Pagamentos são simulados e os resultados de desempenho não constituem garantia para produção.
 
@@ -187,7 +187,7 @@ Repositório público: https://github.com/angelicafolgado/raizes-do-nordeste. A 
 
 A coleção Postman foi validada com Newman 6.2.1: 32 requisições e 88 asserções aprovadas; 17 cenários 2xx e 15 cenários de erro, organizados em nove pastas.
 
-A pasta uninter foi adotada como referência por instrução da discente, embora os próprios PDFs indiquem edição para estudo, omissões e prevalência do original. A adoção não autentica a procedência do material no AVA.
+Os materiais fornecidos foram adotados como referência por instrução da discente, embora os próprios PDFs indiquem edição para estudo, omissões e prevalência do original. A adoção não autentica a procedência do material no AVA.
 
 ## 8. Plano de testes e evidências
 
@@ -213,11 +213,11 @@ Resultado observado: 228.399 requisições em 60,01 segundos; p95 de 11,76 ms; z
 
 A implementação Java entrega o fluxo acadêmico de pedidos, reserva de estoque, pagamento simulado e acompanhamento operacional. Os testes e a medição documentam somente o comportamento observado no ambiente local.
 
-O código executável da API, testes e ferramentas mantidas está em Java 21. O repositório público contém a entrega Java. A coleção Postman foi validada: 32 requisições e 88 asserções aprovadas. Os campos acadêmicos foram mantidos por orientação da discente e marcados como a informar. A referência da pasta uninter foi usada conforme orientação da discente, preservada a ressalva indicada pelos próprios arquivos.
+O código executável da API, testes e ferramentas mantidas está em Java 21. O repositório público contém a entrega Java. A coleção Postman foi validada: 32 requisições e 88 asserções aprovadas. Os campos acadêmicos foram mantidos por orientação da discente e marcados como a informar. A referência fornecida foi usada conforme orientação da discente, preservada a ressalva indicada pelos próprios arquivos.
 
 ## Referências
 
-Materiais de referência designados pela discente: PDFs presentes na pasta uninter; os arquivos locais indicam versão editada para estudo.
+Materiais de referência designados pela discente: PDFs fornecidos para estudo, não distribuídos no repositório; os materiais indicam versão editada para estudo.
 
 Projeto Raízes do Nordeste. Documentação técnica, requisitos, privacidade e desempenho. docs/.
 

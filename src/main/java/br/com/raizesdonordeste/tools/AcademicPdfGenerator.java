@@ -87,7 +87,7 @@ public final class AcademicPdfGenerator {
                     "Relatório técnico da implementação Java 21 e Spring Boot 3.5.",
                     "Disciplina: Projeto Multidisciplinar - Trilha Back-end. Curso, polo, semestre e docente: "
                             + "a informar.",
-                    "A discente indicou os documentos locais da pasta uninter como referência. Os próprios "
+                    "A discente indicou os documentos fornecidos para estudo como referência. Os próprios "
                             + "arquivos contêm aviso de edição para estudo, conteúdo omitido e prevalência do "
                             + "original; a adoção registra sua orientação, sem autenticação independente no AVA.",
                     "O sistema é uma demonstração acadêmica local. Pagamentos são simulados e os resultados "
@@ -233,7 +233,7 @@ public final class AcademicPdfGenerator {
                             + "recomenda cinco commits de evolução real; esta revisão registra correções efetivas, sem fabricar histórico.",
                     "A coleção Postman foi validada com Newman 6.2.1: 32 requisições e 88 asserções aprovadas; "
                             + "17 cenários 2xx e 15 cenários de erro, organizados em nove pastas.",
-                    "A pasta uninter foi adotada como referência por instrução da discente, embora os próprios "
+                    "Os materiais fornecidos foram adotados como referência por instrução da discente, embora os próprios "
                             + "PDFs indiquem edição para estudo, omissões e prevalência do original. A adoção "
                             + "não autentica a procedência do material no AVA."
             ));
@@ -269,12 +269,12 @@ public final class AcademicPdfGenerator {
                     "O código executável da API, testes e ferramentas mantidas está em Java 21. O repositório "
                             + "público contém a entrega Java. A coleção Postman foi validada: 32 requisições e 88 asserções "
                             + "aprovadas. Os campos acadêmicos foram mantidos por orientação da discente e "
-                            + "marcados como a informar. A referência da pasta uninter foi usada conforme orientação "
+                            + "marcados como a informar. A referência fornecida foi usada conforme orientação "
                             + "da discente, preservada a ressalva indicada pelos próprios arquivos."
             ));
             section("Referências", List.of(
-                    "Materiais de referência designados pela discente: PDFs presentes na pasta uninter; os "
-                            + "arquivos locais indicam versão editada para estudo.",
+                    "Materiais de referência designados pela discente: PDFs fornecidos para estudo, não distribuídos no repositório; os "
+                            + "materiais indicam versão editada para estudo.",
                     "Projeto Raízes do Nordeste. Documentação técnica, requisitos, privacidade e desempenho. docs/.",
                     "Oracle. Java Documentation. docs.oracle.com/en/java/.",
                     "Spring. Spring Boot Reference Documentation. docs.spring.io/spring-boot/.",

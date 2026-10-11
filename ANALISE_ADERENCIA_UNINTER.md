@@ -1,6 +1,6 @@
 # Análise de aderência ao roteiro UNINTER — revisão de correções
 
-Atualização: 11/10/2026. Referências: PDFs da pasta uninter e anexos de estudo de caso/trilha Back-end fornecidos. As cópias indicam edição para estudo, omissões e prevalência do original; esta comparação não autentica requisitos adicionais do AVA.
+Atualização: 11/10/2026. Referências: materiais de estudo de caso/trilha Back-end fornecidos pela discente. As cópias indicam edição para estudo, omissões e prevalência do original; esta comparação não autentica requisitos adicionais do AVA.
 
 ## Parecer
 

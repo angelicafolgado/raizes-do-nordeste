@@ -10,7 +10,7 @@ A rede Raízes do Nordeste precisa consolidar pedidos de diferentes canais e aco
 
 O objetivo da entrega é demonstrar uma API REST reproduzível, com persistência real, autenticação, autorização, regras transacionais e documentação acadêmica coerente com o código. A matriz administra a visão da rede, enquanto as unidades representam os locais de atendimento e armazenamento de estoque. O modelo atual não contém uma entidade Matriz nem vinculação de funcionários a uma unidade: o perfil ADMIN representa a administração da rede e os perfis operacionais têm acesso global. Restrição de funcionários por unidade é uma evolução proposta.
 
-Por orientação da discente, os PDFs na pasta `uninter/` foram usados como referência de conteúdo. Os próprios arquivos se identificam como versões editadas para estudo, com conteúdo omitido e prevalência do original; não se afirma que a procedência oficial no AVA foi autenticada.
+Por orientação da discente, os PDFs fornecidos pela discente foram usados como referência de conteúdo e não são distribuídos neste repositório. Os próprios arquivos se identificam como versões editadas para estudo, com conteúdo omitido e prevalência do original; não se afirma que a procedência oficial no AVA foi autenticada.
 
 ## 2. Decisão de escopo
 
