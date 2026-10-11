@@ -11,6 +11,8 @@ Atualizado em 11/10/2026. Este registro descreve a revisão Java 21/Spring Boot,
 | Cópia limpa | Cópia temporária contendo `pom.xml`, `src` e `docs/diagramas`, sem `target` ou banco herdado: `mvn -o test package` e geração do PDF concluídos com sucesso. |
 | PDF acadêmico | 10 páginas; geração Java validada por extração de texto, com nome, RU, resultados de desempenho e plano de testes. |
 | Ensaio de carga | 20 clientes por 60,01 s: 228.399 requisições, p95 de 11,76 ms, zero erros e zero respostas HTTP 5xx. Ver [método e limites](06_CORRECAO_DESEMPENHO.md). |
+| Repositório público | Publicado em <https://github.com/angelicafolgado/raizes-do-nordeste>; os commits atuais de `main` estão no nome de Angelica Dias Folgado. O histórico remoto anterior de Lako foi substituído conforme solicitado. |
+| Linguagens do repositório | A API de linguagens do GitHub reporta somente Java. A coleção Postman permanece como JSON e contém cenários não revalidados contra a API Java. |
 | Suíte legada TypeScript | Não executada nesta revisão; Node.js/npm não estão disponíveis no ambiente. O teste legado foi removido após a substituição da implementação e da suíte pela versão Java. |
 | Coleção Postman | Os 32 cenários permanecem como artefato histórico; a coleção não foi reexecutada nem validada contra o contrato Java atual. |
 
@@ -39,5 +41,6 @@ mvn.cmd @pdfArgs
 
 - A coleção Postman requer revisão e execução manual contra a API Java antes de ser apresentada como evidência.
 - Os diagramas de DER, casos de uso e sequência são artefatos documentais cuja origem precede a revisão Java; as ressalvas estão em [diagramas](05_DIAGRAMAS.md) e no PDF.
-- A fonte indicada pela discente para o roteiro contém avisos de edição para estudo e prevalência do original. A conferência independente no AVA continua necessária.
-- A publicação remota e qualquer atualização do histórico Git ainda não foram realizadas.
+- Os PDFs indicados pela discente como referência se identificam como versões editadas para estudo, com conteúdo omitido e prevalência do original. A análise foi feita contra esse conteúdo, mas não autentica o roteiro oficial no AVA.
+- Curso, polo, semestre e docente não foram informados para a capa; o material indicado pede esses dados. A formatação ABNT e a revisão visual do PDF ainda precisam ser conferidas segundo as orientações efetivas do AVA.
+- O histórico público verdadeiro permanece abaixo dos cinco commits recomendados pelo material. Não foram criados commits artificiais para atingir essa recomendação.

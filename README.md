@@ -2,6 +2,8 @@
 
 API REST acadêmica para pedidos multicanal, estoque por unidade, pagamento simulado, autenticação por perfil, auditoria e registro opcional de consentimento.
 
+Repositório público: <https://github.com/angelicafolgado/raizes-do-nordeste>
+
 ## Java API
 
 - Java 21

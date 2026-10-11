@@ -54,12 +54,11 @@ public final class AcademicPdfGenerator {
                     "Projeto acadêmico: Raízes do Nordeste",
                     "API REST para pedidos multicanal, estoque por unidade e pagamento simulado",
                     "Relatório técnico da implementação Java 21 e Spring Boot 3.5.",
-                    "Disciplina: Projeto Multidisciplinar - Trilha Back-end. Curso, polo, semestre e docentes "
-                            + "não informados não foram presumidos.",
-                    "A discente designou os documentos locais da pasta uninter como referência oficial para "
-                            + "esta entrega. Os arquivos contêm aviso de edição para estudo, conteúdo omitido "
-                            + "e prevalência do original; esta adoção registra a orientação da discente, sem "
-                            + "autenticação independente no AVA.",
+                    "Disciplina: Projeto Multidisciplinar - Trilha Back-end. Curso, polo, semestre e docente: "
+                            + "a informar.",
+                    "A discente indicou os documentos locais da pasta uninter como referência. Os próprios "
+                            + "arquivos contêm aviso de edição para estudo, conteúdo omitido e prevalência do "
+                            + "original; a adoção registra sua orientação, sem autenticação independente no AVA.",
                     "O sistema é uma demonstração acadêmica local. Pagamentos são simulados e os resultados "
                             + "de desempenho não constituem garantia para produção."
             ));
@@ -176,9 +175,11 @@ public final class AcademicPdfGenerator {
                     "O README documenta JDK, Maven, variáveis, banco/seed, início da API, Swagger, testes e "
                             + "geração do PDF. O OpenAPI é servido pela aplicação. A cópia limpa Java foi "
                             + "validada sem target ou banco herdado, usando dependências já disponíveis no Maven local.",
-                    "O repositório público e a coleção Postman não foram validados contra a revisão Java "
-                            + "corrente; o push ainda não foi feito. Não apresentar a coleção legada como "
-                            + "execução comprovada da API Java.",
+                    "Repositório público: https://github.com/angelicafolgado/raizes-do-nordeste. A branch main "
+                            + "tem histórico publicado em nome de Angelica Dias Folgado. O material indicado "
+                            + "recomenda cinco commits; o histórico verdadeiro permanece abaixo dessa recomendação.",
+                    "A coleção Postman contém 32 cenários históricos e não foi validada contra a API Java atual; "
+                            + "não apresentá-la como execução comprovada desta revisão.",
                     "A pasta uninter foi adotada como referência por instrução da discente, embora os próprios "
                             + "PDFs indiquem edição para estudo, omissões e prevalência do original. A adoção "
                             + "não autentica a procedência do material no AVA."
@@ -211,10 +212,11 @@ public final class AcademicPdfGenerator {
                     "A implementação Java entrega o fluxo acadêmico de pedidos, reserva de estoque, pagamento "
                             + "simulado e acompanhamento operacional. Os testes e a medição documentam somente "
                             + "o comportamento observado no ambiente local.",
-                    "O código executável da API, testes e ferramentas mantidas está em Java 21; a publicação "
-                            + "remota e a validação da coleção Postman contra esta revisão continuam pendentes. "
-                            + "A cópia limpa Java foi validada. A referência da pasta uninter foi usada conforme "
-                            + "orientação da discente, preservada a ressalva indicada pelos próprios arquivos."
+                    "O código executável da API, testes e ferramentas mantidas está em Java 21. O repositório "
+                            + "público foi atualizado; a cópia limpa Java foi validada. A coleção Postman ainda "
+                            + "não foi validada contra esta revisão. Os campos acadêmicos não fornecidos foram "
+                            + "marcados como a informar. A referência da pasta uninter foi usada conforme orientação "
+                            + "da discente, preservada a ressalva indicada pelos próprios arquivos."
             ));
             section("Referências", List.of(
                     "Materiais de referência designados pela discente: PDFs presentes na pasta uninter; os "
@@ -236,13 +238,20 @@ public final class AcademicPdfGenerator {
         markdown.append("# Raízes do Nordeste\n\n")
                 .append("**Angelica Dias Folgado**  \n**RU: 4937552**\n\n")
                 .append("Projeto acadêmico: API REST para pedidos multicanal, estoque por unidade e pagamento simulado. ")
-                .append("Relatório técnico da implementação Java 21 e Spring Boot 3.5.\n\n");
+                .append("Relatório técnico da implementação Java 21 e Spring Boot 3.5.\n\n")
+                .append("Disciplina: Projeto Multidisciplinar - Trilha Back-end  \n")
+                .append("Curso: a informar  \nPolo: a informar  \nSemestre: a informar  \nDocente: a informar\n\n");
         text("Angelica Dias Folgado", BOLD, 20, 455);
         text("RU: 4937552", BODY, 12, 430);
         text("RAÍZES DO NORDESTE", BOLD, 22, 330);
         text("Projeto de API REST - Back-end", BODY, 14, 302);
         text("Implementação Java 21 / Spring Boot", BODY, 12, 276);
-        text("Relatório acadêmico e evidências técnicas", BODY, 11, 205);
+        text("Disciplina: Projeto Multidisciplinar - Trilha Back-end", BODY, 10, 248);
+        text("Curso: a informar", BODY, 10, 232);
+        text("Polo: a informar", BODY, 10, 216);
+        text("Semestre: a informar", BODY, 10, 200);
+        text("Docente: a informar", BODY, 10, 184);
+        text("Relatório acadêmico e evidências técnicas", BODY, 11, 154);
         text("2026", BODY, 11, 100);
         closePage();
     }
@@ -417,6 +426,11 @@ public final class AcademicPdfGenerator {
                     || !extracted.contains("228.399")
                     || !extracted.contains("11,76 ms")
                     || !extracted.contains("100% Java")
+                    || !extracted.contains("https://github.com/angelicafolgado/raizes-do-nordeste")
+                    || !extracted.contains("Curso: a informar")
+                    || !extracted.contains("Polo: a informar")
+                    || !extracted.contains("Semestre: a informar")
+                    || !extracted.contains("Docente: a informar")
                     || !extracted.contains("Plano de testes e evidências")) {
                 throw new IOException("O PDF gerado não contém as seções ou evidências acadêmicas esperadas.");
             }

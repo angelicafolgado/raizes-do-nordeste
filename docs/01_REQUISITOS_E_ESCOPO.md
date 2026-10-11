@@ -2,7 +2,7 @@
 
 Projeto: Raízes do Nordeste — API Back-end  
 Versão: 1.0 — 11/10/2026  
-Situação desta etapa: documentação de requisitos concluída; complementos técnicos continuam pendentes.
+Situação: baseline de requisitos e decisões de escopo da etapa 1. Para o estado implementado e suas evidências atuais, consulte [rastreabilidade](06_RASTREABILIDADE.md) e [resultado de validação](04_RESULTADO_VALIDACAO.md).
 
 ## 1. Objetivo e contexto
 
@@ -10,7 +10,7 @@ A rede Raízes do Nordeste precisa consolidar pedidos de diferentes canais e aco
 
 O objetivo da entrega é demonstrar uma API REST reproduzível, com persistência real, autenticação, autorização, regras transacionais e documentação acadêmica coerente com o código. A matriz administra a visão da rede, enquanto as unidades representam os locais de atendimento e armazenamento de estoque. O modelo atual não contém uma entidade Matriz nem vinculação de funcionários a uma unidade: o perfil ADMIN representa a administração da rede e os perfis operacionais têm acesso global. Restrição de funcionários por unidade é uma evolução proposta.
 
-Esta versão usa a cópia adaptada do roteiro fornecida na pasta. A confirmação com o documento oficial do AVA permanece como verificação externa antes da entrega; não impede o desenvolvimento do escopo abaixo.
+Por orientação da discente, os PDFs na pasta `uninter/` foram usados como referência de conteúdo. Os próprios arquivos se identificam como versões editadas para estudo, com conteúdo omitido e prevalência do original; não se afirma que a procedência oficial no AVA foi autenticada.
 
 ## 2. Decisão de escopo
 
@@ -22,7 +22,7 @@ Essa decisão usa a possibilidade do roteiro de contemplar requisitos fora do MV
 
 ### Legenda
 
-- **Implementado:** existe no código atual; a evidência funcional disponível é a validação anterior com 22 testes aprovados.
+- **Implementado:** existe no código Java atual; a evidência funcional e os limites estão em [rastreabilidade](06_RASTREABILIDADE.md) e [resultado de validação](04_RESULTADO_VALIDACAO.md).
 - **Parcial:** existe uma parte, mas falta complemento para o escopo final.
 - **Planejado:** será executado nas próximas etapas desta entrega.
 - **Proposto:** será especificado e justificado na documentação; não integra a implementação desta entrega.
@@ -30,7 +30,7 @@ Essa decisão usa a possibilidade do roteiro de contemplar requisitos fora do MV
 - **P2:** melhoria de consistência e qualidade incluída na conclusão.
 - **P3:** evolução conceitual fora da implementação final definida aqui.
 
-As prioridades são decisões do projeto. Não representam pesos oficiais de avaliação. Os critérios de aceite abaixo são verificações a executar, não resultados já obtidos.
+As prioridades são decisões do projeto. Não representam pesos oficiais de avaliação. Esta matriz registra o baseline de planejamento; os critérios de aceite não substituem os resultados executados registrados na documentação de validação.
 
 ## 3. Atores e responsabilidades
 

@@ -5,6 +5,12 @@
 
 Projeto acadêmico: API REST para pedidos multicanal, estoque por unidade e pagamento simulado. Relatório técnico da implementação Java 21 e Spring Boot 3.5.
 
+Disciplina: Projeto Multidisciplinar - Trilha Back-end  
+Curso: a informar  
+Polo: a informar  
+Semestre: a informar  
+Docente: a informar
+
 ## Apresentação
 
 Angelica Dias Folgado - RU 4937552
@@ -15,9 +21,9 @@ API REST para pedidos multicanal, estoque por unidade e pagamento simulado
 
 Relatório técnico da implementação Java 21 e Spring Boot 3.5.
 
-Disciplina: Projeto Multidisciplinar - Trilha Back-end. Curso, polo, semestre e docentes não informados não foram presumidos.
+Disciplina: Projeto Multidisciplinar - Trilha Back-end. Curso, polo, semestre e docente: a informar.
 
-A discente designou os documentos locais da pasta uninter como referência oficial para esta entrega. Os arquivos contêm aviso de edição para estudo, conteúdo omitido e prevalência do original; esta adoção registra a orientação da discente, sem autenticação independente no AVA.
+A discente indicou os documentos locais da pasta uninter como referência. Os próprios arquivos contêm aviso de edição para estudo, conteúdo omitido e prevalência do original; a adoção registra sua orientação, sem autenticação independente no AVA.
 
 O sistema é uma demonstração acadêmica local. Pagamentos são simulados e os resultados de desempenho não constituem garantia para produção.
 
@@ -151,7 +157,9 @@ A discussão de privacidade é acadêmica e não representa certificação jurí
 
 O README documenta JDK, Maven, variáveis, banco/seed, início da API, Swagger, testes e geração do PDF. O OpenAPI é servido pela aplicação. A cópia limpa Java foi validada sem target ou banco herdado, usando dependências já disponíveis no Maven local.
 
-O repositório público e a coleção Postman não foram validados contra a revisão Java corrente; o push ainda não foi feito. Não apresentar a coleção legada como execução comprovada da API Java.
+Repositório público: https://github.com/angelicafolgado/raizes-do-nordeste. A branch main tem histórico publicado em nome de Angelica Dias Folgado. O material indicado recomenda cinco commits; o histórico verdadeiro permanece abaixo dessa recomendação.
+
+A coleção Postman contém 32 cenários históricos e não foi validada contra a API Java atual; não apresentá-la como execução comprovada desta revisão.
 
 A pasta uninter foi adotada como referência por instrução da discente, embora os próprios PDFs indiquem edição para estudo, omissões e prevalência do original. A adoção não autentica a procedência do material no AVA.
 
@@ -177,7 +185,7 @@ Resultado observado: 228.399 requisições em 60,01 segundos; p95 de 11,76 ms; z
 
 A implementação Java entrega o fluxo acadêmico de pedidos, reserva de estoque, pagamento simulado e acompanhamento operacional. Os testes e a medição documentam somente o comportamento observado no ambiente local.
 
-O código executável da API, testes e ferramentas mantidas está em Java 21; a publicação remota e a validação da coleção Postman contra esta revisão continuam pendentes. A cópia limpa Java foi validada. A referência da pasta uninter foi usada conforme orientação da discente, preservada a ressalva indicada pelos próprios arquivos.
+O código executável da API, testes e ferramentas mantidas está em Java 21. O repositório público foi atualizado; a cópia limpa Java foi validada. A coleção Postman ainda não foi validada contra esta revisão. Os campos acadêmicos não fornecidos foram marcados como a informar. A referência da pasta uninter foi usada conforme orientação da discente, preservada a ressalva indicada pelos próprios arquivos.
 
 ## Referências
 

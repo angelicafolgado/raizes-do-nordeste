@@ -51,4 +51,4 @@ Atualizado em 11/10/2026. Este mapa descreve o estado atual em `src/main/java` e
 | 1–6 | Requisitos, implementação, privacidade, plano, documentação e desempenho registrados nos arquivos de `docs/`. |
 | 7 — PDF acadêmico | Gerado em Java, com Angelica Dias Folgado, RU 4937552, 10 páginas e validação textual. |
 | 8 — cópia limpa | Build/test e geração do PDF passaram em cópia temporária sem artefatos locais herdados. |
-| 8 — publicação remota | Pendente; ainda não foi feito push nem substituído o histórico remoto. |
+| 8 — publicação remota | Publicada em <https://github.com/angelicafolgado/raizes-do-nordeste>. Os commits de `main` estão no nome de Angelica Dias Folgado; o histórico remoto anterior de Lako foi substituído conforme solicitado. O histórico verdadeiro permanece abaixo dos cinco commits recomendados pelo material. |
