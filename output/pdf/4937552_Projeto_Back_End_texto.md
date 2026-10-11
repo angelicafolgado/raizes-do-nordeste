@@ -29,27 +29,37 @@ O sistema é uma demonstração acadêmica local. Pagamentos são simulados e os
 
 ## Sumário
 
-1. Introdução
+1. Introdução ... 4
 
-2. Estudo de caso e escopo
+2. Estudo de caso e escopo ... 4
 
-3. Análise e requisitos
+3. Análise e requisitos ... 4
 
-4. Modelagem e arquitetura
+4. Modelagem e arquitetura ... 5
 
-5. API e endpoints
+Anexo A - Diagrama entidade-relacionamento ... 6
 
-6. Segurança, privacidade e limites
+Anexo B - Casos de uso ... 7
 
-7. Entrega técnica e aderência à trilha
+Anexo C - Classes conceituais de domínio ... 8
 
-8. Plano de testes e evidências
+Anexo C.1 - Arquitetura Java ... 9
 
-9. Ensaio de desempenho
+Anexo D - Atividade do fluxo crítico ... 10
 
-10. Conclusão e referências
+5. API e endpoints ... 11
 
-Anexos: diagramas do banco, casos de uso, arquitetura Java e sequência.
+6. Segurança, privacidade e limites ... 12
+
+7. Entrega técnica e aderência à trilha ... 12
+
+8. Plano de testes e evidências ... 12
+
+9. Ensaio de desempenho ... 13
+
+10. Conclusão ... 13
+
+Referências ... 14
 
 ## 1. Introdução
 
@@ -81,6 +91,8 @@ Pedidos não pagos podem ser cancelados por perfis autorizados, com devolução 
 
 Requisitos não funcionais atendidos incluem separação por responsabilidades, persistência SQLite, JWT, hashing de senha, padrão JSON de erro, limite de corpo HTTP de 100 KB, paginação e proteção de reserva sob concorrência.
 
+Migrações Flyway versionadas inicializam bancos novos e registram a atualização de bases existentes sem apagar dados. Checksums são validados ao iniciar.
+
 Requisitos propostos: cadastro, CRUD administrativo de catálogo, movimentação de estoque, fidelidade por pontos, promoções e persistência distribuída multiwriter.
 
 ## 4. Modelagem e arquitetura
@@ -91,7 +103,7 @@ ApiController atende HTTP; AuthenticationFilter e JwtService validam identidade;
 
 O banco tem nove tabelas: usuarios, unidades, produtos, estoques_unidades, pedidos, itens_pedido, pagamentos, audit_logs e consentimentos. O par unidade/produto do estoque é único; pedidos têm usuário e unidade; itens referenciam pedido e produto; há no máximo um pagamento por pedido.
 
-O código Java usa mapas JDBC e records pontuais; não possui classes Java de entidade para todo o domínio. O diagrama conceitual de classes preservado é histórico; o anexo de arquitetura Java registra as classes técnicas da implementação atual.
+O código Java usa mapas JDBC e records pontuais; não possui classes Java de entidade para todo o domínio. O diagrama conceitual representa os dados projetados por JDBC; o anexo de arquitetura Java registra as classes técnicas da implementação atual.
 
 SQLite permite um escritor por vez. Uma trava local serializa transações de escrita dentro do processo; isso não coordena múltiplas instâncias distribuídas.
 
@@ -99,7 +111,7 @@ A implementação da API, dos testes automatizados e das ferramentas mantidas no
 
 ## Anexo A - Diagrama entidade-relacionamento
 
-Nove tabelas e relacionamentos. schema.sql é a fonte do modelo persistido pela API Java.
+Nove tabelas de domínio e relacionamentos. V1__initial_schema.sql é a migração Flyway; flyway_schema_history mantém versões e checksums.
 
 ![ Anexo A - Diagrama entidade-relacionamento ](../../docs/diagramas/01_der.png)
 
@@ -109,17 +121,23 @@ Visão dos atores e operações; gateway é um adaptador simulado, não uma inte
 
 ![ Anexo B - Casos de uso ](../../docs/diagramas/02_casos_de_uso.png)
 
-## Anexo C - Diagrama de classes Java (visão técnica)
+## Anexo C - Classes conceituais de domínio
 
-O diagrama representa as classes reais da implementação. Ele não substitui um modelo de entidades Java: as entidades de domínio são projetadas por JDBC em mapas e records pontuais.
+Modelo conceitual de dados; a implementação usa projeções JDBC em mapas, não entidades ORM.
 
-ApiController usa RaizesStore e PaymentGateway; MockPaymentGateway implementa o contrato; AuthenticationFilter usa JwtService; ApiExceptionHandler converte ApiException em HTTP.
+![ Anexo C - Classes conceituais de domínio ](../../docs/diagramas/03_classes.png)
 
-## Anexo D - Sequência do fluxo crítico
+## Anexo C.1 - Arquitetura Java
 
-Visão de pedido, pagamento mock e status. A fonte visual original antecede a versão Java e requer revisão final.
+Classes reais e suas dependências. PaymentGateway.process é implementado por MockPaymentGateway.
 
-![ Anexo D - Sequência do fluxo crítico ](../../docs/diagramas/04_sequencia.png)
+![ Anexo C.1 - Arquitetura Java ](../../docs/diagramas/03_arquitetura_java.png)
+
+## Anexo D - Atividade do fluxo crítico
+
+Atividade da implementação Java atual: transações JDBC, aprovação/recusa, falhas técnicas, cancelamento e status.
+
+![ Anexo D - Atividade do fluxo crítico ](../../docs/diagramas/04_sequencia.png)
 
 ## 5. API e endpoints
 
@@ -141,7 +159,15 @@ GET /api/privacidade/aviso; PUT /api/privacidade/consentimentos/fidelidade; GET 
 
 GET /api/auditoria?acao=CONSULTA_PEDIDOS - ADMIN. GET /api-docs.json serve o contrato OpenAPI; / redireciona para Swagger.
 
-Exemplo: {"unidadeId":1,"canalPedido":"APP","itens":[{"produtoId":1,"quantidade":1}]}. O servidor calcula o preço.
+O contrato OpenAPI contém schemas, campos obrigatórios, enumerações, parâmetros, perfis, exemplos e respostas de erro. Ele é aplicado somente a rotas descobertas pelo Spring.
+
+Request de pedido: {"unidadeId": 1, "canalPedido": "APP", "itens": [{"produtoId": 1, "quantidade": 1}]}. O servidor calcula o preço.
+
+Trecho de response 201: {"id": 1, "canalPedido": "APP", "status": "AGUARDANDO_PAGAMENTO", "total": 38.5}. O contrato completo inclui itens, titular, unidade e datas.
+
+Pagamento recusado: envie {"statusSimulado": "RECUSADO"}. Response 200 inclui {"sucesso": false, "statusPedido": "AGUARDANDO_PAGAMENTO"}; a reserva permanece e nova tentativa é permitida.
+
+Erro de estoque, HTTP 409: {"error": "ESTOQUE_INSUFICIENTE", "message": "Estoque insuficiente para Baião de dois.", "details": [], "timestamp": "2026-10-11T13:00:00Z", "path": "/api/pedidos", "requestId": "00000000-0000-4000-8000-000000000001"}. Exemplo ilustrativo; não é uma captura de credenciais.
 
 ## 6. Segurança, privacidade e limites
 
@@ -155,23 +181,25 @@ A discussão de privacidade é acadêmica e não representa certificação jurí
 
 ## 7. Entrega técnica e aderência à trilha
 
-O README documenta JDK, Maven, variáveis, banco/seed, início da API, Swagger, testes e geração do PDF. O OpenAPI é servido pela aplicação. A cópia limpa Java foi validada sem target ou banco herdado, usando dependências já disponíveis no Maven local.
+O README documenta JDK, Maven, variáveis, banco/seed, início da API, Swagger, testes e geração do PDF. O OpenAPI é servido pela aplicação. A cópia limpa de uma revisão anterior foi validada sem target ou banco herdado, usando dependências já disponíveis no Maven local.
 
-Repositório público: https://github.com/angelicafolgado/raizes-do-nordeste. A branch main tem histórico publicado em nome de Angelica Dias Folgado. O material indicado recomenda cinco commits; o histórico verdadeiro permanece abaixo dessa recomendação.
+Repositório público: https://github.com/angelicafolgado/raizes-do-nordeste. A branch main tem histórico publicado em nome de Angelica Dias Folgado. O material indicado recomenda cinco commits de evolução real; esta revisão registra correções efetivas, sem fabricar histórico.
 
-A coleção Postman contém 32 cenários históricos e não foi validada contra a API Java atual; não apresentá-la como execução comprovada desta revisão.
+A coleção Postman foi validada com Newman 6.2.1: 32 requisições e 88 asserções aprovadas; 17 cenários 2xx e 15 cenários de erro, organizados em nove pastas.
 
 A pasta uninter foi adotada como referência por instrução da discente, embora os próprios PDFs indiquem edição para estudo, omissões e prevalência do original. A adoção não autentica a procedência do material no AVA.
 
 ## 8. Plano de testes e evidências
 
-A validação Maven executada em 11/10/2026 concluiu com BUILD SUCCESS: 18 testes aprovados, sem falhas, erros ou testes ignorados.
+A validação Maven executada em 11/10/2026 concluiu com BUILD SUCCESS: 20 testes aprovados, sem falhas, erros ou testes ignorados.
 
 Casos positivos cobrem token de autenticação usado nos testes, listagens, pedido criado com itens agrupados, aprovação de pagamento, avanço para PRONTO, consentimento idempotente, seed idempotente e consultas concorrentes.
 
 Casos negativos cobrem credencial/token inválido (401), perfil ou titular indevido (403), dados inválidos (400/422), unidade/produto inexistente (404), estoque insuficiente e conflito de estado (409), gateway (503/504), corpo excessivo (413) e rollback quando falha auditoria.
 
-A evidência é JUnit: 16 métodos de integração em ApiIntegrationTest e 2 testes do gateway em MockPaymentGatewayTest. Os métodos podem conter várias asserções e códigos HTTP. A coleção Postman histórica não foi reexecutada contra Java.
+O reinício local foi validado: pedido e pagamento permaneceram consultáveis em SQLite. Migrações e seed são repetíveis. Restauração de backup não foi ensaiada nesta revisão.
+
+A evidência é JUnit: 16 métodos de integração em ApiIntegrationTest e 2 testes do gateway em MockPaymentGatewayTest, mais 2 testes de migrações Flyway em DatabaseMigrationTest. A coleção Postman executou 32 requisições e 88 asserções, sem falhas.
 
 ## 9. Ensaio de desempenho
 
@@ -185,7 +213,7 @@ Resultado observado: 228.399 requisições em 60,01 segundos; p95 de 11,76 ms; z
 
 A implementação Java entrega o fluxo acadêmico de pedidos, reserva de estoque, pagamento simulado e acompanhamento operacional. Os testes e a medição documentam somente o comportamento observado no ambiente local.
 
-O código executável da API, testes e ferramentas mantidas está em Java 21. O repositório público foi atualizado; a cópia limpa Java foi validada. A coleção Postman ainda não foi validada contra esta revisão. Os campos acadêmicos não fornecidos foram marcados como a informar. A referência da pasta uninter foi usada conforme orientação da discente, preservada a ressalva indicada pelos próprios arquivos.
+O código executável da API, testes e ferramentas mantidas está em Java 21. O repositório público contém a entrega Java. A coleção Postman foi validada: 32 requisições e 88 asserções aprovadas. Os campos acadêmicos foram mantidos por orientação da discente e marcados como a informar. A referência da pasta uninter foi usada conforme orientação da discente, preservada a ressalva indicada pelos próprios arquivos.
 
 ## Referências
 

@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-11",
+  "base_commit": "b4eaa4adb809f59d7d6c472d4af09d81d94ed837",
+  "workflow": "Java 21 / Spring Boot / SQLite / Flyway",
+  "maven": {
+    "command": "mvn test package",
+    "exit_code": 0,
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "postman": {
+    "runner": "Newman 6.2.1",
+    "requests": 32,
+    "assertions": 88,
+    "failures": 0,
+    "positive_2xx": 17,
+    "negative_errors": 15,
+    "folders": 9
+  },
+  "openapi": {
+    "schema_examples_validated": 76,
+    "real_public_responses_validated": 4,
+    "required_fields_enums_error_responses_checked": true
+  },
+  "database": {
+    "existing_database_migrated": true,
+    "baseline_version": "0",
+    "migration_version": "1",
+    "existing_orders_preserved": 2,
+    "new_database_and_repeatability_tested": true
+  },
+  "pdf": {
+    "file": "output/pdf/4937552_Projeto_Back_End.pdf",
+    "pages": 14,
+    "format": "A4",
+    "embedded_font": "Liberation Serif (SIL OFL 1.1)",
+    "body_size_pt": 12,
+    "line_spacing": 1.5,
+    "left_top_margin_pt": 85,
+    "right_bottom_margin_pt": 57,
+    "numbered_contents": true,
+    "visual_review": true,
+    "academic_fields": "a informar, conforme orientação da autora"
+  },
+  "not_run": [
+    "Ensaio de carga de 60 segundos após as correções",
+    "Restauração de backup",
+    "Alta disponibilidade em produção",
+    "Certificação ABNT contra normas do AVA"
+  ]
+}

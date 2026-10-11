@@ -1,0 +1,46 @@
+digraph Fluxo {
+ graph [rankdir=TB,bgcolor="white",pad=0.4,fontname="Arial",label="04 | Fluxo de atividade — API Java / SQLite",labelloc=t,fontsize=22];
+ node [shape=box,style="rounded,filled",fillcolor="#edf6f5",color="#46616f",fontname="Arial",fontsize=12,margin="0.2,0.12"];
+ edge [fontname="Arial",fontsize=10,color="#46616f"];
+ start [shape=oval,label="Cliente ou Atendente
+JWT validado pelo AuthenticationFilter"];
+ create [label="ApiController.createOrder
+Validar unidade, canal e itens; preço do catálogo"];
+ reserve [label="RaizesStore.transaction (JDBC)
+Reservar estoque + pedido/itens + auditoria"];
+ waiting [label="COMMIT → AGUARDANDO_PAGAMENTO
+Erro em item/saldo: ROLLBACK, resposta 404/409/422"];
+ pay [label="ApiController.pay
+Validar titular e estado; abrir transação"];
+ gateway [label="PaymentGateway.process(Request)
+MockPaymentGateway: resultado correlacionado"];
+ decision [shape=diamond,label="Resultado?"];
+ declined [label="RECUSADO
+Pagamento + auditoria; COMMIT
+200, sucesso=false; mantém reserva"];
+ technical [label="INDISPONIVEL / TIMEOUT
+Auditoria + COMMIT; 503/504
+Sem mudar pedido/estoque/pagamento"];
+ invalid [label="Resposta inválida
+ROLLBACK; 502"];
+ approved [label="APROVADO
+Pagamento + EM_PREPARO + auditoria; COMMIT
+200, sucesso=true"];
+ ready [label="COZINHA ou ADMIN
+ApiController.changeStatus: PRONTO
+Status + auditoria; COMMIT"];
+ delivered [label="COZINHA ou ADMIN
+changeStatus: ENTREGUE
+Status + auditoria; COMMIT"];
+ cancel [label="Antes da aprovação: CANCELADO
+COZINHA/ADMIN; devolver saldo uma vez
+Status + estoque + auditoria; COMMIT"];
+ start -> create -> reserve -> waiting -> pay -> gateway -> decision;
+ waiting -> cancel [label="Cancelar antes de pagar"];
+ decision -> declined [label="Recusa"];
+ declined -> pay [label="Nova tentativa permitida"];
+ decision -> technical [label="Falha técnica"];
+ decision -> invalid [label="Correlação/resultado inválido"];
+ decision -> approved [label="Aprovação"];
+ approved -> ready -> delivered;
+}

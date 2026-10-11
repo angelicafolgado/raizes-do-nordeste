@@ -1,46 +1,37 @@
-# Resultado de validação da implementação Java
+# Resultado de validação — correções da API Java
 
-Atualizado em 11/10/2026. Este registro descreve a revisão Java 21/Spring Boot, não reexecuta nem atribui resultados da implementação Node/TypeScript removida.
-
-## Verificações executadas
+Atualização: 11/10/2026. Evidências desta revisão, sem reutilizar contagens da implementação removida. [Resumo estruturado](07_EVIDENCIAS_CORRECOES.json).
 
 | Verificação | Resultado |
 |---|---|
-| Compilação e pacote Java | `mvn test package`: BUILD SUCCESS. |
-| Suíte automatizada Java | 18 testes aprovados; 0 falhas, 0 erros e 0 ignorados (16 de integração e 2 do gateway mock). |
-| Cópia limpa | Cópia temporária contendo `pom.xml`, `src` e `docs/diagramas`, sem `target` ou banco herdado: `mvn -o test package` e geração do PDF concluídos com sucesso. |
-| PDF acadêmico | 10 páginas; geração Java validada por extração de texto, com nome, RU, resultados de desempenho e plano de testes. |
-| Ensaio de carga | 20 clientes por 60,01 s: 228.399 requisições, p95 de 11,76 ms, zero erros e zero respostas HTTP 5xx. Ver [método e limites](06_CORRECAO_DESEMPENHO.md). |
-| Repositório público | Publicado em <https://github.com/angelicafolgado/raizes-do-nordeste>; os commits atuais de `main` estão no nome de Angelica Dias Folgado. O histórico remoto anterior de Lako foi substituído conforme solicitado. |
-| Linguagens do repositório | A API de linguagens do GitHub reporta somente Java. A coleção Postman permanece como JSON e contém cenários não revalidados contra a API Java. |
-| Suíte legada TypeScript | Não executada nesta revisão; Node.js/npm não estão disponíveis no ambiente. O teste legado foi removido após a substituição da implementação e da suíte pela versão Java. |
-| Coleção Postman | Os 32 cenários permanecem como artefato histórico; a coleção não foi reexecutada nem validada contra o contrato Java atual. |
+| Build e testes | `mvn test package`: BUILD SUCCESS; 20 testes, zero falhas, erros ou ignorados. |
+| Composição da suíte | 16 de integração, 2 do gateway e 2 de migrações Flyway. |
+| Coleção Postman | Newman 6.2.1: 32 requisições e 88 asserções aprovadas; 9 pastas, 17 cenários 2xx e 15 negativos. |
+| Contrato OpenAPI | Schemas, campos obrigatórios, enumerações, permissões, exemplos e erros servidos pela API; 76 exemplos compatíveis com schemas e 4 respostas públicas reais validadas. |
+| Banco novo | Flyway V1 cria nove tabelas de domínio; migração repetida não reaplica V1 e valida checksums. |
+| Banco existente | Baseline 0 + V1 incorporados sem apagar dados; 2 pedidos anteriores preservados na base local. Teste automatizado também preserva registro de usuário em banco temporário. |
+| Reinício local | Pedido e pagamento preservados; startup, health e consulta HTTP confirmados. |
+| PDF | 14 páginas A4; fontes incorporadas, margens 3/2 cm aproximadas, corpo 12 com entrelinha 1,5, sumário paginado, diagramas e exemplos atuais; validação textual e revisão visual. |
+| GitHub | Repositório público acessível por HTTP; atualizações desta revisão enviadas em commit de evolução real, sem reescrever histórico. |
 
-Os testes Java usam SQLite isolado e cobrem autenticação/JWT, permissões, pedidos, reserva e rollback de estoque, pagamento simulado, transições, privacidade, auditoria, seed idempotente, erros HTTP e concorrência. Os resultados demonstram apenas o que foi executado localmente; não certificam produção ou integração financeira real.
+## Reproduzir
 
-## Comandos reproduzíveis
+Prepare variáveis e seed conforme o [README](../README.md), usando banco separado para execução repetida da coleção.
 
-```powershell
-mvn test
-mvn package
+```bash
+mvn test package
+npx --yes newman@6.2.1 run postman/raizes_nordeste_clean_collection.json --env-var baseUrl=http://127.0.0.1:3000
+mvn -Dexec.mainClass=br.com.raizesdonordeste.tools.AcademicPdfGenerator compile exec:java
 ```
 
-Para gerar o PDF e o texto Markdown sincronizado:
+Newman é runner externo opcional; Postman permite executar a mesma coleção sem Node/npm. Não exportar tokens preenchidos. Maven não executa a coleção automaticamente.
 
-```powershell
-$pdfArgs = @(
-  '-q',
-  '-Dexec.mainClass=br.com.raizesdonordeste.tools.AcademicPdfGenerator',
-  'compile',
-  'exec:java'
-)
-mvn.cmd @pdfArgs
-```
+O gerador PDF foi executado e validado separadamente; a recompilação/empacotamento após seus últimos ajustes usou `-DskipTests`, pois os ajustes finais foram somente no gerador e nas fontes incorporadas. A execução efetiva dos 20 testes é a de `mvn test package` acima, não a etapa que pulou os testes.
 
-## Limites e pendências
+## Evidência anterior e limites
 
-- A coleção Postman requer revisão e execução manual contra a API Java antes de ser apresentada como evidência.
-- Os diagramas de DER, casos de uso e sequência são artefatos documentais cuja origem precede a revisão Java; as ressalvas estão em [diagramas](05_DIAGRAMAS.md) e no PDF.
-- Os PDFs indicados pela discente como referência se identificam como versões editadas para estudo, com conteúdo omitido e prevalência do original. A análise foi feita contra esse conteúdo, mas não autentica o roteiro oficial no AVA.
-- Curso, polo, semestre e docente não foram informados para a capa; o material indicado pede esses dados. A formatação ABNT e a revisão visual do PDF ainda precisam ser conferidas segundo as orientações efetivas do AVA.
-- O histórico público verdadeiro permanece abaixo dos cinco commits recomendados pelo material. Não foram criados commits artificiais para atingir essa recomendação.
+O ensaio de carga em [06_RESULTADOS_OPERACIONAIS.json](06_RESULTADOS_OPERACIONAIS.json) pertence à medição anterior: 20 clientes/60,01 s, 228.399 requisições e p95 11,76 ms. Não foi repetido após estas correções; não mede escrita, disponibilidade distribuída ou restauração de backup.
+
+Os materiais de referência fornecidos são cópias editadas para estudo, com omissões e prevalência do original. A conformidade ABNT deve ser conferida com as normas efetivas do AVA. Curso, polo, semestre e docente permanecem “a informar” por orientação expressa da autora.
+
+Cadastro público, gestão administrativa completa, entradas/ajustes de estoque, pontos e campanhas são propostas documentadas; não se apresentam como endpoints implementados. O sistema é uma demonstração local, sem integração financeira real.

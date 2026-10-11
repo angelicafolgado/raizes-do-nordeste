@@ -1,0 +1,23 @@
+digraph Java {
+ graph [rankdir=TB,bgcolor="white",pad=0.4,fontname="Arial",label="Arquitetura — classes reais Java 21 / Spring Boot",labelloc=t,fontsize=22];
+ node [shape=record,style=filled,fillcolor="#edf6f5",color="#46616f",fontname="Arial",fontsize=12,margin=0.2];
+ edge [fontname="Arial",fontsize=11,color="#46616f"];
+ Api [label="ApiController|REST, autorização e coordenação de regras|createOrder / pay / changeStatus"];
+ Store [label="RaizesStore|JdbcTemplate + transações SQLite|reserve / createOrder / payment"];
+ Gateway [label="PaymentGateway (interface)|process(Request): Response"];
+ Mock [label="MockPaymentGateway|process(Request): Response|aprovação / recusa / falhas simuladas"];
+ Filter [label="AuthenticationFilter|valida Bearer e atribui Identity"];
+ Jwt [label="JwtService|issue(Identity) / verify(token)"];
+ Errors [label="ApiExceptionHandler|envelope JSON HTTP"];
+ Exception [label="ApiException|código / status / detalhes"];
+ Flyway [label="Flyway|V1__initial_schema.sql|versões e checksums"];
+ DB [label="SQLite|9 tabelas de domínio + histórico Flyway"];
+ Api -> Store [label="usa"];
+ Api -> Gateway [label="usa"];
+ Mock -> Gateway [label="implementa",style=dashed,arrowhead=empty];
+ Filter -> Jwt [label="usa"];
+ Filter -> Api [label="Identity na requisição"];
+ Errors -> Exception [label="converte"];
+ Store -> DB [label="JDBC"];
+ Flyway -> DB [label="migra antes de usar"];
+}

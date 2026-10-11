@@ -247,7 +247,15 @@ class ApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.openapi").isNotEmpty())
                 .andExpect(jsonPath("$.components.securitySchemes.bearerAuth.scheme").value("bearer"))
-                .andExpect(jsonPath("$.paths['/api/pedidos'].get.security[0].bearerAuth").isEmpty());
+                .andExpect(jsonPath("$.paths['/api/pedidos'].get.security[0].bearerAuth").isEmpty())
+                .andExpect(jsonPath("$.paths['/api/pedidos'].post.requestBody.content['application/json'].schema['$ref']").value("#/components/schemas/PedidoRequest"))
+                .andExpect(jsonPath("$.components.schemas.PedidoRequest.required").value(org.hamcrest.Matchers.hasItems("unidadeId", "canalPedido", "itens")))
+                .andExpect(jsonPath("$.components.schemas.PedidoRequest.properties.canalPedido.enum").value(org.hamcrest.Matchers.hasItems("APP", "TOTEM", "BALCAO", "PICKUP", "WEB")))
+                .andExpect(jsonPath("$.paths['/api/pedidos'].post.responses['409'].content['application/json'].schema['$ref']").value("#/components/schemas/Erro"))
+                .andExpect(jsonPath("$.paths['/api/auth/login'].post.responses['200'].content['application/json'].example.expiresIn").value("8h"))
+                .andExpect(jsonPath("$.paths['/api/pedidos/{id}/pagamento'].post.responses['503']").exists())
+                .andExpect(jsonPath("$.paths['/api/pedidos/{id}/pagamento'].post.responses['504']").exists())
+                .andExpect(jsonPath("$.paths['/'].get.responses['302'].headers.Location.example").value("/api-docs"));
         mvc.perform(get("/api-docs"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().exists("Location"));

@@ -1,20 +1,20 @@
 sequenceDiagram
     actor C as Cliente ou Atendente
-    participant API as API/JWT
-    participant A as Casos de uso
-    participant DB as Store/Prisma/SQLite
+    participant API as AuthenticationFilter/JWT
+    participant A as ApiController
+    participant DB as RaizesStore/JDBC/SQLite/Flyway
     participant G as MockPaymentGateway
     actor K as Cozinha ou ADMIN
-    C->>API: POST /pedidos + JWT (unidade, canal, itens)
-    API->>A: CriarPedidoUseCase.executar(identidade, DTO)
+    C->>API: POST /api/pedidos + JWT (unidade, canal, itens)
+    API->>A: createOrder(body, request)
     A->>DB: BEGIN; validar unidade/produtos; reservar saldo
     A->>DB: Criar pedido/itens e auditar
     DB-->>A: COMMIT; AGUARDANDO_PAGAMENTO
     A-->>API: Pedido persistido
     API-->>C: 201 + pedido
     Note over A,DB: Falha em item/estoque reverte toda a transação
-    C->>API: POST /pedidos/{id}/pagamento + statusSimulado
-    API->>A: ProcessarPagamentoMockUseCase.executar
+    C->>API: POST /api/pedidos/{id}/pagamento + statusSimulado
+    API->>A: pay(id, body, request)
     A->>DB: BEGIN; ler pedido; validar titular e estado
     DB-->>A: Pedido aguardando pagamento
     A->>G: pedidoId, valorCentavos, BRL, correlacaoId, cenario
@@ -31,7 +31,7 @@ sequenceDiagram
         API-->>C: 503 ou 504 + erro padronizado
     end
     K->>API: PATCH status PRONTO; depois ENTREGUE (chamadas separadas)
-    API->>A: AtualizarStatusPedidoUseCase.executar
+    API->>A: changeStatus(id, body, request)
     A->>DB: BEGIN; mudar estado + auditoria; COMMIT
     DB-->>A: Pedido atualizado
     A-->>API: Pedido

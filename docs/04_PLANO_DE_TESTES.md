@@ -1,16 +1,16 @@
 # Etapa 4 — Plano de testes da API
 
-> **Escopo atual:** esta matriz preserva 32 cenários da coleção Postman preparada para a API anterior. A implementação corrente é Java; a coleção ainda não foi executada contra esta revisão e não é evidência de teste concluído. A suíte automatizada Java é executada por `mvn test`.
+> **Escopo atual:** coleção validada contra a API Java em 11/10/2026: 32 requisições e 88 asserções, nenhuma falha. A suíte Java/Flyway é executada por `mvn test` e não executa a coleção automaticamente.
 
 ## Ambiente e execução
 
-Requisitos para a suíte automatizada: JDK 21 e Maven 3.9 ou superior. `mvn test` inicia a aplicação em ambiente de teste com SQLite isolado. Para inspeção manual, execute a API conforme o [README](../README.md), configure `baseUrl` no Postman e importe `postman/raizes_nordeste_clean_collection.json`; confirme e adapte cada requisição ao contrato atual antes de usá-la como evidência.
+Requisitos para a suíte automatizada: JDK 21 e Maven 3.9 ou superior. `mvn test` inicia a aplicação em ambiente de teste com SQLite isolado. Para inspeção manual, execute a API conforme o [README](../README.md), configure `baseUrl` no Postman e importe `postman/raizes_nordeste_clean_collection.json`; execute as pastas em ordem com seed em uma base de demonstração separada.
 
 `baseUrl` é a única variável que precisa de ajuste para outra porta. `token_cliente`, `token_cozinha`, `token_admin` e `pedidoId` são capturados pelas requisições. Todas as contas são fictícias, com senha de demonstração `123456`. Não exporte a coleção com valores reais de tokens preenchidos.
 
-A coleção contém **32 cenários**, **17 planejados com resposta 2xx** e **15 cenários de erro**, em 9 pastas. Esses totais descrevem o arquivo, não uma execução validada na implementação Java. Recusa de pagamento é resultado de negócio respondido com HTTP 200 e tem asserção declarada na coleção.
+A coleção contém **32 cenários**, **17 planejados com resposta 2xx** e **15 cenários de erro**, em 9 pastas. Os 32 cenários e suas 88 asserções passaram na implementação Java. Recusa de pagamento é resultado de negócio respondido com HTTP 200 e tem asserção declarada na coleção.
 
-Para validação automatizada da implementação Java, execute `mvn test`. Os 18 testes atuais cobrem fluxos de API, segurança, transações e concorrência, mas não executam automaticamente as 32 requisições desta coleção nem substituem a validação manual no Postman.
+Para validação automatizada da implementação Java, execute `mvn test`. Os 20 testes atuais cobrem fluxos de API, segurança, transações e concorrência, mas não executam automaticamente as 32 requisições desta coleção nem substituem a execução separada da coleção no Postman ou Newman.
 
 A coleção manual usa a base da API em execução e consome uma unidade do produto 1 por execução bem-sucedida. O seed preserva saldo e pedidos; ele não repõe estoque. Use uma base separada nova para avaliações repetidas, sem apagar a base existente. IDs 99999 usados nos casos 404 pressupõem o conjunto do seed, sem recursos com esses IDs.
 
@@ -68,9 +68,15 @@ A coleção manual usa a base da API em execução e consome uma unidade do prod
 
 ## Testes automatizados complementares
 
-Na implementação removida, a suíte TypeScript verificava itens repetidos, rollback de reserva, paginação, permissões, cancelamento, seed idempotente e concorrência. Os testes Java atuais estão em [ApiIntegrationTest](../src/test/java/br/com/raizesdonordeste/ApiIntegrationTest.java) e [MockPaymentGatewayTest](../src/test/java/br/com/raizesdonordeste/MockPaymentGatewayTest.java); não se afirma que cada asserção da suíte anterior tenha correspondência individual.
+Os testes Java estão em [ApiIntegrationTest](../src/test/java/br/com/raizesdonordeste/ApiIntegrationTest.java), [MockPaymentGatewayTest](../src/test/java/br/com/raizesdonordeste/MockPaymentGatewayTest.java) e [DatabaseMigrationTest](../src/test/java/br/com/raizesdonordeste/DatabaseMigrationTest.java): 16 de integração, 2 do gateway e 2 de migrações. Cobrem autorização, validação, rollback, concorrência, consentimento, sanitização de auditoria e compatibilidade da documentação. As migrações são verificadas em bancos temporários novos e existentes, com preservação de registros e validação de checksums.
 
-Também cobre flag legada ignorada, versão inválida de aviso, tentativa de definir identidade pelo body, histórico próprio, revogação sem bloquear pedido, permissões de auditoria, projeção segura de logs, rollback em falha de auditoria e erro interno sem exceção/query sensível. Os artefatos OpenAPI e Postman têm verificação de contratos e exemplos.
+Execução da coleção por runner externo:
+
+```bash
+npx --yes newman@6.2.1 run postman/raizes_nordeste_clean_collection.json --env-var baseUrl=http://127.0.0.1:3000
+```
+
+Node/npm servem apenas ao Newman; não são dependências da aplicação Java. Também é possível executar a coleção no Postman sem instalar Newman.
 
 ## Critério de conclusão
 

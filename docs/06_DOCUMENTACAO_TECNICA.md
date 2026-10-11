@@ -23,7 +23,7 @@ Configuração padrão: API na porta 3000; banco SQLite `raizes.db`; seed de dem
 
 Swagger: `http://localhost:3000/api-docs`; contrato JSON: `/api-docs.json`; health: `/api/health`. O seed cria contas fictícias e não sobrescreve usuários, produtos, unidades, pedidos ou estoque existentes. Use `SEED_ENABLED=false` em ambiente que não deve receber dados de demonstração.
 
-O [schema.sql](../src/main/resources/schema.sql) inicializa tabelas ausentes com `CREATE TABLE IF NOT EXISTS`; ele não altera tabelas preexistentes. Faça backup e prepare migração explícita antes de alterar o esquema de uma base existente. O teste automatizado usa banco separado em `target/test-api.db`.
+Flyway aplica [V1__initial_schema.sql](../src/main/resources/db/migration/V1__initial_schema.sql) e mantém versões/checksums em flyway_schema_history. Bases anteriores sem histórico usam baseline 0 e V1 idempotente; bases novas começam em V1. Faça backup antes de atualizar bases existentes e não edite migrações já aplicadas. O teste automatizado usa banco separado em target/test-api.db.
 
 ## Arquitetura
 
@@ -81,7 +81,7 @@ mvn test
 mvn package
 ```
 
-A suíte atual contém 16 testes de integração e 2 testes do gateway, executados com SQLite isolado. Ela verifica autenticação, pedidos, estoque, pagamentos, transições, privacidade, auditoria, rollback, seed e concorrência. A coleção Postman preservada não é executada por esses testes e deve ser validada manualmente contra a API Java.
+A suíte atual contém 16 testes de integração, 2 do gateway e 2 de migrações, executados com SQLite isolado. Ela verifica autenticação, pedidos, estoque, pagamentos, transições, privacidade, auditoria, rollback, seed e concorrência. A coleção Postman é executada separadamente e passou com 32 requisições/88 asserções na API Java.
 
 Para gerar o PDF e o Markdown:
 
@@ -108,4 +108,4 @@ $argsMaven = @(
 mvn.cmd @argsMaven
 ```
 
-Consulte o [resultado do ensaio](06_RESULTADOS_OPERACIONAIS.json) para as métricas e os limites medidos. O teste publicado é de leituras locais; não mede escrita, recuperação, múltiplas instâncias ou disponibilidade de produção. Resultados de recuperação permanecem sem medição.
+Consulte o [resultado do ensaio](06_RESULTADOS_OPERACIONAIS.json) para as métricas e os limites medidos. O teste publicado é de leituras locais; não mede escrita, recuperação, múltiplas instâncias ou disponibilidade de produção. Reinício local com preservação de pedido/pagamento foi confirmado nesta revisão; restauração de backup permanece sem ensaio.

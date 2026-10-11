@@ -1,6 +1,6 @@
 # Etapa 2 — Complementos da API
 
-Esta etapa implementa RF10, RF11 e RF16 definidos no documento de requisitos. Não houve alteração do schema ou necessidade de migração: os resultados e falhas usam as tabelas existentes de pedidos, pagamentos e auditoria.
+Esta etapa implementa RF10, RF11 e RF16 definidos no documento de requisitos. Os resultados usam pedidos, pagamentos e auditoria; o esquema agora é controlado por Flyway V1.
 
 ## Gateway de pagamento desacoplado
 
@@ -44,17 +44,15 @@ Novo envelope:
 }
 ```
 
-Cada consulta usa ordenação estável por ID. Total e dados são lidos na mesma transação. Produtos preservam o filtro por unidade, inclusive no cálculo do total e nos estoques retornados. Página além da última retorna lista vazia; unidade inexistente continua retornando 404.
+Cada consulta usa ordenação estável por ID. Total e dados são consultas separadas; não se garante um snapshot único contra inserções externas concorrentes. Produtos preservam o filtro por unidade, inclusive no cálculo do total e nos estoques retornados. Página além da última retorna lista vazia; unidade inexistente continua retornando 404.
 
 **Mudança de contrato:** produtos e unidades deixaram de retornar um array na raiz. Consumidores devem acessar `dados`. A estrutura é consistente com a listagem de pedidos, que agora também usa a validação compartilhada de paginação.
 
 ## Contratos e verificação
 
-O contrato OpenAPI servido pela aplicação Java documenta parâmetros e cenários 502/503/504. A coleção Postman preservada contém 32 cenários planejados, mas ainda não foi reexecutada contra o contrato Java.
+O contrato OpenAPI servido documenta schemas, campos obrigatórios, parâmetros, perfis, exemplos e códigos HTTP, incluindo 502/503/504. A fonte é src/main/resources/openapi-contract.json, aplicada somente às operações descobertas pelo Spring.
 
-Os testes automatizados da implementação Java usam banco isolado e cobrem paginação, falhas auditadas com recuperação, pagamento, rollback, seed e concorrência. A suíte atual tem 18 testes; ela não interpreta nem executa automaticamente a coleção Postman.
-
-Verificação Java concluída em 11/10/2026: `mvn test package` e a geração do PDF passaram; a cópia limpa também concluiu build, testes e geração do documento. Node.js não estava disponível para reexecutar a suíte legada; por isso, não se atribui à revisão Java a execução anterior de cenários TypeScript/Postman.
+A suíte Java/Flyway possui 20 testes; a coleção Postman separada possui 32 cenários em nove pastas, executados com 88 asserções sem falhas. O resultado final e os comandos estão em [validação](04_RESULTADO_VALIDACAO.md).
 
 ## Situação do planejamento
 
@@ -64,4 +62,4 @@ Verificação Java concluída em 11/10/2026: `mvn test package` e a geração do
 | RF11 / RNF11 | Aprovação, recusa, indisponibilidade e timeout simulados, sem alteração indevida do pedido ou duplicação de pagamento. |
 | RF16 | Produtos e unidades paginados, com contratos e testes atualizados. |
 
-O documento da etapa 1 permanece como registro do planejamento original. Próxima etapa: privacidade e segurança, incluindo RF14/RF15 e documentação RNF04.
+O documento da etapa 1 permanece como registro do planejamento original. O estado final está registrado na rastreabilidade; privacidade e auditoria também foram implementadas.

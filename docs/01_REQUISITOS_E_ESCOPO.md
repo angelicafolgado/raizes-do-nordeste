@@ -93,7 +93,7 @@ RF15 não implica implementar o programa de pontos: nesta entrega, o consentimen
 | RN01 | Um pedido pertence a uma única unidade e ao usuário autenticado que o criou. O canal não concede permissões extras. |
 | RN02 | O canal é obrigatório e restrito aos valores aceitos pela aplicação Java. No SQLite ele é persistido como texto validado pela API. |
 | RN03 | IDs e quantidades são inteiros positivos; pedido contém de 1 a 100 entradas de itens; entradas duplicadas são agrupadas. |
-| RN04 | Preço vem do catálogo; total é calculado com centavos inteiros e persistido segundo o schema atual. O preço do item é preservado no pedido. |
+| RN04 | Preço vem do catálogo; total é calculado com centavos inteiros e persistido segundo o esquema atual. O preço do item é preservado no pedido. |
 | RN05 | Reserva de estoque, criação do pedido e auditoria da criação formam uma transação; falha reverte o conjunto. |
 | RN06 | O pagamento aprovado só ocorre para pedido AGUARDANDO_PAGAMENTO e o move para EM_PREPARO. O mock não solicita dados de cartão nem realiza cobrança. |
 | RN07 | Recusa mantém a reserva e permite nova tentativa. Hoje a tabela Pagamento guarda a última tentativa e a auditoria guarda o histórico das tentativas. |
@@ -159,7 +159,7 @@ Rotas candidatas, **não implementadas**: gestão de `/api/campanhas` por ADMIN 
 | RF12–RF13, RN09–RN10 | `ApiController`, `RaizesStore` e testes Java de transições/cancelamento. |
 | RF14–RF15, RNF04 | `RaizesStore`, rotas de auditoria/consentimento e testes Java; consulte [privacidade](03_PRIVACIDADE_E_SEGURANCA.md). |
 | RF03, RF17–RF20 | Seção 7 deste documento; sem endpoints executáveis ou testes de funcionalidade nesta versão. |
-| RNF06–RNF08, ENT04/ENT06 | `/api-docs.json`, `postman/raizes_nordeste_clean_collection.json`, testes em `src/test/java` e `README.md`. A coleção Postman não foi revalidada contra Java. |
+| RNF06–RNF08, ENT04/ENT06 | `/api-docs.json`, `postman/raizes_nordeste_clean_collection.json`, testes em `src/test/java` e `README.md`. A coleção foi validada contra Java: 32 requisições, 88 asserções sem falhas. |
 
 ## 10. Dependências e decisões para as próximas etapas
 
@@ -167,7 +167,7 @@ Rotas candidatas, **não implementadas**: gestão de `/api/campanhas` por ADMIN 
 - O gateway mock deve produzir falhas determinísticas para testes. Não introduzir dependência de provedor real nem credenciais financeiras.
 - Captura de consentimento não deve reutilizar um booleano genérico sem finalidade identificada; o modelo detalhado e a migração serão definidos na etapa 3.
 - A auditoria deverá ter uma forma segura de verificação pelo avaliador: consulta controlada por ADMIN ou evidência automatizada/local documentada, sem endpoint público de logs.
-- O schema SQLite é adequado à demonstração local escolhida. Escala de produção e disponibilidade elevada exigem avaliação adicional e ficam fora das promessas desta entrega.
+- A migração V1 SQLite é adequado à demonstração local escolhida. Escala de produção e disponibilidade elevada exigem avaliação adicional e ficam fora das promessas desta entrega.
 - Cinco commits de evolução são recomendados no roteiro; registrar as alterações reais a partir do estado disponível, sem inventar histórico retroativo.
 - Dados acadêmicos (nome, RU, curso, polo e cidade), orientações do AVA e destino do repositório serão necessários nas etapas de entrega. Não bloqueiam a etapa técnica seguinte.
 
@@ -188,5 +188,5 @@ A conclusão desta etapa não significa que os complementos planejados já foram
 - `UNINTER_Roteiro_Back_End_Copia_Adaptada_Estudo.pdf`: páginas físicas 5–6 (RF/RNF), 6–9 (diagramas, contratos e privacidade), 9–13 (entregáveis e testes) e 18 (tabela consolidada), conforme leitura registrada na análise de aderência.
 - [Análise de aderência](../ANALISE_ADERENCIA_UNINTER.md).
 - [README e funcionalidades atuais](../README.md).
-- [Schema SQL implementado](../src/main/resources/schema.sql).
+- [Schema SQL implementado](../src/main/resources/db/migration/V1__initial_schema.sql).
 - [Testes Java](../src/test/java/br/com/raizesdonordeste/ApiIntegrationTest.java).

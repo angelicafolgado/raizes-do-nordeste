@@ -68,7 +68,7 @@ A resposta projeta somente chaves operacionais previstas. Campos arbitrários de
 | Grupo | Regra proposta para o ambiente acadêmico | Execução atual |
 |---|---|---|
 | Contas, pedidos, pagamentos, decisões e auditoria fictícios | Manter até a avaliação e eventual revisão; revisar necessidade até 30 dias após o encerramento da avaliação | Revisão manual; nenhum job de expurgo implementado |
-| Bases de testes isoladas | Excluir o arquivo ao finalizar a suíte | Implementado pelo teste; arquivos remanescentes após interrupção devem ser revisados manualmente |
+| Bases de testes isoladas | Excluir o arquivo ao finalizar a suíte | O banco de integração permanece em target/test-api.db até limpeza manual ou mvn clean; bancos temporários de DatabaseMigrationTest são gerenciados pelo JUnit |
 | Cópias de segurança da demonstração | Mesma revisão e destino da base de origem; restringir acesso e não publicar | Procedimento manual |
 | Evidências acadêmicas | Preferir dados fictícios e exemplos sem tokens, senhas, segredos ou banco real | Revisão na preparação do PDF/repositório |
 
@@ -82,7 +82,7 @@ O titular pode consultar e revogar a preferência pelo próprio token. Para aces
 
 ## 8. Migração e verificação
 
-O esquema da implementação Java está em [schema.sql](../src/main/resources/schema.sql) e inclui a tabela de consentimentos com FK para usuários. O arquivo inicializa tabelas ausentes; não é um migrador de bases antigas. Antes de aplicar mudanças de esquema a uma base existente, faça backup e prepare uma migração compatível com os dados. Não há mais dependência de Prisma ou comandos npm neste projeto.
+O esquema Java está na migração [V1__initial_schema.sql](../src/main/resources/db/migration/V1__initial_schema.sql), incluindo consentimentos com FK. Flyway registra versões/checksums; baseline 0 permite incorporar o histórico em bases da versão anterior sem apagar registros. Antes de atualizar uma base existente, faça backup e valide a migração em uma cópia. Migrações futuras devem ser adicionadas, sem alterar V1 aplicada.
 
 As verificações cobrem aviso, flag legada, idempotência, revogação, versões, isolamento por titular, bloqueio de atribuição a outro usuário, permissões ADMIN, auditoria de leituras, filtragem de dados legados, rollback de evento quando auditoria falha e sanitização de erros inesperados. O resultado final está registrado no plano de testes da etapa 4.
 
