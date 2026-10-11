@@ -1,0 +1,17 @@
+node_modules/
+.venv/
+dist/
+.env
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+npm-debug.log*
+.pnpm-store/
+.test-output/
+tmp/
+__pycache__/
+*.py[cod]
+.env.*
+!.env.example
+*.log

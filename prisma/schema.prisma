@@ -1,0 +1,131 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Usuario {
+  id                Int      @id @default(autoincrement())
+  nome              String
+  email             String   @unique
+  senha             String
+  role              String   @default("CLIENTE")
+  consentimentoLGPD Boolean  @default(false)
+  criadoEm          DateTime @default(now())
+
+  pedidos        Pedido[]
+  auditLogs      AuditLog[]
+  consentimentos Consentimento[]
+
+  @@map("usuarios")
+}
+
+model Unidade {
+  id       Int              @id @default(autoincrement())
+  nome     String
+  cidade   String
+  pedidos  Pedido[]
+  estoques EstoqueUnidade[]
+
+  @@map("unidades")
+}
+
+model Produto {
+  id        Int              @id @default(autoincrement())
+  nome      String
+  descricao String
+  preco     Float
+  estoques  EstoqueUnidade[]
+  itens     ItemPedido[]
+
+  @@map("produtos")
+}
+
+// Estoque isolado por unidade comercial.
+model EstoqueUnidade {
+  id         Int @id @default(autoincrement())
+  unidadeId  Int
+  produtoId  Int
+  quantidade Int @default(0)
+
+  unidade Unidade @relation(fields: [unidadeId], references: [id])
+  produto Produto @relation(fields: [produtoId], references: [id])
+
+  @@unique([unidadeId, produtoId])
+  @@map("estoques_unidades")
+}
+
+model Pedido {
+  id           Int      @id @default(autoincrement())
+  usuarioId    Int
+  unidadeId    Int
+  canalPedido  String
+  status       String   @default("AGUARDANDO_PAGAMENTO")
+  total        Float    @default(0.0)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  usuario   Usuario      @relation(fields: [usuarioId], references: [id])
+  unidade   Unidade      @relation(fields: [unidadeId], references: [id])
+  itens     ItemPedido[]
+  pagamento Pagamento?
+
+  @@map("pedidos")
+}
+
+model ItemPedido {
+  id            Int   @id @default(autoincrement())
+  pedidoId      Int
+  produtoId     Int
+  quantidade    Int
+  precoUnitario Float
+
+  pedido  Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  produto Produto @relation(fields: [produtoId], references: [id])
+
+  @@map("itens_pedido")
+}
+
+model Pagamento {
+  id          Int      @id @default(autoincrement())
+  pedidoId    Int      @unique
+  valor       Float
+  status      String
+  metodo      String   @default("MOCK_EXTERNAL")
+  transacaoId String
+  criadoEm    DateTime @default(now())
+
+  pedido Pedido @relation(fields: [pedidoId], references: [id])
+
+  @@map("pagamentos")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  acao      String
+  detalhes  String
+  usuarioId Int?
+  timestamp DateTime @default(now())
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@map("audit_logs")
+}
+
+// Eventos append-only. O booleano legado de Usuario não é prova de consentimento.
+model Consentimento {
+  id           Int      @id @default(autoincrement())
+  usuarioId    Int
+  finalidade   String
+  versaoAviso  String
+  aceito       Boolean
+  demonstracao Boolean  @default(true)
+  registradoEm DateTime @default(now())
+  usuario      Usuario  @relation(fields: [usuarioId], references: [id])
+
+  @@index([usuarioId, finalidade, id])
+  @@map("consentimentos")
+}

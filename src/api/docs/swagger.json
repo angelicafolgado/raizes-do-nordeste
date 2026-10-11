@@ -1,0 +1,2989 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Raízes do Nordeste - API de Restauração",
+    "description": "API de demonstração com estoque por unidade, JWT e pagamentos simulados. Não realiza cobranças reais.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "Servidor atual"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Erro": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "issue": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "issue"
+              ]
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "path": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "error",
+          "message",
+          "details",
+          "timestamp",
+          "path",
+          "requestId"
+        ]
+      },
+      "Login": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "senha": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "required": [
+          "email",
+          "senha"
+        ]
+      },
+      "Usuario": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "nome": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "CLIENTE",
+              "ATENDENTE",
+              "COZINHA",
+              "ADMIN"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "email",
+          "role"
+        ]
+      },
+      "Autenticacao": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "tokenType": {
+            "type": "string",
+            "enum": [
+              "Bearer"
+            ]
+          },
+          "expiresIn": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "usuario": {
+            "$ref": "#/components/schemas/Usuario"
+          }
+        },
+        "required": [
+          "accessToken",
+          "tokenType",
+          "expiresIn",
+          "usuario"
+        ]
+      },
+      "Unidade": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "nome": {
+            "type": "string"
+          },
+          "cidade": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "cidade"
+        ]
+      },
+      "Estoque": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "unidadeId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "produtoId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "quantidade": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "unidade": {
+            "$ref": "#/components/schemas/Unidade"
+          }
+        },
+        "required": [
+          "id",
+          "unidadeId",
+          "produtoId",
+          "quantidade",
+          "unidade"
+        ]
+      },
+      "Produto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "nome": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "preco": {
+            "type": "number",
+            "minimum": 0
+          },
+          "estoques": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Estoque"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "descricao",
+          "preco",
+          "estoques"
+        ]
+      },
+      "NovoPedido": {
+        "type": "object",
+        "properties": {
+          "unidadeId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "canalPedido": {
+            "type": "string",
+            "enum": [
+              "APP",
+              "TOTEM",
+              "BALCAO",
+              "PICKUP",
+              "WEB"
+            ]
+          },
+          "itens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "produtoId": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "quantidade": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "produtoId",
+                "quantidade"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "unidadeId",
+          "canalPedido",
+          "itens"
+        ]
+      },
+      "ItemPedido": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pedidoId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "produtoId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "quantidade": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "precoUnitario": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "id",
+          "pedidoId",
+          "produtoId",
+          "quantidade",
+          "precoUnitario"
+        ]
+      },
+      "Pedido": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "usuarioId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "unidadeId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "canalPedido": {
+            "type": "string",
+            "enum": [
+              "APP",
+              "TOTEM",
+              "BALCAO",
+              "PICKUP",
+              "WEB"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AGUARDANDO_PAGAMENTO",
+              "EM_PREPARO",
+              "PRONTO",
+              "ENTREGUE",
+              "CANCELADO"
+            ]
+          },
+          "total": {
+            "type": "number",
+            "minimum": 0
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "atualizadoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemPedido"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "usuarioId",
+          "unidadeId",
+          "canalPedido",
+          "status",
+          "total",
+          "criadoEm",
+          "atualizadoEm",
+          "itens"
+        ]
+      },
+      "ListaPedidos": {
+        "type": "object",
+        "properties": {
+          "dados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PedidoListado"
+            }
+          },
+          "paginacao": {
+            "type": "object",
+            "properties": {
+              "pagina": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "limite": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "totalPaginas": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "pagina",
+              "limite",
+              "total",
+              "totalPaginas"
+            ]
+          }
+        },
+        "required": [
+          "dados",
+          "paginacao"
+        ]
+      },
+      "Pagamento": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pedidoId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "valor": {
+            "type": "number",
+            "minimum": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "APROVADO",
+              "RECUSADO"
+            ]
+          },
+          "metodo": {
+            "type": "string"
+          },
+          "transacaoId": {
+            "type": "string"
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "pedidoId",
+          "valor",
+          "status",
+          "metodo",
+          "transacaoId",
+          "criadoEm"
+        ]
+      },
+      "ResultadoPagamento": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean"
+          },
+          "mensagem": {
+            "type": "string"
+          },
+          "transacaoId": {
+            "type": "string"
+          },
+          "statusPedido": {
+            "type": "string",
+            "enum": [
+              "AGUARDANDO_PAGAMENTO",
+              "EM_PREPARO",
+              "PRONTO",
+              "ENTREGUE",
+              "CANCELADO"
+            ]
+          },
+          "detalhes": {
+            "$ref": "#/components/schemas/Pagamento"
+          }
+        },
+        "required": [
+          "sucesso",
+          "mensagem",
+          "transacaoId",
+          "statusPedido",
+          "detalhes"
+        ]
+      },
+      "ListaProdutos": {
+        "type": "object",
+        "properties": {
+          "dados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Produto"
+            }
+          },
+          "paginacao": {
+            "type": "object",
+            "properties": {
+              "pagina": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "limite": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "totalPaginas": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "pagina",
+              "limite",
+              "total",
+              "totalPaginas"
+            ]
+          }
+        },
+        "required": [
+          "dados",
+          "paginacao"
+        ]
+      },
+      "ListaUnidades": {
+        "type": "object",
+        "properties": {
+          "dados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Unidade"
+            }
+          },
+          "paginacao": {
+            "type": "object",
+            "properties": {
+              "pagina": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "limite": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "totalPaginas": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "pagina",
+              "limite",
+              "total",
+              "totalPaginas"
+            ]
+          }
+        },
+        "required": [
+          "dados",
+          "paginacao"
+        ]
+      },
+      "Consentimento": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "usuarioId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "finalidade": {
+            "type": "string",
+            "enum": [
+              "FIDELIDADE"
+            ]
+          },
+          "versaoAviso": {
+            "type": "string"
+          },
+          "aceito": {
+            "type": "boolean"
+          },
+          "demonstracao": {
+            "type": "boolean"
+          },
+          "registradoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "usuarioId",
+          "finalidade",
+          "versaoAviso",
+          "aceito",
+          "demonstracao",
+          "registradoEm"
+        ]
+      },
+      "EstadoConsentimento": {
+        "type": "object",
+        "properties": {
+          "finalidade": {
+            "type": "string",
+            "enum": [
+              "FIDELIDADE"
+            ]
+          },
+          "versaoAviso": {
+            "type": "string"
+          },
+          "aceito": {
+            "type": "boolean"
+          },
+          "demonstracao": {
+            "type": "boolean"
+          },
+          "ultimoRegistroId": {
+            "type": "integer",
+            "minimum": 1,
+            "nullable": true
+          }
+        },
+        "required": [
+          "finalidade",
+          "versaoAviso",
+          "aceito",
+          "demonstracao",
+          "ultimoRegistroId"
+        ]
+      },
+      "ListaConsentimentos": {
+        "type": "object",
+        "properties": {
+          "dados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Consentimento"
+            }
+          },
+          "paginacao": {
+            "type": "object",
+            "properties": {
+              "pagina": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "limite": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "totalPaginas": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "pagina",
+              "limite",
+              "total",
+              "totalPaginas"
+            ]
+          },
+          "atual": {
+            "$ref": "#/components/schemas/EstadoConsentimento"
+          }
+        },
+        "required": [
+          "dados",
+          "paginacao",
+          "atual"
+        ]
+      },
+      "RegistroAuditoria": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "acao": {
+            "type": "string"
+          },
+          "usuarioId": {
+            "type": "integer",
+            "minimum": 1,
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detalhes": {
+            "type": "object",
+            "description": "Projeção de metadados operacionais permitidos; não contém senha, token, e-mail ou objeto de usuário."
+          }
+        },
+        "required": [
+          "id",
+          "acao",
+          "usuarioId",
+          "timestamp",
+          "detalhes"
+        ]
+      },
+      "ListaAuditoria": {
+        "type": "object",
+        "properties": {
+          "dados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegistroAuditoria"
+            }
+          },
+          "paginacao": {
+            "type": "object",
+            "properties": {
+              "pagina": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "limite": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "totalPaginas": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "pagina",
+              "limite",
+              "total",
+              "totalPaginas"
+            ]
+          }
+        },
+        "required": [
+          "dados",
+          "paginacao"
+        ]
+      },
+      "AvisoPrivacidade": {
+        "type": "object",
+        "properties": {
+          "finalidade": {
+            "type": "string",
+            "enum": [
+              "FIDELIDADE"
+            ]
+          },
+          "versaoAviso": {
+            "type": "string",
+            "example": "1.0"
+          },
+          "demonstracao": {
+            "type": "boolean"
+          },
+          "opcional": {
+            "type": "boolean"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "dados": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "revogacao": {
+            "type": "string"
+          },
+          "retencao": {
+            "type": "string"
+          },
+          "compartilhamento": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "finalidade",
+          "versaoAviso",
+          "demonstracao",
+          "opcional",
+          "titulo",
+          "descricao",
+          "dados",
+          "revogacao",
+          "retencao",
+          "compartilhamento"
+        ]
+      },
+      "ProdutoResumo": {
+        "type": "object",
+        "required": [
+          "id",
+          "nome",
+          "descricao",
+          "preco"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "nome": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "preco": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      },
+      "ItemPedidoListado": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pedidoId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "produtoId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "quantidade": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "precoUnitario": {
+            "type": "number",
+            "minimum": 0
+          },
+          "produto": {
+            "$ref": "#/components/schemas/ProdutoResumo"
+          }
+        },
+        "required": [
+          "id",
+          "pedidoId",
+          "produtoId",
+          "quantidade",
+          "precoUnitario",
+          "produto"
+        ]
+      },
+      "PedidoListado": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "usuarioId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "unidadeId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "canalPedido": {
+            "type": "string",
+            "enum": [
+              "APP",
+              "TOTEM",
+              "BALCAO",
+              "PICKUP",
+              "WEB"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AGUARDANDO_PAGAMENTO",
+              "EM_PREPARO",
+              "PRONTO",
+              "ENTREGUE",
+              "CANCELADO"
+            ]
+          },
+          "total": {
+            "type": "number",
+            "minimum": 0
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "atualizadoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemPedidoListado"
+            }
+          },
+          "pagamento": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "pedidoId": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "valor": {
+                "type": "number",
+                "minimum": 0
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "APROVADO",
+                  "RECUSADO"
+                ]
+              },
+              "metodo": {
+                "type": "string"
+              },
+              "transacaoId": {
+                "type": "string"
+              },
+              "criadoEm": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "id",
+              "pedidoId",
+              "valor",
+              "status",
+              "metodo",
+              "transacaoId",
+              "criadoEm"
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "usuarioId",
+          "unidadeId",
+          "canalPedido",
+          "status",
+          "total",
+          "criadoEm",
+          "atualizadoEm",
+          "itens",
+          "pagamento"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "summary": "Autenticar Utilizador",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "email": "maria@cliente.com",
+                "senha": "123456"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Autenticacao"
+                },
+                "example": {
+                  "accessToken": "JWT_FICTICIO_OBTENHA_UM_TOKEN_PELO_LOGIN",
+                  "tokenType": "Bearer",
+                  "expiresIn": 28800,
+                  "usuario": {
+                    "id": 1,
+                    "nome": "Maria da Silva",
+                    "email": "maria@cliente.com",
+                    "role": "CLIENTE"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Corpo JSON inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "JSON_INVALIDO",
+                  "message": "Corpo JSON inválido.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/auth/login",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciais de acesso inválidas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "CREDENCIAIS_INVALIDAS",
+                  "message": "Credenciais de acesso inválidas.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/auth/login",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "O corpo excede o limite de 100 KB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "CORPO_MUITO_GRANDE",
+                  "message": "O corpo excede o limite de 100 KB.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/auth/login",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Informe parâmetros válidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "PARAMETRO_INVALIDO",
+                  "message": "Informe parâmetros válidos.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/auth/login",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha inesperada no processamento.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "ERRO_INTERNO_SERVIDOR",
+                  "message": "Falha inesperada no processamento.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/auth/login",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "post_auth_login",
+        "tags": [
+          "Auth"
+        ],
+        "security": []
+      }
+    },
+    "/produtos": {
+      "get": {
+        "summary": "Consultar Ementa e Existências",
+        "responses": {
+          "200": {
+            "description": "Página de resultados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaProdutos"
+                },
+                "example": {
+                  "dados": [
+                    {
+                      "id": 1,
+                      "nome": "Baião de Dois Completo",
+                      "descricao": "Queijo coalho e carne de sol",
+                      "preco": 38.5,
+                      "estoques": [
+                        {
+                          "id": 1,
+                          "unidadeId": 1,
+                          "produtoId": 1,
+                          "quantidade": 25,
+                          "unidade": {
+                            "id": 1,
+                            "nome": "Unidade Recife Olinda",
+                            "cidade": "Recife"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "paginacao": {
+                    "pagina": 1,
+                    "limite": 10,
+                    "total": 1,
+                    "totalPaginas": 1
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unidade não encontrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "UNIDADE_NAO_ENCONTRADA",
+                  "message": "Unidade não encontrada.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/produtos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito ao processar a operação.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "CONFLITO_OPERACAO",
+                  "message": "Conflito ao processar a operação.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/produtos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Informe parâmetros válidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "PARAMETRO_INVALIDO",
+                  "message": "Informe parâmetros válidos.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/produtos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha inesperada no processamento.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "ERRO_INTERNO_SERVIDOR",
+                  "message": "Falha inesperada no processamento.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/produtos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "unidadeId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Filtrar cardápio e estoque por unidade."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 10,
+              "maximum": 100
+            }
+          }
+        ],
+        "operationId": "get_produtos",
+        "tags": [
+          "Produtos"
+        ],
+        "security": []
+      }
+    },
+    "/pedidos": {
+      "post": {
+        "summary": "Criar novo Pedido Multi-canal",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "unidadeId": 1,
+                "canalPedido": "TOTEM",
+                "itens": [
+                  {
+                    "produtoId": 1,
+                    "quantidade": 2
+                  },
+                  {
+                    "produtoId": 2,
+                    "quantidade": 1
+                  }
+                ]
+              },
+              "schema": {
+                "$ref": "#/components/schemas/NovoPedido"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pedido"
+                },
+                "example": {
+                  "id": 1,
+                  "usuarioId": 1,
+                  "unidadeId": 1,
+                  "canalPedido": "TOTEM",
+                  "status": "AGUARDANDO_PAGAMENTO",
+                  "total": 91.0,
+                  "criadoEm": "2026-10-11T12:00:00.000Z",
+                  "atualizadoEm": "2026-10-11T12:00:00.000Z",
+                  "itens": [
+                    {
+                      "id": 1,
+                      "pedidoId": 1,
+                      "produtoId": 1,
+                      "quantidade": 2,
+                      "precoUnitario": 38.5
+                    },
+                    {
+                      "id": 2,
+                      "pedidoId": 1,
+                      "produtoId": 2,
+                      "quantidade": 1,
+                      "precoUnitario": 14.0
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Corpo JSON inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "JSON_INVALIDO",
+                  "message": "Corpo JSON inválido.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Cabeçalho de autorização não fornecido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "NAO_AUTENTICADO",
+                  "message": "Cabeçalho de autorização não fornecido.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Perfil sem permissão para esta operação.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "ACESSO_NEGADO",
+                  "message": "Perfil sem permissão para esta operação.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pedido não encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "PEDIDO_NAO_ENCONTRADO",
+                  "message": "Pedido não encontrado.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Estoque insuficiente para Baião de Dois Completo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "ESTOQUE_INSUFICIENTE",
+                  "message": "Estoque insuficiente para Baião de Dois Completo.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "O corpo excede o limite de 100 KB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "CORPO_MUITO_GRANDE",
+                  "message": "O corpo excede o limite de 100 KB.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Informe parâmetros válidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "PARAMETRO_INVALIDO",
+                  "message": "Informe parâmetros válidos.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha inesperada no processamento.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "ERRO_INTERNO_SERVIDOR",
+                  "message": "Falha inesperada no processamento.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          }
+        },
+        "description": "CLIENTE, ATENDENTE ou ADMIN. Pedido pertence ao usuário autenticado. Itens repetidos são agrupados. Falhas revertem toda a reserva.",
+        "operationId": "post_pedidos",
+        "tags": [
+          "Pedidos"
+        ]
+      },
+      "get": {
+        "summary": "Listar Pedidos com paginação e filtro por Canal",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "canalPedido",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "APP",
+                "TOTEM",
+                "BALCAO",
+                "PICKUP",
+                "WEB"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaPedidos"
+                },
+                "example": {
+                  "dados": [
+                    {
+                      "id": 1,
+                      "usuarioId": 1,
+                      "unidadeId": 1,
+                      "canalPedido": "TOTEM",
+                      "status": "AGUARDANDO_PAGAMENTO",
+                      "total": 91.0,
+                      "criadoEm": "2026-10-11T12:00:00.000Z",
+                      "atualizadoEm": "2026-10-11T12:00:00.000Z",
+                      "itens": [
+                        {
+                          "id": 1,
+                          "pedidoId": 1,
+                          "produtoId": 1,
+                          "quantidade": 2,
+                          "precoUnitario": 38.5,
+                          "produto": {
+                            "id": 1,
+                            "nome": "Baião de Dois Completo",
+                            "descricao": "Queijo coalho e carne de sol",
+                            "preco": 38.5
+                          }
+                        },
+                        {
+                          "id": 2,
+                          "pedidoId": 1,
+                          "produtoId": 2,
+                          "quantidade": 1,
+                          "precoUnitario": 14.0,
+                          "produto": {
+                            "id": 2,
+                            "nome": "Tapioca Tradicional de Manteiga",
+                            "descricao": "Tapioca artesanal nordestina",
+                            "preco": 14.0
+                          }
+                        }
+                      ],
+                      "pagamento": null
+                    }
+                  ],
+                  "paginacao": {
+                    "pagina": 1,
+                    "limite": 10,
+                    "total": 1,
+                    "totalPaginas": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Filtro de canal inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "CANAL_INVALIDO",
+                  "message": "Filtro de canal inválido.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Cabeçalho de autorização não fornecido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "NAO_AUTENTICADO",
+                  "message": "Cabeçalho de autorização não fornecido.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito ao processar a operação.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "CONFLITO_OPERACAO",
+                  "message": "Conflito ao processar a operação.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Informe parâmetros válidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "PARAMETRO_INVALIDO",
+                  "message": "Informe parâmetros válidos.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha inesperada no processamento.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "ERRO_INTERNO_SERVIDOR",
+                  "message": "Falha inesperada no processamento.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          }
+        },
+        "description": "CLIENTE vê apenas seus pedidos. ATENDENTE, COZINHA e ADMIN consultam todos. Máximo de 100 itens por página. Consultas geram auditoria de ator, escopo e filtros, sem cópia dos pedidos no log.",
+        "operationId": "get_pedidos",
+        "tags": [
+          "Pedidos"
+        ]
+      }
+    },
+    "/pedidos/{id}/pagamento": {
+      "post": {
+        "summary": "Processar Simulação de Pagamento (Mock)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "statusSimulado": {
+                    "type": "string",
+                    "enum": [
+                      "APROVADO",
+                      "RECUSADO",
+                      "INDISPONIVEL",
+                      "TIMEOUT"
+                    ]
+                  }
+                },
+                "required": [
+                  "statusSimulado"
+                ]
+              },
+              "examples": {
+                "aprovado": {
+                  "value": {
+                    "statusSimulado": "APROVADO"
+                  }
+                },
+                "recusado": {
+                  "value": {
+                    "statusSimulado": "RECUSADO"
+                  }
+                },
+                "indisponivel": {
+                  "value": {
+                    "statusSimulado": "INDISPONIVEL"
+                  }
+                },
+                "timeout": {
+                  "value": {
+                    "statusSimulado": "TIMEOUT"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoPagamento"
+                },
+                "examples": {
+                  "aprovado": {
+                    "value": {
+                      "sucesso": true,
+                      "mensagem": "Pagamento simulado aprovado.",
+                      "transacaoId": "MOCK-TX-exemplo",
+                      "statusPedido": "EM_PREPARO",
+                      "detalhes": {
+                        "id": 1,
+                        "pedidoId": 1,
+                        "valor": 91.0,
+                        "status": "APROVADO",
+                        "metodo": "SIMULACAO_GATEWAY",
+                        "transacaoId": "MOCK-TX-exemplo",
+                        "criadoEm": "2026-10-11T12:00:00.000Z"
+                      }
+                    }
+                  },
+                  "recusado": {
+                    "value": {
+                      "sucesso": false,
+                      "mensagem": "Pagamento simulado recusado.",
+                      "transacaoId": "MOCK-TX-exemplo",
+                      "statusPedido": "AGUARDANDO_PAGAMENTO",
+                      "detalhes": {
+                        "id": 1,
+                        "pedidoId": 1,
+                        "valor": 91.0,
+                        "status": "RECUSADO",
+                        "metodo": "SIMULACAO_GATEWAY",
+                        "transacaoId": "MOCK-TX-exemplo",
+                        "criadoEm": "2026-10-11T12:00:00.000Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Corpo JSON inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "JSON_INVALIDO",
+                  "message": "Corpo JSON inválido.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/pagamento",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Cabeçalho de autorização não fornecido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "NAO_AUTENTICADO",
+                  "message": "Cabeçalho de autorização não fornecido.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/pagamento",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Perfil sem permissão para esta operação.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "ACESSO_NEGADO",
+                  "message": "Perfil sem permissão para esta operação.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/pagamento",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pedido não encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "PEDIDO_NAO_ENCONTRADO",
+                  "message": "Pedido não encontrado.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/pagamento",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito ao processar a operação.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "CONFLITO_OPERACAO",
+                  "message": "Conflito ao processar a operação.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/pagamento",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "O corpo excede o limite de 100 KB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "CORPO_MUITO_GRANDE",
+                  "message": "O corpo excede o limite de 100 KB.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/pagamento",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Informe parâmetros válidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "PARAMETRO_INVALIDO",
+                  "message": "Informe parâmetros válidos.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/pagamento",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha inesperada no processamento.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "ERRO_INTERNO_SERVIDOR",
+                  "message": "Falha inesperada no processamento.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/pagamento",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Resposta do gateway não corresponde à solicitação.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "RESPOSTA_GATEWAY_INVALIDA",
+                  "message": "Resposta do gateway não corresponde à solicitação.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/pagamento",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Gateway simulado indisponível.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "GATEWAY_INDISPONIVEL",
+                  "message": "Gateway simulado indisponível.",
+                  "details": [
+                    {
+                      "field": "correlacaoId",
+                      "issue": "c74b1106-96a0-478f-bb23-7b72473e1ef2"
+                    }
+                  ],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/pagamento",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Tempo de resposta do gateway simulado esgotado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "GATEWAY_TIMEOUT",
+                  "message": "Tempo de resposta do gateway simulado esgotado.",
+                  "details": [
+                    {
+                      "field": "correlacaoId",
+                      "issue": "c74b1106-96a0-478f-bb23-7b72473e1ef2"
+                    }
+                  ],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/pagamento",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          }
+        },
+        "description": "CLIENTE (próprio pedido), ATENDENTE ou ADMIN. Recusa mantém reserva e permite nova tentativa. Aprovação avança para EM_PREPARO. Última tentativa em pagamento; histórico completo na auditoria. INDISPONIVEL retorna 503; TIMEOUT retorna 504. Falhas técnicas preservam pedido, pagamento anterior e reserva e são auditadas. TIMEOUT é simulado imediatamente, sem espera real.",
+        "operationId": "post_pedidos_id_pagamento",
+        "tags": [
+          "Pedidos"
+        ]
+      }
+    },
+    "/pedidos/{id}/status": {
+      "patch": {
+        "summary": "Atualizar Estado Operacional (Exclusivo Cozinha/Admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "status": "PRONTO"
+              },
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "AGUARDANDO_PAGAMENTO",
+                      "EM_PREPARO",
+                      "PRONTO",
+                      "ENTREGUE",
+                      "CANCELADO"
+                    ]
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pedido"
+                },
+                "example": {
+                  "id": 1,
+                  "usuarioId": 1,
+                  "unidadeId": 1,
+                  "canalPedido": "TOTEM",
+                  "status": "PRONTO",
+                  "total": 91.0,
+                  "criadoEm": "2026-10-11T12:00:00.000Z",
+                  "atualizadoEm": "2026-10-11T12:00:00.000Z",
+                  "itens": [
+                    {
+                      "id": 1,
+                      "pedidoId": 1,
+                      "produtoId": 1,
+                      "quantidade": 2,
+                      "precoUnitario": 38.5
+                    },
+                    {
+                      "id": 2,
+                      "pedidoId": 1,
+                      "produtoId": 2,
+                      "quantidade": 1,
+                      "precoUnitario": 14.0
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Corpo JSON inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "JSON_INVALIDO",
+                  "message": "Corpo JSON inválido.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/status",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Cabeçalho de autorização não fornecido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "NAO_AUTENTICADO",
+                  "message": "Cabeçalho de autorização não fornecido.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/status",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Perfil sem permissão para esta operação.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "ACESSO_NEGADO",
+                  "message": "Perfil sem permissão para esta operação.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/status",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pedido não encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "PEDIDO_NAO_ENCONTRADO",
+                  "message": "Pedido não encontrado.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/status",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito ao processar a operação.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "CONFLITO_OPERACAO",
+                  "message": "Conflito ao processar a operação.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/status",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "O corpo excede o limite de 100 KB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "CORPO_MUITO_GRANDE",
+                  "message": "O corpo excede o limite de 100 KB.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/status",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Informe parâmetros válidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "PARAMETRO_INVALIDO",
+                  "message": "Informe parâmetros válidos.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/status",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha inesperada no processamento.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "ERRO_INTERNO_SERVIDOR",
+                  "message": "Falha inesperada no processamento.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/pedidos/1/status",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          }
+        },
+        "description": "COZINHA ou ADMIN. EM_PREPARO → PRONTO → ENTREGUE; AGUARDANDO_PAGAMENTO → CANCELADO, com devolução de estoque. Este mock não implementa estorno de pedidos pagos.",
+        "operationId": "patch_pedidos_id_status",
+        "tags": [
+          "Pedidos"
+        ]
+      }
+    },
+    "/unidades": {
+      "get": {
+        "summary": "Listar unidades",
+        "responses": {
+          "200": {
+            "description": "Página de resultados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaUnidades"
+                },
+                "example": {
+                  "dados": [
+                    {
+                      "id": 1,
+                      "nome": "Unidade Recife Olinda",
+                      "cidade": "Recife"
+                    }
+                  ],
+                  "paginacao": {
+                    "pagina": 1,
+                    "limite": 10,
+                    "total": 1,
+                    "totalPaginas": 1
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito ao processar a operação.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "CONFLITO_OPERACAO",
+                  "message": "Conflito ao processar a operação.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/unidades",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Informe parâmetros válidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "PARAMETRO_INVALIDO",
+                  "message": "Informe parâmetros válidos.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/unidades",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha inesperada no processamento.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "ERRO_INTERNO_SERVIDOR",
+                  "message": "Falha inesperada no processamento.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/unidades",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 10,
+              "maximum": 100
+            }
+          }
+        ],
+        "operationId": "get_unidades",
+        "tags": [
+          "Unidades"
+        ],
+        "security": []
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Disponibilidade da API",
+        "responses": {
+          "200": {
+            "description": "Disponível",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                },
+                "example": {
+                  "status": "ok"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_health",
+        "tags": [
+          "Health"
+        ],
+        "security": []
+      }
+    },
+    "/privacidade/aviso": {
+      "get": {
+        "summary": "Consultar aviso opcional da demonstração de fidelidade",
+        "description": "Não ativa um programa real de pontos ou comunicação. Consulte a versão antes de aceitar.",
+        "responses": {
+          "200": {
+            "description": "Aviso vigente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvisoPrivacidade"
+                },
+                "example": {
+                  "finalidade": "FIDELIDADE",
+                  "versaoAviso": "1.0",
+                  "demonstracao": true,
+                  "opcional": true,
+                  "titulo": "Preferência de fidelidade — demonstração acadêmica",
+                  "descricao": "Registrar sua decisão opcional sobre participação na demonstração de fidelidade. Esta versão apenas registra a preferência: não acumula pontos, não concede benefícios e não envia mensagens. Um programa real exigirá novo aviso e nova decisão.",
+                  "dados": [
+                    "Identificador do usuário autenticado",
+                    "Decisão de aceitar ou revogar",
+                    "Versão do aviso",
+                    "Data e hora da decisão"
+                  ],
+                  "revogacao": "Envie {\"aceito\":false} para PUT /api/privacidade/consentimentos/fidelidade. Pedidos e login permanecem disponíveis.",
+                  "retencao": "O histórico é mantido para demonstrar as decisões durante o projeto. Não há expurgo automático; consulte a política de privacidade da entrega para o procedimento de encerramento.",
+                  "compartilhamento": "Nenhum provedor externo recebe os dados de consentimento nesta demonstração."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_privacidade_aviso",
+        "tags": [
+          "Privacidade"
+        ],
+        "security": []
+      }
+    },
+    "/privacidade/consentimentos": {
+      "get": {
+        "summary": "Consultar meu estado e histórico de consentimento",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Identidade vem do JWT. Histórico próprio paginado; estado atual é calculado independentemente da página. A consulta é auditada.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 10,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaConsentimentos"
+                },
+                "example": {
+                  "dados": [
+                    {
+                      "id": 1,
+                      "usuarioId": 1,
+                      "finalidade": "FIDELIDADE",
+                      "versaoAviso": "1.0",
+                      "aceito": true,
+                      "demonstracao": true,
+                      "registradoEm": "2026-10-11T12:00:00.000Z"
+                    }
+                  ],
+                  "paginacao": {
+                    "pagina": 1,
+                    "limite": 10,
+                    "total": 1,
+                    "totalPaginas": 1
+                  },
+                  "atual": {
+                    "finalidade": "FIDELIDADE",
+                    "versaoAviso": "1.0",
+                    "aceito": true,
+                    "demonstracao": true,
+                    "ultimoRegistroId": 1
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Cabeçalho de autorização não fornecido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "NAO_AUTENTICADO",
+                  "message": "Cabeçalho de autorização não fornecido.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/privacidade/consentimentos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito ao processar a operação.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "CONFLITO_OPERACAO",
+                  "message": "Conflito ao processar a operação.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/privacidade/consentimentos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Informe parâmetros válidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "PARAMETRO_INVALIDO",
+                  "message": "Informe parâmetros válidos.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/privacidade/consentimentos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha inesperada no processamento.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "ERRO_INTERNO_SERVIDOR",
+                  "message": "Falha inesperada no processamento.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/privacidade/consentimentos",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_privacidade_consentimentos",
+        "tags": [
+          "Privacidade"
+        ]
+      }
+    },
+    "/privacidade/consentimentos/fidelidade": {
+      "put": {
+        "summary": "Registrar ou revogar minha decisão opcional",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Somente o titular autenticado. Aceite exige a versão vigente. Revogação não exige versão atual e não bloqueia pedidos. PUT repetido não duplica evento. Histórico é de demonstração; flag legada não é autorização.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "aceito",
+                      "versaoAviso"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "aceito": {
+                        "type": "boolean",
+                        "enum": [
+                          true
+                        ]
+                      },
+                      "versaoAviso": {
+                        "type": "string",
+                        "enum": [
+                          "1.0"
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "aceito"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "aceito": {
+                        "type": "boolean",
+                        "enum": [
+                          false
+                        ]
+                      },
+                      "versaoAviso": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              },
+              "examples": {
+                "aceitar": {
+                  "value": {
+                    "aceito": true,
+                    "versaoAviso": "1.0"
+                  }
+                },
+                "revogar": {
+                  "value": {
+                    "aceito": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Consentimento"
+                },
+                "example": {
+                  "id": 1,
+                  "usuarioId": 1,
+                  "finalidade": "FIDELIDADE",
+                  "versaoAviso": "1.0",
+                  "aceito": true,
+                  "demonstracao": true,
+                  "registradoEm": "2026-10-11T12:00:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Corpo JSON inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "JSON_INVALIDO",
+                  "message": "Corpo JSON inválido.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/privacidade/consentimentos/fidelidade",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Cabeçalho de autorização não fornecido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "NAO_AUTENTICADO",
+                  "message": "Cabeçalho de autorização não fornecido.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/privacidade/consentimentos/fidelidade",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito ao processar a operação.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "CONFLITO_OPERACAO",
+                  "message": "Conflito ao processar a operação.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/privacidade/consentimentos/fidelidade",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "O corpo excede o limite de 100 KB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "CORPO_MUITO_GRANDE",
+                  "message": "O corpo excede o limite de 100 KB.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/privacidade/consentimentos/fidelidade",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Informe parâmetros válidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "PARAMETRO_INVALIDO",
+                  "message": "Informe parâmetros válidos.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/privacidade/consentimentos/fidelidade",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha inesperada no processamento.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "ERRO_INTERNO_SERVIDOR",
+                  "message": "Falha inesperada no processamento.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/privacidade/consentimentos/fidelidade",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "put_privacidade_consentimentos_fidelidade",
+        "tags": [
+          "Privacidade"
+        ]
+      }
+    },
+    "/auditoria": {
+      "get": {
+        "summary": "Consultar auditoria (ADMIN)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Somente ADMIN. Filtro opcional por ação exata. Consulta gera seu próprio log depois de ler a página; esse novo log aparece em consultas subsequentes. Não retorna entidades de usuários.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 10,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "acao",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Z_]{1,64}$"
+            },
+            "example": "CONSULTA_PEDIDOS"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaAuditoria"
+                },
+                "example": {
+                  "dados": [
+                    {
+                      "id": 1,
+                      "acao": "CONSULTA_PEDIDOS",
+                      "usuarioId": 3,
+                      "timestamp": "2026-10-11T12:00:00.000Z",
+                      "detalhes": {
+                        "pagina": 1,
+                        "limite": 10,
+                        "quantidadeRetornada": 1,
+                        "escopo": "REDE"
+                      }
+                    }
+                  ],
+                  "paginacao": {
+                    "pagina": 1,
+                    "limite": 10,
+                    "total": 1,
+                    "totalPaginas": 1
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Cabeçalho de autorização não fornecido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "NAO_AUTENTICADO",
+                  "message": "Cabeçalho de autorização não fornecido.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/auditoria",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Perfil sem permissão para esta operação.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "ACESSO_NEGADO",
+                  "message": "Perfil sem permissão para esta operação.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/auditoria",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito ao processar a operação.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "CONFLITO_OPERACAO",
+                  "message": "Conflito ao processar a operação.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/auditoria",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Informe parâmetros válidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "PARAMETRO_INVALIDO",
+                  "message": "Informe parâmetros válidos.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/auditoria",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha inesperada no processamento.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                },
+                "example": {
+                  "error": "ERRO_INTERNO_SERVIDOR",
+                  "message": "Falha inesperada no processamento.",
+                  "details": [],
+                  "timestamp": "2026-10-11T12:00:00.000Z",
+                  "path": "/api/auditoria",
+                  "requestId": "86b6d503-7449-4479-9af0-9bd890e6c587"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_auditoria",
+        "tags": [
+          "Auditoria"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+sequenceDiagram
+    actor C as Cliente ou Atendente
+    participant API as API/JWT
+    participant A as Casos de uso
+    participant DB as Store/Prisma/SQLite
+    participant G as MockPaymentGateway
+    actor K as Cozinha ou ADMIN
+    C->>API: POST /pedidos + JWT (unidade, canal, itens)
+    API->>A: CriarPedidoUseCase.executar(identidade, DTO)
+    A->>DB: BEGIN; validar unidade/produtos; reservar saldo
+    A->>DB: Criar pedido/itens e auditar
+    DB-->>A: COMMIT; AGUARDANDO_PAGAMENTO
+    A-->>API: Pedido persistido
+    API-->>C: 201 + pedido
+    Note over A,DB: Falha em item/estoque reverte toda a transação
+    C->>API: POST /pedidos/{id}/pagamento + statusSimulado
+    API->>A: ProcessarPagamentoMockUseCase.executar
+    A->>DB: BEGIN; ler pedido; validar titular e estado
+    DB-->>A: Pedido aguardando pagamento
+    A->>G: pedidoId, valorCentavos, BRL, correlacaoId, cenario
+    G-->>A: Resultado correlacionado (transacaoId em aprovação/recusa)
+    Note over A,G: Correlação inválida: rollback e 502
+    alt APROVADO ou RECUSADO
+        A->>DB: Status condicional + upsert pagamento + auditoria
+        DB-->>A: COMMIT
+        A-->>API: Resultado
+        API-->>C: 200; aprovado=EM_PREPARO, recusado=AGUARDANDO_PAGAMENTO
+    else INDISPONIVEL ou TIMEOUT
+        A->>DB: Auditoria da falha; COMMIT sem mudar pedido/estoque
+        A-->>API: Erro após commit
+        API-->>C: 503 ou 504 + erro padronizado
+    end
+    K->>API: PATCH status PRONTO; depois ENTREGUE (chamadas separadas)
+    API->>A: AtualizarStatusPedidoUseCase.executar
+    A->>DB: BEGIN; mudar estado + auditoria; COMMIT
+    DB-->>A: Pedido atualizado
+    A-->>API: Pedido
+    API-->>K: 200 + pedido
+    Note over A,DB: Cancelar apenas antes do pagamento; devolver saldo uma vez

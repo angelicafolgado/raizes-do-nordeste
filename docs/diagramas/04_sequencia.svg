@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1840" height="2640" viewBox="0 0 1840 2640">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10" fill="none" stroke="#24475a" stroke-width="1.5"/></marker></defs>
+<rect width="100%" height="100%" fill="white"/>
+<text x="40" y="48" font-family="Arial, sans-serif" font-size="30" fill="#24475a" text-anchor="start" font-weight="700">04 | Sequência — Pedido → Pagamento mock → Status</text>
+<text x="40" y="82" font-family="Arial, sans-serif" font-size="18" fill="#24475a" text-anchor="start" font-weight="400">Mensagens agrupadas por responsabilidade; transações e alternativas refletem o código atual.</text>
+<rect x="35" y="110" width="250" height="55" rx="6" fill="#163e50" stroke="#163e50"/>
+<text x="160" y="144" font-family="Arial, sans-serif" font-size="17" fill="white" text-anchor="middle" font-weight="700">Cliente / Atendente</text>
+<line x1="160" x2="160" y1="165" y2="2550" stroke="#a6bac2" stroke-dasharray="6 7"/>
+<rect x="315" y="110" width="250" height="55" rx="6" fill="#163e50" stroke="#163e50"/>
+<text x="440" y="144" font-family="Arial, sans-serif" font-size="17" fill="white" text-anchor="middle" font-weight="700">API / JWT</text>
+<line x1="440" x2="440" y1="165" y2="2550" stroke="#a6bac2" stroke-dasharray="6 7"/>
+<rect x="625" y="110" width="250" height="55" rx="6" fill="#163e50" stroke="#163e50"/>
+<text x="750" y="144" font-family="Arial, sans-serif" font-size="17" fill="white" text-anchor="middle" font-weight="700">Casos de uso</text>
+<line x1="750" x2="750" y1="165" y2="2550" stroke="#a6bac2" stroke-dasharray="6 7"/>
+<rect x="955" y="110" width="250" height="55" rx="6" fill="#163e50" stroke="#163e50"/>
+<text x="1080" y="144" font-family="Arial, sans-serif" font-size="17" fill="white" text-anchor="middle" font-weight="700">Store / Prisma / SQLite</text>
+<line x1="1080" x2="1080" y1="165" y2="2550" stroke="#a6bac2" stroke-dasharray="6 7"/>
+<rect x="1285" y="110" width="250" height="55" rx="6" fill="#163e50" stroke="#163e50"/>
+<text x="1410" y="144" font-family="Arial, sans-serif" font-size="17" fill="white" text-anchor="middle" font-weight="700">MockPaymentGateway</text>
+<line x1="1410" x2="1410" y1="165" y2="2550" stroke="#a6bac2" stroke-dasharray="6 7"/>
+<rect x="1575" y="110" width="250" height="55" rx="6" fill="#163e50" stroke="#163e50"/>
+<text x="1700" y="144" font-family="Arial, sans-serif" font-size="17" fill="white" text-anchor="middle" font-weight="700">Cozinha / ADMIN</text>
+<line x1="1700" x2="1700" y1="165" y2="2550" stroke="#a6bac2" stroke-dasharray="6 7"/>
+<rect x="35" y="190" width="1770" height="38" rx="6" fill="#dbeeed" stroke="#b1ccca"/>
+<text x="52" y="216" font-family="Arial, sans-serif" font-size="18" fill="#24475a" text-anchor="start" font-weight="700">1. Criar pedido — autenticação e autorização antes do caso de uso</text>
+<path d="M429,289 L440,295 L429,301" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="160" y1="295" x2="440" y2="295" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="201.7" y="227" width="196.6" height="54" rx="6" fill="white" stroke="white"/>
+<text x="300.0" y="259" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">POST /pedidos + JWT</text>
+<text x="300.0" y="280" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">unidade, canal, itens</text>
+<path d="M739,359 L750,365 L739,371" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="440" y1="365" x2="750" y2="365" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="505.3" y="297" width="179.4" height="54" rx="6" fill="white" stroke="white"/>
+<text x="595.0" y="329" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">Identidade do token</text>
+<text x="595.0" y="350" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">+ DTO validado</text>
+<path d="M1069,439 L1080,445 L1069,451" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="750" y1="445" x2="1080" y2="445" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="786.6" y="377" width="256.79999999999995" height="54" rx="6" fill="white" stroke="white"/>
+<text x="915.0" y="409" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">BEGIN; unidade e produtos;</text>
+<text x="915.0" y="430" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">reserva condicional do saldo</text>
+<path d="M1069,519 L1080,525 L1069,531" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="750" y1="525" x2="1080" y2="525" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="795.2" y="457" width="239.6" height="54" rx="6" fill="white" stroke="white"/>
+<text x="915.0" y="489" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">Criar Pedido + ItemPedido;</text>
+<text x="915.0" y="510" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">auditar CRIACAO_PEDIDO</text>
+<path d="M761,589 L750,595 L761,601" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="1080" y1="595" x2="750" y2="595" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)" stroke-dasharray="7 5"/>
+<rect x="821.0" y="527" width="188.0" height="54" rx="6" fill="white" stroke="white"/>
+<text x="915.0" y="559" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">COMMIT; pedido</text>
+<text x="915.0" y="580" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">AGUARDANDO_PAGAMENTO</text>
+<path d="M451,654 L440,660 L451,666" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="750" y1="660" x2="440" y2="660" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)" stroke-dasharray="7 5"/>
+<rect x="513.9" y="614" width="162.2" height="32" rx="6" fill="white" stroke="white"/>
+<text x="595.0" y="646" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">Pedido persistido</text>
+<path d="M171,719 L160,725 L171,731" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="440" y1="725" x2="160" y2="725" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)" stroke-dasharray="7 5"/>
+<rect x="240.4" y="679" width="119.19999999999999" height="32" rx="6" fill="white" stroke="white"/>
+<text x="300.0" y="711" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">201 + pedido</text>
+<rect x="55" y="747" width="1730" height="55" rx="6" fill="#fff4dd" stroke="#d9bd7d"/>
+<text x="73" y="770" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="start" font-weight="400">Item inválido / unidade ou produto ausente / estoque insuficiente: erro 400/422, 404 ou 409; rollback integral.</text>
+<rect x="35" y="835" width="1770" height="38" rx="6" fill="#dbeeed" stroke="#b1ccca"/>
+<text x="52" y="861" font-family="Arial, sans-serif" font-size="18" fill="#24475a" text-anchor="start" font-weight="700">2. Solicitar pagamento — uma chamada; alternativas mutuamente exclusivas</text>
+<path d="M429,934 L440,940 L429,946" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="160" y1="940" x2="440" y2="940" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="171.60000000000002" y="872" width="256.79999999999995" height="54" rx="6" fill="white" stroke="white"/>
+<text x="300.0" y="904" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">POST /pedidos/{id}/pagamento</text>
+<text x="300.0" y="925" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">JWT + statusSimulado</text>
+<path d="M739,999 L750,1005 L739,1011" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="440" y1="1005" x2="750" y2="1005" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="475.2" y="937" width="239.6" height="54" rx="6" fill="white" stroke="white"/>
+<text x="595.0" y="969" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">Executar pagamento</text>
+<text x="595.0" y="990" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">com identidade autenticada</text>
+<path d="M1069,1074 L1080,1080 L1069,1086" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="750" y1="1080" x2="1080" y2="1080" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="803.8" y="1012" width="222.39999999999998" height="54" rx="6" fill="white" stroke="white"/>
+<text x="915.0" y="1044" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">BEGIN; ler pedido;</text>
+<text x="915.0" y="1065" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">validar titular e estado</text>
+<path d="M761,1139 L750,1145 L761,1151" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="1080" y1="1145" x2="750" y2="1145" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)" stroke-dasharray="7 5"/>
+<rect x="790.9" y="1099" width="248.2" height="32" rx="6" fill="white" stroke="white"/>
+<text x="915.0" y="1131" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">Pedido aguardando pagamento</text>
+<path d="M1399,1214 L1410,1220 L1399,1226" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="750" y1="1220" x2="1410" y2="1220" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="891.4" y="1152" width="377.2" height="54" rx="6" fill="white" stroke="white"/>
+<text x="1080.0" y="1184" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">Solicitação: pedidoId, valorCentavos, BRL,</text>
+<text x="1080.0" y="1205" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">correlacaoId e cenário simulado</text>
+<path d="M761,1284 L750,1290 L761,1296" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="1410" y1="1290" x2="750" y2="1290" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)" stroke-dasharray="7 5"/>
+<rect x="925.8" y="1222" width="308.4" height="54" rx="6" fill="white" stroke="white"/>
+<text x="1080.0" y="1254" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">Resultado + pedidoId + correlação;</text>
+<text x="1080.0" y="1275" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">transacaoId em aprovação / recusa</text>
+<rect x="55" y="1310" width="1730" height="55" rx="6" fill="#fff4dd" stroke="#d9bd7d"/>
+<text x="73" y="1333" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="start" font-weight="400">Correlação incompatível: rollback e 502. Token/perfil/titular/estado inválido: rejeição antes de solicitar ao gateway.</text>
+<rect x="55" y="1395" width="1730" height="420" rx="6" fill="none" stroke="#43857e"/>
+<text x="75" y="1425" font-family="Arial, sans-serif" font-size="18" fill="#24475a" text-anchor="start" font-weight="700">alt</text>
+<text x="130" y="1425" font-family="Arial, sans-serif" font-size="18" fill="#24475a" text-anchor="start" font-weight="700">[APROVADO ou RECUSADO]</text>
+<path d="M1069,1504 L1080,1510 L1069,1516" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="750" y1="1510" x2="1080" y2="1510" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="756.0" y="1442" width="318" height="54" rx="6" fill="white" stroke="white"/>
+<text x="915.0" y="1474" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">Status condicional; upsert pagamento;</text>
+<text x="915.0" y="1495" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">auditar PAGAMENTO_MOCK; COMMIT</text>
+<path d="M761,1569 L750,1575 L761,1581" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="1080" y1="1575" x2="750" y2="1575" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)" stroke-dasharray="7 5"/>
+<rect x="778.0" y="1529" width="274.0" height="32" rx="6" fill="white" stroke="white"/>
+<text x="915.0" y="1561" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">Pagamento e estado persistidos</text>
+<path d="M451,1634 L440,1640 L451,1646" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="750" y1="1640" x2="440" y2="1640" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)" stroke-dasharray="7 5"/>
+<rect x="483.8" y="1594" width="222.39999999999998" height="32" rx="6" fill="white" stroke="white"/>
+<text x="595.0" y="1626" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">Resultado do caso de uso</text>
+<path d="M171,1699 L160,1705 L171,1711" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="440" y1="1705" x2="160" y2="1705" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)" stroke-dasharray="7 5"/>
+<rect x="175.9" y="1637" width="248.2" height="54" rx="6" fill="white" stroke="white"/>
+<text x="300.0" y="1669" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">200 + sucesso, transacaoId,</text>
+<text x="300.0" y="1690" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">statusPedido e detalhes</text>
+<rect x="55" y="1730" width="1730" height="55" rx="6" fill="#fff4dd" stroke="#d9bd7d"/>
+<text x="73" y="1753" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="start" font-weight="400">APROVADO → EM_PREPARO. RECUSADO → AGUARDANDO_PAGAMENTO, mantendo reserva e permitindo nova tentativa.</text>
+<rect x="55" y="1840" width="1730" height="250" rx="6" fill="none" stroke="#43857e"/>
+<text x="75" y="1870" font-family="Arial, sans-serif" font-size="18" fill="#24475a" text-anchor="start" font-weight="700">else</text>
+<text x="135" y="1870" font-family="Arial, sans-serif" font-size="18" fill="#24475a" text-anchor="start" font-weight="700">[INDISPONIVEL ou TIMEOUT]</text>
+<path d="M1069,1944 L1080,1950 L1069,1956" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="750" y1="1950" x2="1080" y2="1950" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="769.4" y="1882" width="291.2" height="54" rx="6" fill="white" stroke="white"/>
+<text x="915.0" y="1914" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">Auditar falha; COMMIT; preservar</text>
+<text x="915.0" y="1935" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">pedido, pagamento e estoque</text>
+<path d="M451,2004 L440,2010 L451,2016" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="750" y1="2010" x2="440" y2="2010" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)" stroke-dasharray="7 5"/>
+<rect x="462.3" y="1964" width="265.4" height="32" rx="6" fill="white" stroke="white"/>
+<text x="595.0" y="1996" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">Erro após commit da auditoria</text>
+<path d="M171,2064 L160,2070 L171,2076" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="440" y1="2070" x2="160" y2="2070" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)" stroke-dasharray="7 5"/>
+<rect x="171.60000000000002" y="2024" width="256.79999999999995" height="32" rx="6" fill="white" stroke="white"/>
+<text x="300.0" y="2056" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">503 / 504 + erro padronizado</text>
+<rect x="35" y="2130" width="1770" height="38" rx="6" fill="#dbeeed" stroke="#b1ccca"/>
+<text x="52" y="2156" font-family="Arial, sans-serif" font-size="18" fill="#24475a" text-anchor="start" font-weight="700">3. Operação — após aprovação, chamadas separadas para cada transição</text>
+<path d="M451,2224 L440,2230 L451,2236" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="1700" y1="2230" x2="440" y2="2230" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="816.9" y="2184" width="506.2" height="32" rx="6" fill="white" stroke="white"/>
+<text x="1070.0" y="2216" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">PATCH /pedidos/{id}/status + JWT: PRONTO; depois ENTREGUE</text>
+<path d="M739,2284 L750,2290 L739,2296" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="440" y1="2290" x2="750" y2="2290" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="475.2" y="2244" width="239.6" height="32" rx="6" fill="white" stroke="white"/>
+<text x="595.0" y="2276" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">Validar perfil e transição</text>
+<path d="M1069,2344 L1080,2350 L1069,2356" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="750" y1="2350" x2="1080" y2="2350" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="795.2" y="2282" width="239.6" height="54" rx="6" fill="white" stroke="white"/>
+<text x="915.0" y="2314" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">BEGIN; status + auditoria;</text>
+<text x="915.0" y="2335" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">COMMIT</text>
+<path d="M761,2404 L750,2410 L761,2416" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="1080" y1="2410" x2="750" y2="2410" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)" stroke-dasharray="7 5"/>
+<rect x="833.9" y="2364" width="162.2" height="32" rx="6" fill="white" stroke="white"/>
+<text x="915.0" y="2396" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">Pedido atualizado</text>
+<path d="M451,2464 L440,2470 L451,2476" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="750" y1="2470" x2="440" y2="2470" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)" stroke-dasharray="7 5"/>
+<rect x="561.2" y="2424" width="67.6" height="32" rx="6" fill="white" stroke="white"/>
+<text x="595.0" y="2456" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">Pedido</text>
+<path d="M1689,2524 L1700,2530 L1689,2536" fill="none" stroke="#24475a" stroke-width="1.6"/>
+<line x1="440" y1="2530" x2="1700" y2="2530" stroke="#24475a" stroke-width="1.6" marker-end="url(#arrow)" stroke-dasharray="7 5"/>
+<rect x="1010.4" y="2484" width="119.19999999999999" height="32" rx="6" fill="white" stroke="white"/>
+<text x="1070.0" y="2516" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="middle" font-weight="400">200 + pedido</text>
+<text x="40" y="2580" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="start" font-weight="400">Cancelamento: somente AGUARDANDO_PAGAMENTO → CANCELADO, com devolução única de estoque e auditoria na mesma transação.</text>
+<text x="40" y="2610" font-family="Arial, sans-serif" font-size="16" fill="#24475a" text-anchor="start" font-weight="400">O gateway é local e imediato: TIMEOUT é um resultado simulado, sem espera de rede ou cobrança real.</text>
+</svg>

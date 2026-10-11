@@ -1,0 +1,39 @@
+{
+  "name": "raizes-do-nordeste-backend-ts",
+  "version": "1.0.0",
+  "description": "API REST Raízes do Nordeste - Clean Architecture e TypeScript",
+  "main": "dist/server.js",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev --name init",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:deploy": "prisma migrate deploy",
+    "test": "tsx --test tests/*.test.ts",
+    "setup": "node scripts/setup.cjs && prisma generate && prisma migrate deploy && tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.15.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20.14.2",
+    "@types/swagger-ui-express": "^4.1.6",
+    "prisma": "^5.15.0",
+    "tsx": "^4.15.4",
+    "typescript": "^5.4.5"
+  }
+}

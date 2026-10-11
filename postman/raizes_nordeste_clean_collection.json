@@ -1,0 +1,1185 @@
+{
+  "info": {
+    "name": "Raízes do Nordeste — fluxo completo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Execute a coleção completa em ordem, com banco populado. Cada requisição contém pré-condições e asserções de status/conteúdo. baseUrl padrão http://localhost:3000; tokens e pedidoId são capturados automaticamente. Não há token real salvo na coleção."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token_cliente",
+      "value": ""
+    },
+    {
+      "key": "token_cozinha",
+      "value": ""
+    },
+    {
+      "key": "pedidoId",
+      "value": ""
+    },
+    {
+      "key": "token_admin",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Auth",
+      "description": "Execute as pastas e suas requisições na ordem apresentada.",
+      "item": [
+        {
+          "name": "T01 - Login cliente",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"maria@cliente.com\",\n  \"senha\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados.\nResultado esperado: HTTP 200; accessToken presente; CLIENTE.\nEvidência: asserções da requisição T01 - Login cliente, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_cliente\", pm.response.json().accessToken);",
+                  "pm.test(\"Perfil cliente\", () => pm.expect(pm.response.json().usuario.role).to.eql(\"CLIENTE\"));",
+                  "pm.test(\"Token recebido\", () => pm.expect(typeof pm.response.json().accessToken).to.eql(\"string\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T02 - Login cozinha",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cozinha@raizes.com\",\n  \"senha\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados.\nResultado esperado: HTTP 200; accessToken presente; COZINHA.\nEvidência: asserções da requisição T02 - Login cozinha, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_cozinha\", pm.response.json().accessToken);",
+                  "pm.test(\"Perfil cozinha\", () => pm.expect(pm.response.json().usuario.role).to.eql(\"COZINHA\"));",
+                  "pm.test(\"Token recebido\", () => pm.expect(typeof pm.response.json().accessToken).to.eql(\"string\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T03 - Senha incorreta",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"maria@cliente.com\",\n  \"senha\": \"errada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados.\nResultado esperado: HTTP 401; CREDENCIAIS_INVALIDAS.\nEvidência: asserções da requisição T03 - Senha incorreta, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Envelope de erro\", () => pm.expect([\"error\",\"message\",\"details\",\"timestamp\",\"path\",\"requestId\"].every(k => Object.prototype.hasOwnProperty.call(pm.response.json(), k))).to.eql(true));",
+                  "pm.test(\"Código de erro\", () => pm.expect(pm.response.json().error).to.eql(\"CREDENCIAIS_INVALIDAS\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Cardápio",
+      "description": "Execute as pastas e suas requisições na ordem apresentada.",
+      "item": [
+        {
+          "name": "T04 - Cardápio",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/produtos",
+            "header": [],
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados.\nResultado esperado: HTTP 200; dados e paginacao; estoque por unidade.\nEvidência: asserções da requisição T04 - Cardápio, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Lista paginada\", () => pm.expect(Array.isArray(pm.response.json().dados)).to.eql(true));",
+                  "pm.test(\"Total informado\", () => pm.expect(typeof pm.response.json().paginacao.total).to.eql(\"number\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 Pedidos",
+      "description": "Execute as pastas e suas requisições na ordem apresentada.",
+      "item": [
+        {
+          "name": "T05 - Criar pedido TOTEM",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/pedidos",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": 1,\n  \"canalPedido\": \"TOTEM\",\n  \"itens\": [\n    {\n      \"produtoId\": 1,\n      \"quantidade\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior.\nResultado esperado: HTTP 201; id capturado; AGUARDANDO_PAGAMENTO; total 38,50.\nEvidência: asserções da requisição T05 - Criar pedido TOTEM, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"pedidoId\", pm.response.json().id);",
+                  "pm.test(\"Pedido criado\", () => pm.expect(pm.response.json().status).to.eql(\"AGUARDANDO_PAGAMENTO\"));",
+                  "pm.test(\"Total calculado\", () => pm.expect(pm.response.json().total).to.eql(38.5));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T06 - Filtrar pedidos",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/pedidos?canalPedido=TOTEM&page=1&limit=5",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior.\nResultado esperado: HTTP 200; canal TOTEM nos resultados.\nEvidência: asserções da requisição T06 - Filtrar pedidos, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Filtro TOTEM\", () => pm.expect(pm.response.json().dados.every(p => p.canalPedido === \"TOTEM\")).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T07 - Canal inválido",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/pedidos",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": 1,\n  \"canalPedido\": \"INVALIDO\",\n  \"itens\": [\n    {\n      \"produtoId\": 1,\n      \"quantidade\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior.\nResultado esperado: HTTP 400; CANAL_INVALIDO.\nEvidência: asserções da requisição T07 - Canal inválido, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Envelope de erro\", () => pm.expect([\"error\",\"message\",\"details\",\"timestamp\",\"path\",\"requestId\"].every(k => Object.prototype.hasOwnProperty.call(pm.response.json(), k))).to.eql(true));",
+                  "pm.test(\"Código de erro\", () => pm.expect(pm.response.json().error).to.eql(\"CANAL_INVALIDO\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T08 - Estoque insuficiente",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/pedidos",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": 1,\n  \"canalPedido\": \"TOTEM\",\n  \"itens\": [\n    {\n      \"produtoId\": 1,\n      \"quantidade\": 99999\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior.\nResultado esperado: HTTP 409; ESTOQUE_INSUFICIENTE.\nEvidência: asserções da requisição T08 - Estoque insuficiente, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Envelope de erro\", () => pm.expect([\"error\",\"message\",\"details\",\"timestamp\",\"path\",\"requestId\"].every(k => Object.prototype.hasOwnProperty.call(pm.response.json(), k))).to.eql(true));",
+                  "pm.test(\"Código de erro\", () => pm.expect(pm.response.json().error).to.eql(\"ESTOQUE_INSUFICIENTE\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T09 - Quantidade inválida",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/pedidos",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": 1,\n  \"canalPedido\": \"TOTEM\",\n  \"itens\": [\n    {\n      \"produtoId\": 1,\n      \"quantidade\": 0\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior.\nResultado esperado: HTTP 422; PARAMETRO_INVALIDO.\nEvidência: asserções da requisição T09 - Quantidade inválida, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"Envelope de erro\", () => pm.expect([\"error\",\"message\",\"details\",\"timestamp\",\"path\",\"requestId\"].every(k => Object.prototype.hasOwnProperty.call(pm.response.json(), k))).to.eql(true));",
+                  "pm.test(\"Código de erro\", () => pm.expect(pm.response.json().error).to.eql(\"PARAMETRO_INVALIDO\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 Pagamento mock",
+      "description": "Execute as pastas e suas requisições na ordem apresentada.",
+      "item": [
+        {
+          "name": "T10 - Pagamento recusado",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/pedidos/{{pedidoId}}/pagamento",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statusSimulado\": \"RECUSADO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior; pedidoId capturado em T05; pedido aguardando pagamento.\nResultado esperado: HTTP 200; sucesso=false; AGUARDANDO_PAGAMENTO.\nEvidência: asserções da requisição T10 - Pagamento recusado, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Recusado\", () => pm.expect(pm.response.json().sucesso).to.eql(false));",
+                  "pm.test(\"Aguardando após recusa\", () => pm.expect(pm.response.json().statusPedido).to.eql(\"AGUARDANDO_PAGAMENTO\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T11 - Gateway indisponível",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/pedidos/{{pedidoId}}/pagamento",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statusSimulado\": \"INDISPONIVEL\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior; pedidoId capturado em T05; pedido aguardando pagamento.\nResultado esperado: HTTP 503; GATEWAY_INDISPONIVEL.\nEvidência: asserções da requisição T11 - Gateway indisponível, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 503\", () => pm.response.to.have.status(503));",
+                  "pm.test(\"Erro gateway\", () => pm.expect(pm.response.json().error).to.eql(\"GATEWAY_INDISPONIVEL\"));",
+                  "pm.test(\"Envelope de erro\", () => pm.expect([\"error\",\"message\",\"details\",\"timestamp\",\"path\",\"requestId\"].every(k => Object.prototype.hasOwnProperty.call(pm.response.json(), k))).to.eql(true));",
+                  "pm.test(\"Código de erro\", () => pm.expect(pm.response.json().error).to.eql(\"GATEWAY_INDISPONIVEL\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T12 - Timeout gateway",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/pedidos/{{pedidoId}}/pagamento",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statusSimulado\": \"TIMEOUT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior; pedidoId capturado em T05; pedido aguardando pagamento.\nResultado esperado: HTTP 504; GATEWAY_TIMEOUT.\nEvidência: asserções da requisição T12 - Timeout gateway, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 504\", () => pm.response.to.have.status(504));",
+                  "pm.test(\"Erro timeout\", () => pm.expect(pm.response.json().error).to.eql(\"GATEWAY_TIMEOUT\"));",
+                  "pm.test(\"Envelope de erro\", () => pm.expect([\"error\",\"message\",\"details\",\"timestamp\",\"path\",\"requestId\"].every(k => Object.prototype.hasOwnProperty.call(pm.response.json(), k))).to.eql(true));",
+                  "pm.test(\"Código de erro\", () => pm.expect(pm.response.json().error).to.eql(\"GATEWAY_TIMEOUT\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T13 - Nova tentativa aprovada",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/pedidos/{{pedidoId}}/pagamento",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statusSimulado\": \"APROVADO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior; pedidoId capturado em T05; pedido aguardando pagamento.\nResultado esperado: HTTP 200; sucesso=true; EM_PREPARO.\nEvidência: asserções da requisição T13 - Nova tentativa aprovada, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Em preparo\", () => pm.expect(pm.response.json().statusPedido).to.eql(\"EM_PREPARO\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 Status e duplicidade",
+      "description": "Execute as pastas e suas requisições na ordem apresentada.",
+      "item": [
+        {
+          "name": "T14 - Cliente sem permissão",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/pedidos/{{pedidoId}}/status",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PRONTO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior; pedidoId capturado em T05; pagamento aprovado em T13.\nResultado esperado: HTTP 403; ACESSO_NEGADO.\nEvidência: asserções da requisição T14 - Cliente sem permissão, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"Envelope de erro\", () => pm.expect([\"error\",\"message\",\"details\",\"timestamp\",\"path\",\"requestId\"].every(k => Object.prototype.hasOwnProperty.call(pm.response.json(), k))).to.eql(true));",
+                  "pm.test(\"Código de erro\", () => pm.expect(pm.response.json().error).to.eql(\"ACESSO_NEGADO\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T15 - Cozinha marca pronto",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/pedidos/{{pedidoId}}/status",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cozinha}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PRONTO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cozinha}} obtido no login anterior; pedidoId capturado em T05; pagamento aprovado em T13.\nResultado esperado: HTTP 200; status=PRONTO.\nEvidência: asserções da requisição T15 - Cozinha marca pronto, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Pronto\", () => pm.expect(pm.response.json().status).to.eql(\"PRONTO\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T16 - Entrega",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/pedidos/{{pedidoId}}/status",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cozinha}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ENTREGUE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cozinha}} obtido no login anterior; pedidoId capturado em T05; pedido PRONTO após T15.\nResultado esperado: HTTP 200; status=ENTREGUE.\nEvidência: asserções da requisição T16 - Entrega, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Entregue\", () => pm.expect(pm.response.json().status).to.eql(\"ENTREGUE\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T17 - Pagamento repetido",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/pedidos/{{pedidoId}}/pagamento",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statusSimulado\": \"APROVADO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior; pedidoId capturado em T05; pedido já ENTREGUE.\nResultado esperado: HTTP 409; ESTADO_INVALIDO.\nEvidência: asserções da requisição T17 - Pagamento repetido, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Envelope de erro\", () => pm.expect([\"error\",\"message\",\"details\",\"timestamp\",\"path\",\"requestId\"].every(k => Object.prototype.hasOwnProperty.call(pm.response.json(), k))).to.eql(true));",
+                  "pm.test(\"Código de erro\", () => pm.expect(pm.response.json().error).to.eql(\"ESTADO_INVALIDO\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 Acesso e paginação",
+      "description": "Execute as pastas e suas requisições na ordem apresentada.",
+      "item": [
+        {
+          "name": "T18 - Sem autenticação",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/pedidos",
+            "header": [],
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados.\nResultado esperado: HTTP 401; NAO_AUTENTICADO.\nEvidência: asserções da requisição T18 - Sem autenticação, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Envelope de erro\", () => pm.expect([\"error\",\"message\",\"details\",\"timestamp\",\"path\",\"requestId\"].every(k => Object.prototype.hasOwnProperty.call(pm.response.json(), k))).to.eql(true));",
+                  "pm.test(\"Código de erro\", () => pm.expect(pm.response.json().error).to.eql(\"NAO_AUTENTICADO\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T19 - Produtos paginados",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/produtos?unidadeId=1&page=2&limit=1",
+            "header": [],
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados.\nResultado esperado: HTTP 200; pagina=2; um produto.\nEvidência: asserções da requisição T19 - Produtos paginados, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Página 2\", () => pm.expect(pm.response.json().paginacao.pagina).to.eql(2));",
+                  "pm.test(\"Um produto\", () => pm.expect(pm.response.json().dados.length).to.eql(1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T20 - Unidades paginadas",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/unidades?page=1&limit=1",
+            "header": [],
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados.\nResultado esperado: HTTP 200; uma unidade.\nEvidência: asserções da requisição T20 - Unidades paginadas, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Uma unidade\", () => pm.expect(pm.response.json().dados.length).to.eql(1));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "07 Privacidade",
+      "description": "Execute as pastas e suas requisições na ordem apresentada.",
+      "item": [
+        {
+          "name": "T21 - Aviso opcional",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/privacidade/aviso",
+            "header": [],
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados.\nResultado esperado: HTTP 200; opcional=true; versão 1.0.\nEvidência: asserções da requisição T21 - Aviso opcional, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Opcional\", () => pm.expect(pm.response.json().opcional).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T22 - Aceitar demonstração",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/privacidade/consentimentos/fidelidade",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aceito\": true,\n  \"versaoAviso\": \"1.0\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior.\nResultado esperado: HTTP 200; aceito=true.\nEvidência: asserções da requisição T22 - Aceitar demonstração, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Aceito\", () => pm.expect(pm.response.json().aceito).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T23 - Histórico próprio",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/privacidade/consentimentos",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior; aceite registrado em T22.\nResultado esperado: HTTP 200; atual.aceito=true.\nEvidência: asserções da requisição T23 - Histórico próprio, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Estado ativo\", () => pm.expect(pm.response.json().atual.aceito).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T24 - Revogar decisão",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/privacidade/consentimentos/fidelidade",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aceito\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior.\nResultado esperado: HTTP 200; aceito=false.\nEvidência: asserções da requisição T24 - Revogar decisão, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Revogado\", () => pm.expect(pm.response.json().aceito).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T25 - Histórico sem token",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/privacidade/consentimentos",
+            "header": [],
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados.\nResultado esperado: HTTP 401; NAO_AUTENTICADO.\nEvidência: asserções da requisição T25 - Histórico sem token, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Envelope de erro\", () => pm.expect([\"error\",\"message\",\"details\",\"timestamp\",\"path\",\"requestId\"].every(k => Object.prototype.hasOwnProperty.call(pm.response.json(), k))).to.eql(true));",
+                  "pm.test(\"Código de erro\", () => pm.expect(pm.response.json().error).to.eql(\"NAO_AUTENTICADO\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "08 Auditoria",
+      "description": "Execute as pastas e suas requisições na ordem apresentada.",
+      "item": [
+        {
+          "name": "T26 - Cliente não acessa auditoria",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/auditoria",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior.\nResultado esperado: HTTP 403; ACESSO_NEGADO.\nEvidência: asserções da requisição T26 - Cliente não acessa auditoria, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"Envelope de erro\", () => pm.expect([\"error\",\"message\",\"details\",\"timestamp\",\"path\",\"requestId\"].every(k => Object.prototype.hasOwnProperty.call(pm.response.json(), k))).to.eql(true));",
+                  "pm.test(\"Código de erro\", () => pm.expect(pm.response.json().error).to.eql(\"ACESSO_NEGADO\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T27 - Login administrador",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@raizes.com\",\n  \"senha\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados.\nResultado esperado: HTTP 200; accessToken presente; ADMIN.\nEvidência: asserções da requisição T27 - Login administrador, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token_admin\", pm.response.json().accessToken);",
+                  "pm.test(\"Perfil administrador\", () => pm.expect(pm.response.json().usuario.role).to.eql(\"ADMIN\"));",
+                  "pm.test(\"Token recebido\", () => pm.expect(typeof pm.response.json().accessToken).to.eql(\"string\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T28 - Evidência de revogação auditada",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/auditoria?acao=CONSENTIMENTO_REVOGADO&limit=1",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_admin}} obtido no login anterior; revogação registrada em T24.\nResultado esperado: HTTP 200; evento CONSENTIMENTO_REVOGADO.\nEvidência: asserções da requisição T28 - Evidência de revogação auditada, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Evento registrado\", () => pm.expect(pm.response.json().dados[0].acao).to.eql(\"CONSENTIMENTO_REVOGADO\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "09 Validações adicionais",
+      "description": "Execute as pastas e suas requisições na ordem apresentada.",
+      "item": [
+        {
+          "name": "T29 - Canal obrigatório ausente",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/pedidos",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": 1,\n  \"itens\": [\n    {\n      \"produtoId\": 1,\n      \"quantidade\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior.\nResultado esperado: HTTP 400; CANAL_INVALIDO.\nEvidência: asserções da requisição T29 - Canal obrigatório ausente, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Envelope de erro\", () => pm.expect([\"error\",\"message\",\"details\",\"timestamp\",\"path\",\"requestId\"].every(k => Object.prototype.hasOwnProperty.call(pm.response.json(), k))).to.eql(true));",
+                  "pm.test(\"Código de erro\", () => pm.expect(pm.response.json().error).to.eql(\"CANAL_INVALIDO\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T30 - Tipo de quantidade inválido",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/pedidos",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": 1,\n  \"canalPedido\": \"TOTEM\",\n  \"itens\": [\n    {\n      \"produtoId\": 1,\n      \"quantidade\": \"1\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior.\nResultado esperado: HTTP 422; PARAMETRO_INVALIDO.\nEvidência: asserções da requisição T30 - Tipo de quantidade inválido, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"Envelope de erro\", () => pm.expect([\"error\",\"message\",\"details\",\"timestamp\",\"path\",\"requestId\"].every(k => Object.prototype.hasOwnProperty.call(pm.response.json(), k))).to.eql(true));",
+                  "pm.test(\"Código de erro\", () => pm.expect(pm.response.json().error).to.eql(\"PARAMETRO_INVALIDO\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T31 - Unidade inexistente",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/pedidos",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": 99999,\n  \"canalPedido\": \"TOTEM\",\n  \"itens\": [\n    {\n      \"produtoId\": 1,\n      \"quantidade\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior.\nResultado esperado: HTTP 404; UNIDADE_NAO_ENCONTRADA.\nEvidência: asserções da requisição T31 - Unidade inexistente, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Envelope de erro\", () => pm.expect([\"error\",\"message\",\"details\",\"timestamp\",\"path\",\"requestId\"].every(k => Object.prototype.hasOwnProperty.call(pm.response.json(), k))).to.eql(true));",
+                  "pm.test(\"Código de erro\", () => pm.expect(pm.response.json().error).to.eql(\"UNIDADE_NAO_ENCONTRADA\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "T32 - Produto inexistente",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/pedidos",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": 1,\n  \"canalPedido\": \"TOTEM\",\n  \"itens\": [\n    {\n      \"produtoId\": 99999,\n      \"quantidade\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pré-condição: API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior.\nResultado esperado: HTTP 404; PRODUTO_NAO_ENCONTRADO.\nEvidência: asserções da requisição T32 - Produto inexistente, executada em ordem no Collection Runner."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Envelope de erro\", () => pm.expect([\"error\",\"message\",\"details\",\"timestamp\",\"path\",\"requestId\"].every(k => Object.prototype.hasOwnProperty.call(pm.response.json(), k))).to.eql(true));",
+                  "pm.test(\"Código de erro\", () => pm.expect(pm.response.json().error).to.eql(\"PRODUTO_NAO_ENCONTRADO\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

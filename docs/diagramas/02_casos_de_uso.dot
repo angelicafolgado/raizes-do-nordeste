@@ -1,0 +1,45 @@
+digraph G {
+graph [rankdir=LR, bgcolor="white", pad="0.4", nodesep="0.45", ranksep="1.0", splines=polyline, outputorder=edgesfirst, fontname="Arial", labelloc=t, labeljust=l, label=<<FONT POINT-SIZE="24" COLOR="#123447"><B>02 | Casos de uso — API implementada</B></FONT><BR/><FONT POINT-SIZE="12" COLOR="#46616f">Atores em notação retangular UML • generalização = seta vazada para Usuário • associações indicam participação</FONT><BR/><BR/>>];
+node [shape=plain, fontname="Arial", fontsize=12];
+edge [fontname="Arial", fontsize=11, color="#71858e", fontcolor="#24475a", penwidth=1.2, arrowsize=0.7];
+usuario [shape=box, style="rounded,filled", fillcolor="#e8f1f5", color="#406579", margin="0.16", label="«actor»\nUsuário da rede"];
+cliente [shape=box, style="rounded,filled", fillcolor="#e8f1f5", color="#406579", margin="0.16", label="«actor»\nCliente\nApp / Web / Totem"];
+atendente [shape=box, style="rounded,filled", fillcolor="#e8f1f5", color="#406579", margin="0.16", label="«actor»\nAtendente\nBalcão"];
+cozinha [shape=box, style="rounded,filled", fillcolor="#e8f1f5", color="#406579", margin="0.16", label="«actor»\nCozinha"];
+admin [shape=box, style="rounded,filled", fillcolor="#e8f1f5", color="#406579", margin="0.16", label="«actor»\nGerente / Administrador\nperfil ADMIN"];
+gateway [shape=box, style="rounded,filled", fillcolor="#e8f1f5", color="#406579", margin="0.16", label="«actor»\nGateway de pagamento\nsimulado por adaptador local"];
+subgraph cluster_api { label="Raízes do Nordeste — fronteira da API"; color="#a4bbc5"; style=rounded; fontcolor="#123447"; fontsize=16;
+login [shape=ellipse, style=filled, fillcolor="#f1f8f6", color="#43857e", margin="0.16", label="UC01\nAutenticar usuário"];
+catalogo [shape=ellipse, style=filled, fillcolor="#f1f8f6", color="#43857e", margin="0.16", label="UC02\nConsultar unidades,\ncardápio e aviso público"];
+historico [shape=ellipse, style=filled, fillcolor="#f1f8f6", color="#43857e", margin="0.16", label="UC03\nConsultar pedidos\n(próprios ou da rede)"];
+consentir [shape=ellipse, style=filled, fillcolor="#f1f8f6", color="#43857e", margin="0.16", label="UC04\nRegistrar / revogar decisão\ne consultar próprio histórico"];
+criar [shape=ellipse, style=filled, fillcolor="#f1f8f6", color="#43857e", margin="0.16", label="UC05\nCriar pedido multicanal"];
+reservar [shape=ellipse, style=filled, fillcolor="#f1f8f6", color="#43857e", margin="0.16", label="UC06\nValidar itens e\nreservar estoque"];
+pagar [shape=ellipse, style=filled, fillcolor="#f1f8f6", color="#43857e", margin="0.16", label="UC07\nSolicitar pagamento mock"];
+status [shape=ellipse, style=filled, fillcolor="#f1f8f6", color="#43857e", margin="0.16", label="UC08\nAvançar preparo / entrega"];
+cancelar [shape=ellipse, style=filled, fillcolor="#f1f8f6", color="#43857e", margin="0.16", label="UC09\nCancelar pedido não pago"];
+auditoria [shape=ellipse, style=filled, fillcolor="#f1f8f6", color="#43857e", margin="0.16", label="UC10\nConsultar auditoria"];
+}
+cliente -> usuario [arrowhead=empty, color="#8a9ba3"];
+atendente -> usuario [arrowhead=empty, color="#8a9ba3"];
+cozinha -> usuario [arrowhead=empty, color="#8a9ba3"];
+admin -> usuario [arrowhead=empty, color="#8a9ba3"];
+usuario -> login [dir=none];
+usuario -> catalogo [dir=none];
+usuario -> historico [dir=none];
+usuario -> consentir [dir=none];
+cliente -> criar [dir=none];
+cliente -> pagar [dir=none];
+atendente -> criar [dir=none];
+atendente -> pagar [dir=none];
+admin -> criar [dir=none];
+admin -> pagar [dir=none];
+cozinha -> status [dir=none];
+cozinha -> cancelar [dir=none];
+admin -> status [dir=none];
+admin -> cancelar [dir=none];
+admin -> auditoria [dir=none];
+criar -> reservar [style=dashed, label="«include»", arrowhead=open, color="#238577"];
+pagar -> gateway [dir=none];
+{rank=same; cliente; atendente; cozinha; admin;}
+}
