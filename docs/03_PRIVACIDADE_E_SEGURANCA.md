@@ -38,7 +38,7 @@ As hipóteses acima são decisões de modelagem para o relatório, sujeitas à a
 
 ## 4. Aviso e ciclo de consentimento
 
-Finalidade: `FIDELIDADE`. Versão inicial: `1.0`. O texto deixa claro que a aplicação apenas registra a preferência para demonstração: não ativa programa real, não acumula pontos e não envia mensagens. A implantação futura de outro tratamento exige novo aviso e nova decisão. O aviso publicado está em `src/application/privacy/aviso.ts`; versões publicadas devem ser preservadas no histórico do projeto.
+Finalidade: `FIDELIDADE`. Versão inicial: `1.0`. O texto deixa claro que a aplicação apenas registra a preferência para demonstração: não ativa programa real, não acumula pontos e não envia mensagens. A implantação futura de outro tratamento exige novo aviso e nova decisão. O aviso publicado é servido pela implementação Java em [ApiController](../src/main/java/br/com/raizesdonordeste/api/ApiController.java); versões publicadas devem ser preservadas no histórico do projeto.
 
 | Operação | Contrato |
 |---|---|
@@ -82,7 +82,7 @@ O titular pode consultar e revogar a preferência pelo próprio token. Para aces
 
 ## 8. Migração e verificação
 
-`20261011133230_consentimentos` cria somente tabela e índice de consentimentos, com FK para usuários. Não altera ou apaga contas/pedidos existentes. Em outra instalação, executar `npm run prisma:deploy` e `npm run prisma:generate` (ou `npm run setup`).
+O esquema da implementação Java está em [schema.sql](../src/main/resources/schema.sql) e inclui a tabela de consentimentos com FK para usuários. O arquivo inicializa tabelas ausentes; não é um migrador de bases antigas. Antes de aplicar mudanças de esquema a uma base existente, faça backup e prepare uma migração compatível com os dados. Não há mais dependência de Prisma ou comandos npm neste projeto.
 
 As verificações cobrem aviso, flag legada, idempotência, revogação, versões, isolamento por titular, bloqueio de atribuição a outro usuário, permissões ADMIN, auditoria de leituras, filtragem de dados legados, rollback de evento quando auditoria falha e sanitização de erros inesperados. O resultado final está registrado no plano de testes da etapa 4.
 

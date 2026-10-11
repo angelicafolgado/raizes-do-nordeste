@@ -1,47 +1,43 @@
-# Etapas 3 e 4 — Resultado da validação
+# Resultado de validação da implementação Java
 
-Data: 11/10/2026. Etapas concluídas: privacidade/consentimento/auditoria e contratos/plano de testes.
+Atualizado em 11/10/2026. Este registro descreve a revisão Java 21/Spring Boot, não reexecuta nem atribui resultados da implementação Node/TypeScript removida.
 
 ## Verificações executadas
 
 | Verificação | Resultado |
 |---|---|
-| Migração `20261011133230_consentimentos` | Aplicada à base local sem remover dados existentes; cria tabela, FK e índice. |
-| Compilação TypeScript (`tsc`) | Código de saída 0. |
-| Suíte HTTP (`tsx --test tests/api.test.ts`) | 36 testes aprovados; 0 falhas, cancelamentos ou testes ignorados. |
-| Execução da coleção dentro da suíte | 32 requisições em 9 pastas; asserções HTTP e de conteúdo aprovadas. |
-| Contagem dos cenários da coleção | 17 respostas 2xx e 15 cenários de erro. |
-| Validação OpenAPI (`scripts/validate_docs.py`) | 12 operações e 81 exemplos validados contra schemas; referências locais e IDs verificados. |
-| Consistência coleção/Swagger | Métodos, rotas e códigos esperados dos 32 cenários encontrados no contrato. |
+| Compilação e pacote Java | `mvn test package`: BUILD SUCCESS. |
+| Suíte automatizada Java | 18 testes aprovados; 0 falhas, 0 erros e 0 ignorados (16 de integração e 2 do gateway mock). |
+| Cópia limpa | Cópia temporária contendo `pom.xml`, `src` e `docs/diagramas`, sem `target` ou banco herdado: `mvn -o test package` e geração do PDF concluídos com sucesso. |
+| PDF acadêmico | 10 páginas; geração Java validada por extração de texto, com nome, RU, resultados de desempenho e plano de testes. |
+| Ensaio de carga | 20 clientes por 60,01 s: 228.399 requisições, p95 de 11,76 ms, zero erros e zero respostas HTTP 5xx. Ver [método e limites](06_CORRECAO_DESEMPENHO.md). |
+| Suíte legada TypeScript | Não executada nesta revisão; Node.js/npm não estão disponíveis no ambiente. O teste legado foi removido após a substituição da implementação e da suíte pela versão Java. |
+| Coleção Postman | Os 32 cenários permanecem como artefato histórico; a coleção não foi reexecutada nem validada contra o contrato Java atual. |
 
-A suíte usa uma base SQLite isolada, criada por migrações e povoada pelo seed. O teste da coleção interpreta os recursos `pm` utilizados pelos scripts e envia requisições HTTP reais à API local. Não foi executada a interface gráfica do Postman; o JSON foi preparado para importação e execução em ordem pelo avaliador.
+Os testes Java usam SQLite isolado e cobrem autenticação/JWT, permissões, pedidos, reserva e rollback de estoque, pagamento simulado, transições, privacidade, auditoria, seed idempotente, erros HTTP e concorrência. Os resultados demonstram apenas o que foi executado localmente; não certificam produção ou integração financeira real.
 
 ## Comandos reproduzíveis
 
-```bash
-npm run setup
-npm run build
-npm test
+```powershell
+mvn test
+mvn package
 ```
 
-Validação dos artefatos de documentação, usando Python com `jsonschema`:
+Para gerar o PDF e o texto Markdown sincronizado:
 
-```bash
-python scripts/update_docs.py
-python scripts/validate_docs.py
+```powershell
+$pdfArgs = @(
+  '-q',
+  '-Dexec.mainClass=br.com.raizesdonordeste.tools.AcademicPdfGenerator',
+  'compile',
+  'exec:java'
+)
+mvn.cmd @pdfArgs
 ```
 
-Neste computador, a compilação e os testes usaram os executáveis locais `node_modules/.bin/tsc.cmd` e `node_modules/.bin/tsx.cmd`, com o runtime Node disponível no ambiente. Os scripts npm apontam para os mesmos comandos.
+## Limites e pendências
 
-## Evidências relevantes
-
-- Consentimento: versão vigente, finalidade, caráter opcional e histórico por titular; revogação mantém login/pedido/pagamento disponíveis; flag legada não concede autorização.
-- Segurança: tentativas de escolher outro usuário no body são rejeitadas; clientes não acessam auditoria; leitura de logs é restrita ao ADMIN e gera nova auditoria.
-- Transações: falha ao gravar auditoria reverte o evento de consentimento; falhas de pagamento preservam pedido/estoque; concorrência não aprova duas vezes nem vende saldo inexistente.
-- Minimização: metadados de auditoria não incluem senha, token, e-mail ou objeto Usuario; logs legados têm projeção restrita; erros inesperados não serializam a exceção ou query string.
-- Contratos: exemplos explícitos de aprovação e recusa; falhas 502/503/504; schemas de paginação e consentimento; operações protegidas identificadas no OpenAPI.
-- Plano: todos os cenários T01–T32 têm endpoint, pré-condição, entrada, saída esperada e referência de evidência em `04_PLANO_DE_TESTES.md`.
-
-## Limites da validação
-
-Esses resultados não são teste de carga, certificação jurídica, prova de disponibilidade contínua ou validação de um provedor financeiro real. Retenção/anonimização continuam sendo políticas e procedimentos documentados, sem expurgo automático. As próximas etapas são diagramas, consolidação técnica, PDF acadêmico e entrega do repositório.
+- A coleção Postman requer revisão e execução manual contra a API Java antes de ser apresentada como evidência.
+- Os diagramas de DER, casos de uso e sequência são artefatos documentais cuja origem precede a revisão Java; as ressalvas estão em [diagramas](05_DIAGRAMAS.md) e no PDF.
+- A fonte indicada pela discente para o roteiro contém avisos de edição para estudo e prevalência do original. A conferência independente no AVA continua necessária.
+- A publicação remota e qualquer atualização do histórico Git ainda não foram realizadas.

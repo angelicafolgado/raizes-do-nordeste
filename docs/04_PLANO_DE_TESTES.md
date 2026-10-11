@@ -1,14 +1,16 @@
 # Etapa 4 — Plano de testes da API
 
+> **Escopo atual:** esta matriz preserva 32 cenários da coleção Postman preparada para a API anterior. A implementação corrente é Java; a coleção ainda não foi executada contra esta revisão e não é evidência de teste concluído. A suíte automatizada Java é executada por `mvn test`.
+
 ## Ambiente e execução
 
-Requisitos: Node.js 20+, dependências instaladas, migrations aplicadas e seed. API padrão: `http://localhost:3000`. Rodar `npm run setup` e `npm run dev`; importar `postman/raizes_nordeste_clean_collection.json` no Postman e executar **a coleção inteira, em ordem**, com uma iteração. As pastas preservam dependências de login, criação, pagamento, status e consentimento.
+Requisitos para a suíte automatizada: JDK 21 e Maven 3.9 ou superior. `mvn test` inicia a aplicação em ambiente de teste com SQLite isolado. Para inspeção manual, execute a API conforme o [README](../README.md), configure `baseUrl` no Postman e importe `postman/raizes_nordeste_clean_collection.json`; confirme e adapte cada requisição ao contrato atual antes de usá-la como evidência.
 
 `baseUrl` é a única variável que precisa de ajuste para outra porta. `token_cliente`, `token_cozinha`, `token_admin` e `pedidoId` são capturados pelas requisições. Todas as contas são fictícias, com senha de demonstração `123456`. Não exporte a coleção com valores reais de tokens preenchidos.
 
-A coleção tem **32 cenários**, **17 com resposta 2xx** e **15 cenários de erro**, em 9 pastas. Recusa de pagamento é resultado de negócio respondido com HTTP 200 e possui asserção explícita `sucesso=false`.
+A coleção contém **32 cenários**, **17 planejados com resposta 2xx** e **15 cenários de erro**, em 9 pastas. Esses totais descrevem o arquivo, não uma execução validada na implementação Java. Recusa de pagamento é resultado de negócio respondido com HTTP 200 e tem asserção declarada na coleção.
 
-Para validação automatizada: `npm run build` e `npm test`. A suíte HTTP usa banco SQLite temporário e executa também todas as requisições e asserções desta coleção. A execução automatizada reproduz os recursos `pm` usados aqui; não é uma alegação de execução pela interface do aplicativo Postman. O uso manual no Postman é reproduzível com o arquivo entregue.
+Para validação automatizada da implementação Java, execute `mvn test`. Os 18 testes atuais cobrem fluxos de API, segurança, transações e concorrência, mas não executam automaticamente as 32 requisições desta coleção nem substituem a validação manual no Postman.
 
 A coleção manual usa a base da API em execução e consome uma unidade do produto 1 por execução bem-sucedida. O seed preserva saldo e pedidos; ele não repõe estoque. Use uma base separada nova para avaliações repetidas, sem apagar a base existente. IDs 99999 usados nos casos 404 pressupõem o conjunto do seed, sem recursos com esses IDs.
 
@@ -66,7 +68,7 @@ A coleção manual usa a base da API em execução e consome uma unidade do prod
 
 ## Testes automatizados complementares
 
-`tests/api.test.ts` cobre itens repetidos, rollback de reserva, estoque de outra unidade, IDs parcialmente numéricos, paginação inválida, cliente acessando pedido alheio, cancelamento, seed idempotente, concorrência na última unidade e no pagamento, contrato enviado ao gateway, falha de correlação e preservação de pagamento anterior.
+Na implementação removida, a suíte TypeScript verificava itens repetidos, rollback de reserva, paginação, permissões, cancelamento, seed idempotente e concorrência. Os testes Java atuais estão em [ApiIntegrationTest](../src/test/java/br/com/raizesdonordeste/ApiIntegrationTest.java) e [MockPaymentGatewayTest](../src/test/java/br/com/raizesdonordeste/MockPaymentGatewayTest.java); não se afirma que cada asserção da suíte anterior tenha correspondência individual.
 
 Também cobre flag legada ignorada, versão inválida de aviso, tentativa de definir identidade pelo body, histórico próprio, revogação sem bloquear pedido, permissões de auditoria, projeção segura de logs, rollback em falha de auditoria e erro interno sem exceção/query sensível. Os artefatos OpenAPI e Postman têm verificação de contratos e exemplos.
 

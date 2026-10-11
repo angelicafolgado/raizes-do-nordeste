@@ -73,7 +73,7 @@ RF15 não implica implementar o programa de pontos: nesta entrega, o consentimen
 
 | ID | Requisito | Prioridade / estado | Critério de aceite |
 |---|---|---|---|
-| RNF01 | Separar domínio, aplicação, infraestrutura e API. | P1 / Implementado | Domínio/aplicação não importam Express ou Prisma; integrações usam interfaces; controllers tratam entrada/saída e delegam regras. |
+| RNF01 | Separar responsabilidades de API, segurança, persistência e pagamento. | P1 / Implementado | Implementação Java separa `ApiController`, filtros/configuração, `RaizesStore` e o contrato `PaymentGateway`; limites e responsabilidades estão descritos na documentação técnica. |
 | RNF02 | Persistir dados com integridade e migrações reproduzíveis. | P1 / Implementado | Banco recriado por migrações; PK/FK e unicidade coerentes; seed repetido não apaga pedidos nem repõe estoque consumido. |
 | RNF03 | Proteger credenciais e segredos. | P1 / Implementado | Senhas com bcrypt, JWT assinado e validado, segredo externo ao código e ignorado pelo versionamento; responses sem hashes/tokens de terceiros. |
 | RNF04 | Explicitar finalidade, minimização e ciclo de vida dos dados. | P1 / Planejado | Inventário por campo e finalidade, base de tratamento a fundamentar, controle de acesso, estratégia de retenção/anonimização e procedimento de revogação; distinguir política proposta de mecanismo implementado. |
@@ -91,7 +91,7 @@ RF15 não implica implementar o programa de pontos: nesta entrega, o consentimen
 | ID | Regra |
 |---|---|
 | RN01 | Um pedido pertence a uma única unidade e ao usuário autenticado que o criou. O canal não concede permissões extras. |
-| RN02 | O canal é obrigatório e restrito ao enum do domínio. No banco SQLite/Prisma 5 ele é persistido como string validada pela aplicação. |
+| RN02 | O canal é obrigatório e restrito aos valores aceitos pela aplicação Java. No SQLite ele é persistido como texto validado pela API. |
 | RN03 | IDs e quantidades são inteiros positivos; pedido contém de 1 a 100 entradas de itens; entradas duplicadas são agrupadas. |
 | RN04 | Preço vem do catálogo; total é calculado com centavos inteiros e persistido segundo o schema atual. O preço do item é preservado no pedido. |
 | RN05 | Reserva de estoque, criação do pedido e auditoria da criação formam uma transação; falha reverte o conjunto. |
@@ -151,15 +151,15 @@ Rotas candidatas, **não implementadas**: gestão de `/api/campanhas` por ADMIN 
 
 | Requisitos | Implementação/evidência atual ou destino |
 |---|---|
-| RF01–RF02, RNF03 | `src/infrastructure/security/`, `src/api/middlewares/authMiddleware.ts`, rotas e testes de acesso. |
-| RF04–RF05, RF16 | `ProdutoController`, `ListarProdutosCardapioUseCase`, `PrismaStore`; RF16 requer alteração futura de contrato. |
-| RF06–RF08, RN01–RN05 | `CriarPedidoUseCase`, `CanalPedido`, transação do repositório e testes de reserva/rollback/concorrência. |
-| RF09 | `ListarPedidosUseCase`, listagem paginada e testes de isolamento por cliente. |
-| RF10–RF11, RN06–RN08, RNF11 | `ProcessarPagamentoMockUseCase` e testes de recusa/nova tentativa/concorrência; contrato e adaptador do gateway ainda serão criados. |
-| RF12–RF13, RN09–RN10 | `AtualizarStatusPedidoUseCase` e testes de transições/cancelamento. |
-| RF14–RF15, RNF04 | `AuditLogger`, `AuditLog` e booleano de consentimento existentes; ampliação e política pendentes. |
+| RF01–RF02, RNF03 | Implementação atual: `JwtService`, `AuthenticationFilter`, `ApiController` e testes em `src/test/java`. |
+| RF04–RF05, RF16 | `ApiController` e `RaizesStore`; unidades e produtos são paginados e o estoque permanece separado por unidade. |
+| RF06–RF08, RN01–RN05 | `ApiController`, `RaizesStore` e testes Java de reserva/rollback/concorrência. |
+| RF09 | `ApiController`, `RaizesStore`, listagem paginada e testes de isolamento por cliente. |
+| RF10–RF11, RN06–RN08, RNF11 | `PaymentGateway`, `MockPaymentGateway`, `ApiController` e testes Java de recusa/nova tentativa/concorrência. |
+| RF12–RF13, RN09–RN10 | `ApiController`, `RaizesStore` e testes Java de transições/cancelamento. |
+| RF14–RF15, RNF04 | `RaizesStore`, rotas de auditoria/consentimento e testes Java; consulte [privacidade](03_PRIVACIDADE_E_SEGURANCA.md). |
 | RF03, RF17–RF20 | Seção 7 deste documento; sem endpoints executáveis ou testes de funcionalidade nesta versão. |
-| RNF06–RNF08, ENT04/ENT06 | `src/api/docs/swagger.json`, `postman/raizes_nordeste_clean_collection.json`, `tests/api.test.ts`, `README.md`. |
+| RNF06–RNF08, ENT04/ENT06 | `/api-docs.json`, `postman/raizes_nordeste_clean_collection.json`, testes em `src/test/java` e `README.md`. A coleção Postman não foi revalidada contra Java. |
 
 ## 10. Dependências e decisões para as próximas etapas
 
@@ -188,5 +188,5 @@ A conclusão desta etapa não significa que os complementos planejados já foram
 - `UNINTER_Roteiro_Back_End_Copia_Adaptada_Estudo.pdf`: páginas físicas 5–6 (RF/RNF), 6–9 (diagramas, contratos e privacidade), 9–13 (entregáveis e testes) e 18 (tabela consolidada), conforme leitura registrada na análise de aderência.
 - [Análise de aderência](../ANALISE_ADERENCIA_UNINTER.md).
 - [README e funcionalidades atuais](../README.md).
-- [Schema implementado](../prisma/schema.prisma).
-- [Testes existentes](../tests/api.test.ts).
+- [Schema SQL implementado](../src/main/resources/schema.sql).
+- [Testes Java](../src/test/java/br/com/raizesdonordeste/ApiIntegrationTest.java).

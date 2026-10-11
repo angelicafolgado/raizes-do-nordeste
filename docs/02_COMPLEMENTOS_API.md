@@ -4,10 +4,10 @@ Esta etapa implementa RF10, RF11 e RF16 definidos no documento de requisitos. N�
 
 ## Gateway de pagamento desacoplado
 
-- `src/application/ports/PaymentGateway.ts` define solicitação e resposta sem dependências de infraestrutura.
-- `src/infrastructure/payments/MockPaymentGateway.ts` implementa a simulação local determinística.
-- `src/composition.ts` injeta o adaptador no caso de uso.
-- `ProcessarPagamentoMockUseCase` valida autorização e estado, envia o valor em centavos, verifica a correlação e usa o retorno do gateway para decidir o novo status.
+- `src/main/java/br/com/raizesdonordeste/application/payments/PaymentGateway.java` define a solicitação e a resposta do gateway.
+- `src/main/java/br/com/raizesdonordeste/infrastructure/payments/MockPaymentGateway.java` implementa a simulação local determinística.
+- A configuração Spring injeta o adaptador no `ApiController`; `RaizesStore` controla as alterações persistidas e transacionais.
+- A implementação valida autorização e estado, envia o valor em centavos, verifica a correlação e usa o retorno do gateway para decidir o novo status.
 
 Solicitação interna: `pedidoId`, `valorCentavos`, `moeda: BRL`, `correlacaoId` e `cenario`. Valor e identidade do pedido vêm do banco, não do corpo enviado pelo cliente. A resposta mantém pedido e correlação; aprovação/recusa também retornam um identificador de transação.
 
@@ -50,11 +50,11 @@ Cada consulta usa ordenação estável por ID. Total e dados são lidos na mesma
 
 ## Contratos e verificação
 
-Swagger e seu gerador foram atualizados com schemas de páginas, parâmetros e cenários 502/503/504. A coleção Postman passou de 16 para 20 cenários, incluindo falhas técnicas e páginas de produtos/unidades. A organização final em pastas continua prevista para a etapa 4.
+O contrato OpenAPI servido pela aplicação Java documenta parâmetros e cenários 502/503/504. A coleção Postman preservada contém 32 cenários planejados, mas ainda não foi reexecutada contra o contrato Java.
 
-A suíte passou de 22 para 26 testes, acrescentando paginação e entradas inválidas, falhas auditadas com recuperação, contrato enviado ao gateway, uso de seu retorno e rejeição de correlação incorreta. Os testes de concorrência existentes permanecem na suíte. A validação usa banco isolado e inclui a execução das 20 requisições Postman.
+Os testes automatizados da implementação Java usam banco isolado e cobrem paginação, falhas auditadas com recuperação, pagamento, rollback, seed e concorrência. A suíte atual tem 18 testes; ela não interpreta nem executa automaticamente a coleção Postman.
 
-Verificação concluída em 11/10/2026: compilação TypeScript aprovada, **26 testes aprovados**, incluindo execução das **20 requisições Postman**. Referências locais do OpenAPI, parâmetros de paginação e códigos de falha do gateway também foram verificados. Comandos reproduzíveis: `npm run build` e `npm test` (ou equivalentes via pnpm).
+Verificação Java concluída em 11/10/2026: `mvn test package` e a geração do PDF passaram; a cópia limpa também concluiu build, testes e geração do documento. Node.js não estava disponível para reexecutar a suíte legada; por isso, não se atribui à revisão Java a execução anterior de cenários TypeScript/Postman.
 
 ## Situação do planejamento
 

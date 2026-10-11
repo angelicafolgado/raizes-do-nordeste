@@ -2,29 +2,30 @@
 
 > A matriz abaixo é o diagnóstico inicial e foi preservada como histórico; não representa o estado atual. Para a situação atual, consulte o resumo a seguir, a [rastreabilidade da etapa 6](docs/06_RASTREABILIDADE.md) e a [correção de desempenho](docs/06_CORRECAO_DESEMPENHO.md).
 
-Atualização: 11/10/2026. O roteiro local, apesar do nome do arquivo indicar cópia adaptada para estudo, foi aceito como referência oficial desta entrega por orientação do aluno. Esta decisão identifica a referência usada no trabalho; não altera o conteúdo do arquivo.
+Atualização: 11/10/2026. Por orientação da discente, os materiais presentes em `uninter/` foram usados como referência desta análise. A adoção registra a fonte indicada pela discente e não certifica a procedência dos arquivos perante o AVA.
 
 ## Situação atual
 
 | Frente | Estado confirmado |
 |---|---|
-| Etapa 6: desempenho | Resolvido no cenário medido. Ensaio com 20 clientes por 60 segundos: 48.486 consultas, p95 de 39,37 ms, zero erros e zero respostas 5xx. A suíte atual passa com 37/37 testes. Ver [correção e limites do ensaio](docs/06_CORRECAO_DESEMPENHO.md) e [resultado operacional](docs/06_RESULTADOS_OPERACIONAIS.json). |
-| Etapa 7: PDF acadêmico | Elaborado com nome e RU informados nos dados existentes do projeto. O gerador e o PDF incorporam o roteiro adotado como oficial por orientação do aluno; a etapa de elaboração do documento está concluída. |
-| Etapa 8: publicação | O conteúdo final será publicado em `https://github.com/angelicafolgado/raizes-do-nordeste.git` em um único commit de Angelica Dias Folgado (`Angelicafolgado1@gmail.com`); o push com substituição da história remota ainda está pendente. |
-| Etapa 8: cópia limpa | Validada em cópia isolada temporária: instalação pelo lockfile congelado, geração do Prisma, migrations e seed em SQLite novo, compilação TypeScript e 37/37 testes aprovados. A cópia começou sem `.env`, dependências instaladas ou banco local; o setup criou os próprios dados de ambiente. |
+| Etapa 6: desempenho | Meta atingida no ensaio de leitura Java com 20 clientes por 60 segundos: 228.399 consultas, p95 de 11,76 ms, zero erros e zero respostas 5xx. A suíte Java atual passou com 18/18 testes. O teste não mediu escritas, reinício ou restauração. Ver [correção e limites do ensaio](docs/06_CORRECAO_DESEMPENHO.md) e [resultado operacional](docs/06_RESULTADOS_OPERACIONAIS.json). |
+| Etapa 7: PDF acadêmico | Gerado e validado em `output/pdf/4937552_Projeto_Back_End.pdf`, com texto-fonte Markdown ao lado. Identifica Angelica Dias Folgado, RU 4937552, inclui os resultados medidos e descreve o código executável Java. |
+| Etapa 8: publicação | Ainda pendente. O push para `https://github.com/angelicafolgado/raizes-do-nordeste.git` não foi executado; não afirmar que a publicação ou a substituição do histórico remoto foi concluída. |
+| Etapa 8: cópia limpa | Validada em cópia temporária com `pom.xml`, `src` e os diagramas necessários ao PDF: `mvn -o test package` aprovou 18/18 testes e o gerador Java produziu e validou o PDF de 10 páginas. A cópia não recebeu `target` nem banco herdado. |
+| Código executável Java | A implementação TypeScript/Node e utilitários em Python/JavaScript foram removidos após a substituição pelos componentes Java. Documentação, SQL, XML, JSON e artefatos de interoperabilidade permanecem em seus formatos próprios; a coleção Postman ainda não foi validada contra esta revisão. |
 
 ## Matriz inicial de aderência (registro histórico)
 
-Referência: `UNINTER_Roteiro_Back_End_Copia_Adaptada_Estudo.pdf`, fornecido nesta pasta e adotado como oficial para esta entrega por orientação do aluno. A numeração abaixo é a página física do PDF (incluindo capa). A tabela consolidada da página 18 foi considerada prioritária, conforme instrução do roteiro. As situações desta matriz são o retrato registrado na análise inicial; para o estado atualizado, use a tabela anterior e os artefatos da etapa 6.
+Referência: materiais na pasta `uninter/`, indicada pela discente. A matriz abaixo é um registro histórico da análise inicial, anterior à implementação Java; seus detalhes não descrevem a revisão atual. Para o estado atual, use a tabela anterior e os artefatos Java. A conferência independente do roteiro oficial do AVA permanece pendente.
 
 | Requisito | Referência | Situação e evidência |
 |---|---|---|
 | MVP: pedido → pagamento mock → status | p. 10, seção 7.2 | Atendido. Casos de uso de criação, pagamento e atualização; persistência real e testes de ponta a ponta. |
-| JWT, perfis e senha com hash | pp. 9–10 | Atendido no MVP. `src/infrastructure/security/`, `src/api/middlewares/authMiddleware.ts` e `src/api/routes/pedidoRoutes.ts`. |
-| Multicanalidade | p. 5 | Atendido na API e domínio. Enum TypeScript, canal obrigatório e filtro na listagem. O Prisma 5/SQLite armazena string; a validação ocorre na aplicação, conforme explicado no README. |
+| JWT, perfis e senha com hash | pp. 9–10 | Estado inicial: atendido no MVP. A implementação atual correspondente está em Java, incluindo `JwtService` e `AuthenticationFilter`; consulte os arquivos Java e os testes de integração. |
+| Multicanalidade | p. 5 | Estado inicial: atendido na API e domínio. A implementação atual Java valida o canal e filtra pedidos; SQLite persiste o valor como texto. |
 | Estoque por unidade | pp. 5, 10 | Atendido para reserva, consulta, restrição de venda e devolução no cancelamento. Não há endpoint administrativo de entrada/ajuste nem modelo de movimentações. Isso não impede escolher o Fluxo A, mas deve constar na análise do escopo proposto. |
 | Arquitetura por camadas | pp. 6–7 | Atendida. Domain, Application, Infrastructure e API; interfaces de persistência e segurança com composição de dependências. |
-| Banco, migrations e seed | pp. 9–10 | Atendidos. `prisma/schema.prisma`, `prisma/migrations/` e `prisma/seed.ts`. O schema não substitui o DER exigido. |
+| Banco, migrations e seed | pp. 9–10 | Registro histórico da solução inicial com Prisma. Os arquivos legados foram removidos; o código Java atual inicializa o esquema por `src/main/resources/schema.sql` e o seed é `SeedRunner`. O schema não substitui o DER exigido. |
 | Requisitos RF/RNF e prioridades | pp. 5–6, 18 | Parcial. README descreve implementação e limites, mas falta catálogo formal, contexto da rede, prioridades, justificativas e requisitos de desempenho, disponibilidade e tolerância a falhas. |
 | Cadastro, fidelização, promoções e gestão | p. 5 | Incompleto na análise. Usuários, produtos e unidades são cadastrados pelo seed, sem gestão via API. Fidelização (pontos/resgate/consentimento) e promoções não têm implementação nem proposta documentada. O roteiro permite contemplar requisitos fora do MVP ao menos conceitualmente. |
 | Casos de uso, DER e classes | pp. 6–7, 10 | Ausentes como artefatos de entrega. Faltam atores, relacionamentos, PK/FK, cardinalidades e restrições. A seção detalhada exige classes; a tabela consolidada aceita classes e/ou sequência/atividade. Entregar classes e sequência evita essa ambiguidade. |
@@ -44,16 +45,15 @@ Referência: `UNINTER_Roteiro_Back_End_Copia_Adaptada_Estudo.pdf`, fornecido nes
 2. Produzir casos de uso, DER e classes compatíveis com o código; detalhar Pedido + Pagamento. Acrescentar sequência do gateway mock para esclarecer a integração.
 3. Documentar o tratamento de dados e consentimento, distinguindo controles implementados de propostas. Explicar retenção e anonimização.
 4. Organizar a coleção em pastas e completar cenários e matriz T01… com pré-condições, entradas, status, trechos da resposta e evidências. Acrescentar exemplos reais ao Swagger e paginação de produtos quando aplicável.
-5. A publicação no repositório público, com README e links acessíveis, foi concluída. O roteiro aceita instruções de Swagger local e torna deploy opcional.
+5. A publicação no repositório público, com README e links acessíveis, permanece pendente. O roteiro aceita instruções de Swagger local e torna deploy opcional.
 6. O PDF acadêmico com identificação do aluno/RU e referências foi gerado em `output/pdf/4937552_Projeto_Back_End.pdf`. A referência do roteiro foi adotada conforme orientação do aluno.
 
 ## Fontes locais inspecionadas
 
 - Roteiro PDF completo e inspeção visual da tabela consolidada.
 - `README.md` e inventário dos arquivos da pasta.
-- `src/api/routes/`, `src/api/docs/swagger.json` e middlewares.
-- `src/application/use-cases/ProcessarPagamentoMockUseCase.ts` e demais casos de uso indicados pela busca de rotas/auditoria.
-- `src/infrastructure/repositories/PrismaStore.ts`, entidades e seed.
-- `postman/raizes_nordeste_clean_collection.json` e `tests/api.test.ts`.
+- A implementação Java atual em `src/main/java/` e os testes em `src/test/java/`.
+- O esquema SQL atual em `src/main/resources/schema.sql`.
+- `postman/raizes_nordeste_clean_collection.json`, mantida como artefato ainda não validado contra a API Java.
 
 Nenhuma alteração no código da API foi feita nesta revisão. Não foi atribuída nota: a avaliação final cabe ao professor e depende dos artefatos e links efetivamente entregues.
