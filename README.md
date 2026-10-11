@@ -187,3 +187,5 @@ O arquivo é criado em `output/pdf/4937552_Projeto_Back_End.pdf`, acompanhado de
 A API, os testes automatizados e as ferramentas de execução, carga e geração do PDF são implementados em Java 21. O código legado TypeScript/Node.js e os utilitários Python/JavaScript foram removidos após a substituição pelo projeto Java. Arquivos de documentação, configuração, SQL e a coleção Postman continuam em seus formatos próprios; a coleção Postman é executada separadamente de `mvn test` e foi validada com Newman nesta revisão.
 
 O roteiro do AVA fornecido para a entrega é uma cópia adaptada para estudo; requisitos acadêmicos devem ser conferidos com o roteiro oficial disponibilizado no AVA.
+
+A organização do relatório segue capa, folha de rosto, sumário, oito capítulos e apêndices com contratos, cenários, evidências e diagramas próprios. Consulte a [comparação documental e os limites da referência estrutural](docs/08_COMPARACAO_E_ESTRUTURA_PDF.md).

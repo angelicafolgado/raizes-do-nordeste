@@ -51,7 +51,7 @@ public final class AcademicPdfGenerator {
     }
 
     private String contents(String title) {
-        return title + " ... " + contentsPages.getOrDefault(title, 0);
+        return title + " ... " + Math.max(0, contentsPages.getOrDefault(title, 1) - 1);
     }
 
     public static void main(String[] args) throws IOException {
@@ -80,48 +80,34 @@ public final class AcademicPdfGenerator {
     private void generate(Path output) throws IOException {
         try {
             cover();
-            section("Apresentação", List.of(
-                    "Angelica Dias Folgado - RU 4937552",
-                    "Projeto acadêmico: Raízes do Nordeste",
-                    "API REST para pedidos multicanal, estoque por unidade e pagamento simulado",
-                    "Relatório técnico da implementação Java 21 e Spring Boot 3.5.",
-                    "Disciplina: Projeto Multidisciplinar - Trilha Back-end. Curso, polo, semestre e docente: "
-                            + "a informar.",
-                    "A discente indicou os documentos fornecidos para estudo como referência. Os próprios "
-                            + "arquivos contêm aviso de edição para estudo, conteúdo omitido e prevalência do "
-                            + "original; a adoção registra sua orientação, sem autenticação independente no AVA.",
-                    "O sistema é uma demonstração acadêmica local. Pagamentos são simulados e os resultados "
-                            + "de desempenho não constituem garantia para produção."
-            ));
-            closePage();
+            titlePage();
             section("Sumário", List.of(
-                    contents("1. Introdução"),
-                    contents("2. Estudo de caso e escopo"),
-                    contents("3. Análise e requisitos"),
-                    contents("4. Modelagem e arquitetura"),
-                    contents("Anexo A - Diagrama entidade-relacionamento"),
-                    contents("Anexo B - Casos de uso"),
-                    contents("Anexo C - Classes conceituais de domínio"),
-                    contents("Anexo C.1 - Arquitetura Java"),
-                    contents("Anexo D - Atividade do fluxo crítico"),
-                    contents("5. API e endpoints"),
-                    contents("6. Segurança, privacidade e limites"),
-                    contents("7. Entrega técnica e aderência à trilha"),
-                    contents("8. Plano de testes e evidências"),
-                    contents("9. Ensaio de desempenho"),
-                    contents("10. Conclusão"),
-                    contents("Referências")
+                    contents("1. Introdução e objetivos"),
+                    contents("2. Análise e requisitos"),
+                    contents("3. Modelagem e arquitetura"),
+                    contents("4. API e contratos"),
+                    contents("5. LGPD, privacidade, segurança e auditoria"),
+                    contents("6. Plano de testes e evidências"),
+                    contents("7. Entrega técnica"),
+                    contents("8. Conclusão"),
+                    contents("Referências"),
+                    contents("Apêndice A - Contratos e exemplos da API"),
+                    contents("Apêndice B - Cenários de teste da API"),
+                    contents("Apêndice C - Evidências de execução"),
+                    contents("Apêndice D - Casos de uso"),
+                    contents("Apêndice E - Classes conceituais de domínio"),
+                    contents("Apêndice F - Arquitetura Java"),
+                    contents("Apêndice G - Diagrama entidade-relacionamento"),
+                    contents("Apêndice H - Atividade do fluxo crítico")
             ));
             closePage();
-            section("1. Introdução", List.of(
+            section("1. Introdução e objetivos", List.of(
                     "Uma rede de alimentação precisa receber pedidos por diferentes canais, consultar "
                             + "a disponibilidade de cada unidade e acompanhar o preparo. O projeto implementa "
                             + "uma API para demonstrar esse fluxo com persistência e controle de acesso.",
                     "O objetivo é demonstrar o fluxo Pedido -> Pagamento simulado -> Status com banco real, "
                             + "autenticação e regras de autorização. Os canais APP, WEB, TOTEM, BALCAO e PICKUP "
-                            + "são atributos do pedido."
-            ));
-            section("2. Estudo de caso e escopo", List.of(
+                            + "são atributos do pedido.",
                     "A matriz acompanha a rede; cada unidade mantém saldo próprio por produto. ADMIN representa "
                             + "a administração da rede. O sistema não implementa interface gráfica nem integração "
                             + "financeira externa.",
@@ -131,7 +117,8 @@ public final class AcademicPdfGenerator {
                     "Cadastro público, administração completa de produtos/unidades, entradas administrativas "
                             + "de estoque, pontos e campanhas são propostas fora do MVP."
             ));
-            section("3. Análise e requisitos", List.of(
+            closePage();
+            section("2. Análise e requisitos", List.of(
                     "A API autentica usuários por e-mail e senha e emite JWT. Senhas são armazenadas com BCrypt.",
                     "As permissões distinguem CLIENTE, ATENDENTE, COZINHA e ADMIN. Clientes consultam apenas "
                             + "seus pedidos; operações de cozinha e administração seguem regras de perfil.",
@@ -150,7 +137,8 @@ public final class AcademicPdfGenerator {
                     "Requisitos propostos: cadastro, CRUD administrativo de catálogo, movimentação de estoque, "
                             + "fidelidade por pontos, promoções e persistência distribuída multiwriter."
             ));
-            section("4. Modelagem e arquitetura", List.of(
+            closePage();
+            section("3. Modelagem e arquitetura", List.of(
                     "A aplicação foi implementada em Java 21 com Spring Boot 3.5, API REST, JDBC e SQLite. "
                             + "A documentação OpenAPI está disponível em /api-docs.",
                     "ApiController atende HTTP; AuthenticationFilter e JwtService validam identidade; "
@@ -161,7 +149,7 @@ public final class AcademicPdfGenerator {
                             + "estoque é único; pedidos têm usuário e unidade; itens referenciam pedido e produto; "
                             + "há no máximo um pagamento por pedido.",
                     "O código Java usa mapas JDBC e records pontuais; não possui classes Java de entidade para "
-                            + "todo o domínio. O diagrama conceitual representa os dados projetados por JDBC; o anexo "
+                            + "todo o domínio. O diagrama conceitual representa os dados projetados por JDBC; o apêndice "
                             + "de arquitetura Java registra as classes técnicas da implementação atual.",
                     "SQLite permite um escritor por vez. Uma trava local serializa transações de escrita "
                             + "dentro do processo; isso não coordena múltiplas instâncias distribuídas.",
@@ -170,22 +158,8 @@ public final class AcademicPdfGenerator {
                             + "documentação, configuração, SQL e artefatos de integração permanecem em seus "
                             + "formatos próprios."
             ));
-            addImagePage("Anexo A - Diagrama entidade-relacionamento",
-                    Path.of("docs", "diagramas", "01_der.png"),
-                    "Nove tabelas de domínio e relacionamentos. V1__initial_schema.sql é a migração Flyway; flyway_schema_history mantém versões e checksums.");
-            addImagePage("Anexo B - Casos de uso",
-                    Path.of("docs", "diagramas", "02_casos_de_uso.png"),
-                    "Visão dos atores e operações; gateway é um adaptador simulado, não uma integração financeira ativa.");
-            addImagePage("Anexo C - Classes conceituais de domínio",
-                    Path.of("docs", "diagramas", "03_classes.png"),
-                    "Modelo conceitual de dados; a implementação usa projeções JDBC em mapas, não entidades ORM.");
-            addImagePage("Anexo C.1 - Arquitetura Java",
-                    Path.of("docs", "diagramas", "03_arquitetura_java.png"),
-                    "Classes reais e suas dependências. PaymentGateway.process é implementado por MockPaymentGateway.");
-            addImagePage("Anexo D - Atividade do fluxo crítico",
-                    Path.of("docs", "diagramas", "04_sequencia.png"),
-                    "Atividade da implementação Java atual: transações JDBC, aprovação/recusa, falhas técnicas, cancelamento e status.");
-            section("5. API e endpoints", List.of(
+            closePage();
+            section("4. API e contratos", List.of(
                     "GET /api/health - público; responde à verificação de saúde.",
                     "POST /api/auth/login - público; e-mail e senha; retorna JWT ou 401.",
                     "GET /api/unidades?page=1&limit=10 e GET /api/produtos?unidadeId=1&page=1&limit=10 "
@@ -213,7 +187,8 @@ public final class AcademicPdfGenerator {
                             + "\"timestamp\": \"2026-10-11T13:00:00Z\", \"path\": \"/api/pedidos\", "
                             + "\"requestId\": \"00000000-0000-4000-8000-000000000001\"}. Exemplo ilustrativo; não é uma captura de credenciais."
             ));
-            section("6. Segurança, privacidade e limites", List.of(
+            closePage();
+            section("5. LGPD, privacidade, segurança e auditoria", List.of(
                     "O seed fornece contas fictícias. Senhas são armazenadas com BCrypt; chamadas protegidas "
                             + "usam JWT; perfis e titularidade limitam operações.",
                     "O pagamento não captura dados de cartão nem contata adquirente. O consentimento de "
@@ -224,20 +199,8 @@ public final class AcademicPdfGenerator {
                             + "pela aplicação; segredos e bancos não devem ser publicados.",
                     "A discussão de privacidade é acadêmica e não representa certificação jurídica ou parecer."
             ));
-            section("7. Entrega técnica e aderência à trilha", List.of(
-                    "O README documenta JDK, Maven, variáveis, banco/seed, início da API, Swagger, testes e "
-                            + "geração do PDF. O OpenAPI é servido pela aplicação. A cópia limpa de uma revisão anterior foi "
-                            + "validada sem target ou banco herdado, usando dependências já disponíveis no Maven local.",
-                    "Repositório público: https://github.com/angelicafolgado/raizes-do-nordeste. A branch main "
-                            + "tem histórico publicado em nome de Angelica Dias Folgado. O material indicado "
-                            + "recomenda cinco commits de evolução real; esta revisão registra correções efetivas, sem fabricar histórico.",
-                    "A coleção Postman foi validada com Newman 6.2.1: 32 requisições e 88 asserções aprovadas; "
-                            + "17 cenários 2xx e 15 cenários de erro, organizados em nove pastas.",
-                    "Os materiais fornecidos foram adotados como referência por instrução da discente, embora os próprios "
-                            + "PDFs indiquem edição para estudo, omissões e prevalência do original. A adoção "
-                            + "não autentica a procedência do material no AVA."
-            ));
-            section("8. Plano de testes e evidências", List.of(
+            closePage();
+            section("6. Plano de testes e evidências", List.of(
                     "A validação Maven executada em 11/10/2026 concluiu com BUILD SUCCESS: 20 testes "
                             + "aprovados, sem falhas, erros ou testes ignorados.",
                     "Casos positivos cobrem token de autenticação usado nos testes, listagens, pedido criado "
@@ -252,17 +215,22 @@ public final class AcademicPdfGenerator {
                             + "em MockPaymentGatewayTest, mais 2 testes de migrações Flyway em DatabaseMigrationTest. "
                             + "A coleção Postman executou 32 requisições e 88 asserções, sem falhas."
             ));
-            section("9. Ensaio de desempenho", List.of(
-                    "A medição foi executada contra o JAR Spring Boot empacotado, em loopback, com SQLite "
-                            + "isolado e seed local. Vinte workers concorrentes alternaram consultas públicas "
-                            + "de produtos e unidades por 60 segundos, usando clientes HTTP persistentes.",
-                    "Resultado observado: 228.399 requisições em 60,01 segundos; p95 de 11,76 ms; zero "
-                            + "falhas e zero respostas HTTP 5xx. Meta local: p95 até 1.000 ms, zero falhas e "
-                            + "menos de 1% de respostas 5xx. O cenário atingiu esses limites.",
-                    "É um ensaio de leituras locais, não de escritas, rede externa, múltiplas instâncias, "
-                            + "reinício, restauração ou disponibilidade em produção."
+            closePage();
+            section("7. Entrega técnica", List.of(
+                    "O README documenta JDK, Maven, variáveis, banco/seed, início da API, Swagger, testes e "
+                            + "geração do PDF. O OpenAPI é servido pela aplicação. A cópia limpa de uma revisão anterior foi "
+                            + "validada sem target ou banco herdado, usando dependências já disponíveis no Maven local.",
+                    "Repositório público: https://github.com/angelicafolgado/raizes-do-nordeste. A branch main "
+                            + "tem histórico publicado em nome de Angelica Dias Folgado. O material indicado "
+                            + "recomenda cinco commits de evolução real; esta revisão registra correções efetivas, sem fabricar histórico.",
+                    "A coleção Postman foi validada com Newman 6.2.1: 32 requisições e 88 asserções aprovadas; "
+                            + "17 cenários 2xx e 15 cenários de erro, organizados em nove pastas.",
+                    "Os materiais fornecidos foram adotados como referência por instrução da discente, embora os próprios "
+                            + "PDFs indiquem edição para estudo, omissões e prevalência do original. A adoção "
+                            + "não autentica a procedência do material no AVA."
             ));
-            section("10. Conclusão", List.of(
+            closePage();
+            section("8. Conclusão", List.of(
                     "A implementação Java entrega o fluxo acadêmico de pedidos, reserva de estoque, pagamento "
                             + "simulado e acompanhamento operacional. Os testes e a medição documentam somente "
                             + "o comportamento observado no ambiente local.",
@@ -272,6 +240,7 @@ public final class AcademicPdfGenerator {
                             + "marcados como a informar. A referência fornecida foi usada conforme orientação "
                             + "da discente, preservada a ressalva indicada pelos próprios arquivos."
             ));
+            closePage();
             section("Referências", List.of(
                     "Materiais de referência designados pela discente: PDFs fornecidos para estudo, não distribuídos no repositório; os "
                             + "materiais indicam versão editada para estudo.",
@@ -280,10 +249,93 @@ public final class AcademicPdfGenerator {
                     "Spring. Spring Boot Reference Documentation. docs.spring.io/spring-boot/.",
                     "Brasil. Lei nº 13.709, de 14 de agosto de 2018 (LGPD). Texto compilado no Portal da Legislação."
             ));
+            contractAppendix();
+            testAppendix();
+            closePage();
+            section("Apêndice C - Evidências de execução", List.of(
+                    "Evidências próprias: docs/04_RESULTADO_VALIDACAO.md e docs/07_EVIDENCIAS_CORRECOES.json. A execução registrada aprovou 20 testes Java e 88 asserções Postman. Esta reorganização documental não é uma nova execução da API.",
+                    "A medição de desempenho abaixo é anterior às correções recentes e não foi repetida; os valores são históricos, relativos ao projeto de Angelica."
+            ));
+            section("C.1 Ensaio de desempenho anterior", List.of(
+                    "A medição foi executada contra o JAR Spring Boot empacotado, em loopback, com SQLite "
+                            + "isolado e seed local. Vinte workers concorrentes alternaram consultas públicas "
+                            + "de produtos e unidades por 60 segundos, usando clientes HTTP persistentes.",
+                    "Resultado observado: 228.399 requisições em 60,01 segundos; p95 de 11,76 ms; zero "
+                            + "falhas e zero respostas HTTP 5xx. Meta local: p95 até 1.000 ms, zero falhas e "
+                            + "menos de 1% de respostas 5xx. O cenário atingiu esses limites.",
+                    "É um ensaio de leituras locais, não de escritas, rede externa, múltiplas instâncias, "
+                            + "reinício, restauração ou disponibilidade em produção."
+            ));
+            addImagePage("Apêndice D - Casos de uso",
+                    Path.of("docs", "diagramas", "02_casos_de_uso.png"),
+                    "Visão dos atores e operações; gateway é um adaptador simulado, não uma integração financeira ativa.");
+            addImagePage("Apêndice E - Classes conceituais de domínio",
+                    Path.of("docs", "diagramas", "03_classes.png"),
+                    "Modelo conceitual de dados; a implementação usa projeções JDBC em mapas, não entidades ORM.");
+            addImagePage("Apêndice F - Arquitetura Java",
+                    Path.of("docs", "diagramas", "03_arquitetura_java.png"),
+                    "Classes reais e suas dependências. PaymentGateway.process é implementado por MockPaymentGateway.");
+            addImagePage("Apêndice G - Diagrama entidade-relacionamento",
+                    Path.of("docs", "diagramas", "01_der.png"),
+                    "Nove tabelas de domínio e relacionamentos. V1__initial_schema.sql é a migração Flyway; flyway_schema_history mantém versões e checksums.");
+            addImagePage("Apêndice H - Atividade do fluxo crítico",
+                    Path.of("docs", "diagramas", "04_sequencia.png"),
+                    "Atividade da implementação Java atual: transações JDBC, aprovação/recusa, falhas técnicas, cancelamento e status.");
             closePage();
             document.save(output.toFile());
         } finally {
             document.close();
+        }
+    }
+
+    private void contractAppendix() throws IOException {
+        closePage();
+        section("Apêndice A - Contratos e exemplos da API", List.of(
+                "Contratos extraídos do OpenAPI do projeto de Angelica. Os exemplos são ilustrativos; não representam novas capturas de execução. O schema completo está em src/main/resources/openapi-contract.json e em /api-docs.json."));
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var contract = mapper.readTree(Files.readString(Path.of("src/main/resources/openapi-contract.json")));
+        var paths = contract.path("paths").fields();
+        while (paths.hasNext()) {
+            var route = paths.next();
+            var operations = route.getValue().fields();
+            while (operations.hasNext()) {
+                var operation = operations.next();
+                var data = operation.getValue();
+                var paragraphs = new java.util.ArrayList<String>();
+                paragraphs.add(data.path("summary").asText());
+                paragraphs.add(data.path("description").asText());
+                if (data.has("parameters")) paragraphs.add("Parâmetros: " + data.path("parameters"));
+                var request = data.path("requestBody").path("content").path("application/json");
+                if (!request.isMissingNode()) {
+                    paragraphs.add("Request - schema: " + request.path("schema"));
+                    if (request.has("example")) paragraphs.add("Exemplo de request: " + request.path("example"));
+                }
+                var responses = data.path("responses").fields();
+                while (responses.hasNext()) {
+                    var response = responses.next();
+                    var json = response.getValue().path("content").path("application/json");
+                    paragraphs.add("HTTP " + response.getKey() + ": " + response.getValue().path("description").asText()
+                            + (json.has("schema") ? "; schema: " + json.path("schema") : ""));
+                    if (json.has("example")) paragraphs.add("Exemplo HTTP " + response.getKey() + ": " + json.path("example"));
+                }
+                section(operation.getKey().toUpperCase(java.util.Locale.ROOT) + " " + route.getKey(), paragraphs);
+            }
+        }
+    }
+
+    private void testAppendix() throws IOException {
+        closePage();
+        section("Apêndice B - Cenários de teste da API", List.of(
+                "Cenários do plano de testes próprio. Pré-condição geral: API iniciada, migrations e seed aplicados em banco de demonstração separado. Tokens são obtidos pelos logins da coleção. As entradas completas constam em docs/04_PLANO_DE_TESTES.md e postman/raizes_nordeste_clean_collection.json."));
+        for (String row : Files.readAllLines(Path.of("docs/04_PLANO_DE_TESTES.md"))) {
+            if (!row.matches("\\| T[0-9]{2} .*")) continue;
+            String[] cells = row.split("\\|", -1);
+            section(cells[1].trim() + " - " + cells[2].trim(), List.of(
+                    "Operação: " + cells[3].trim().replace("`", ""),
+                    "Pré-condições: " + cells[4].trim(),
+                    "Entrada: " + cells[5].trim().replace("`", ""),
+                    "Resultado esperado: " + cells[6].trim(),
+                    "Localização na coleção: " + cells[7].trim()));
         }
     }
 
@@ -295,41 +347,112 @@ public final class AcademicPdfGenerator {
                 .append("Relatório técnico da implementação Java 21 e Spring Boot 3.5.\n\n")
                 .append("Disciplina: Projeto Multidisciplinar - Trilha Back-end  \n")
                 .append("Curso: a informar  \nPolo: a informar  \nSemestre: a informar  \nDocente: a informar\n\n");
-        text("Angelica Dias Folgado", BOLD, 20, 455);
-        text("RU: 4937552", BODY, 12, 430);
-        text("RAÍZES DO NORDESTE", BOLD, 22, 330);
-        text("Projeto de API REST - Back-end", BODY, 14, 302);
-        text("Implementação Java 21 / Spring Boot", BODY, 12, 276);
-        text("Disciplina: Projeto Multidisciplinar - Trilha Back-end", BODY, 10, 248);
-        text("Curso: a informar", BODY, 10, 232);
-        text("Polo: a informar", BODY, 10, 216);
-        text("Semestre: a informar", BODY, 10, 200);
-        text("Docente: a informar", BODY, 10, 184);
-        text("Relatório acadêmico e evidências técnicas", BODY, 11, 154);
-        text("2026", BODY, 11, 100);
+        centered("CENTRO UNIVERSITÁRIO INTERNACIONAL UNINTER", BOLD, 12, 750);
+        centered("CURSO: A INFORMAR", BODY, 12, 723);
+        centered("ANGELICA DIAS FOLGADO", BOLD, 12, 650);
+        centered("RU: 4937552", BODY, 12, 628);
+        centered("RAÍZES DO NORDESTE", BOLD, 12, 465);
+        centered("PROJETO MULTIDISCIPLINAR - TRILHA BACK-END", BOLD, 12, 435);
+        centered("Polo de apoio: a informar", BODY, 12, 345);
+        centered("Semestre/período: a informar", BODY, 12, 323);
+        centered("Docente: a informar", BODY, 12, 301);
+        centered("A INFORMAR", BODY, 12, 105);
+        centered("2026", BODY, 12, 83);
         closePage();
     }
 
-    private void section(String title, List<String> paragraphs) throws IOException {
-        if (page == null) {
-            newPage();
+    private void centered(String value, PDFont font, float size, float baseline) throws IOException {
+        float width = PDRectangle.A4.getWidth() - MARGIN - RIGHT;
+        textAt(value, font, size, MARGIN + (width - font.getStringWidth(value) * size / 1000) / 2, baseline);
+    }
+
+    private void titlePage() throws IOException {
+        newPage();
+        centered("ANGELICA DIAS FOLGADO", BOLD, 12, 750);
+        centered("RU: 4937552", BODY, 12, 728);
+        centered("RAÍZES DO NORDESTE", BOLD, 12, 575);
+        centered("PROJETO MULTIDISCIPLINAR - TRILHA BACK-END", BOLD, 12, 547);
+        String note = "Trabalho apresentado à disciplina Projeto Multidisciplinar, do curso a informar, "
+                + "no Centro Universitário Internacional UNINTER. Relatório da implementação própria "
+                + "de uma API REST em Java para a rede Raízes do Nordeste. Docente: a informar.";
+        float noteX = MARGIN + (PDRectangle.A4.getWidth() - MARGIN - RIGHT) / 2;
+        float baseline = 420;
+        for (String line : wrap(note, BODY, 12, PDRectangle.A4.getWidth() - RIGHT - noteX)) {
+            textAt(line, BODY, 12, noteX, baseline);
+            baseline -= 12;
         }
-        float firstParagraph = paragraphs.isEmpty() ? 0 : wrap(paragraphs.getFirst(), BODY, BODY_SIZE,
-                PDRectangle.A4.getWidth() - MARGIN - RIGHT).size() * BODY_LEADING + 12;
-        ensureSpace(28 + firstParagraph);
+        centered("A INFORMAR", BODY, 12, 105);
+        centered("2026", BODY, 12, 83);
+        markdown.append("## Folha de rosto\n\nAngelica Dias Folgado — RU 4937552\n\n")
+                .append(note).append("\n\n");
+        closePage();
+    }
+
+    private void justified(String line, float start, float baseline, float width, boolean expand) throws IOException {
+        String[] words = line.split(" ");
+        if (!expand || words.length < 2) {
+            textAt(line, BODY, BODY_SIZE, start, baseline);
+            return;
+        }
+        float natural = BODY.getStringWidth(line) * BODY_SIZE / 1000;
+        float extra = Math.max(0, (width - natural) / (words.length - 1));
+        var positions = new java.util.ArrayList<Object>();
+        for (int i = 0; i < words.length; i++) {
+            positions.add(words[i] + (i < words.length - 1 ? " " : ""));
+            if (i < words.length - 1) positions.add(-extra * 1000 / BODY_SIZE);
+        }
+        stream.beginText();
+        stream.setFont(BODY, BODY_SIZE);
+        stream.newLineAtOffset(start, baseline);
+        stream.showTextWithPositioning(positions.toArray());
+        stream.endText();
+    }
+
+    private void section(String title, List<String> paragraphs) throws IOException {
+        if (page == null) newPage();
+        ensureSpace(60);
         recordedPages.put(title, pageNumber);
-        text(title, BOLD, 15, y);
-        y -= 28;
+        float width = PDRectangle.A4.getWidth() - MARGIN - RIGHT;
+        boolean contents = title.equals("Sumário");
+        boolean references = title.equals("Referências");
+        boolean narrative = title.matches("[1-8]\\. .*");
+        if (contents || references) centered(title.toUpperCase(java.util.Locale.ROOT), BOLD, 12, y);
+        else {
+            for (String line : wrap(title, BOLD, 12, width)) {
+                text(line, BOLD, 12, y);
+                y -= 18;
+            }
+        }
+        y -= contents || references ? 36 : 18;
         markdown.append("## ").append(title).append("\n\n");
         for (String paragraph : paragraphs) {
             markdown.append(paragraph).append("\n\n");
-            List<String> lines = wrap(paragraph, BODY, BODY_SIZE, PDRectangle.A4.getWidth() - MARGIN - RIGHT);
-            ensureSpace(lines.size() * BODY_LEADING + 12);
-            for (String line : lines) {
-                text(line, BODY, BODY_SIZE, y);
-                y -= BODY_LEADING;
+            if (contents) {
+                int separator = paragraph.lastIndexOf(" ... ");
+                String label = paragraph.substring(0, separator);
+                String number = paragraph.substring(separator + 5);
+                float numberWidth = BODY.getStringWidth(number) * BODY_SIZE / 1000;
+                float numberX = PDRectangle.A4.getWidth() - RIGHT - numberWidth;
+                text(label, BODY, 12, y);
+                float labelEnd = MARGIN + BODY.getStringWidth(label) * BODY_SIZE / 1000 + 8;
+                float dotWidth = BODY.getStringWidth(".") * BODY_SIZE / 1000;
+                int dots = Math.max(0, (int) ((numberX - labelEnd - 8) / dotWidth));
+                textAt(".".repeat(dots), BODY, 12, labelEnd, y);
+                textAt(number, BODY, 12, numberX, y);
+                y -= 28;
+                continue;
             }
-            y -= 10;
+            float indent = narrative ? 35.43f : 0;
+            List<String> lines = wrap(paragraph, BODY, BODY_SIZE, width - indent);
+            ensureSpace(Math.min(lines.size() * BODY_LEADING, BODY_LEADING * 2));
+            for (int i = 0; i < lines.size(); i++) {
+                ensureSpace(references ? 12 : BODY_LEADING);
+                float currentIndent = i == 0 ? indent : 0;
+                justified(lines.get(i), MARGIN + currentIndent, y, width - currentIndent,
+                        narrative && i < lines.size() - 1);
+                y -= references ? 12 : BODY_LEADING;
+            }
+            y -= references ? 12 : narrative ? 0 : 10;
         }
     }
 
@@ -380,19 +503,16 @@ public final class AcademicPdfGenerator {
         pageNumber++;
         stream = new PDPageContentStream(document, page);
         y = page.getMediaBox().getHeight() - TOP;
-        if (pageNumber > 1) {
-            text("RAIZES DO NORDESTE | ANGELICA DIAS FOLGADO | RU 4937552", BODY, 8,
-                    page.getMediaBox().getHeight() - 30);
-        }
+
     }
 
     private void closePage() throws IOException {
         if (stream != null) {
-            stream.beginText();
-            stream.setFont(BODY, 8);
-            stream.newLineAtOffset(MARGIN, 30);
-            stream.showText("RU 4937552 | " + pageNumber);
-            stream.endText();
+            if (pageNumber >= 4) {
+                String number = Integer.toString(pageNumber - 1);
+                float x = PDRectangle.A4.getWidth() - RIGHT - BODY.getStringWidth(number) * 10 / 1000;
+                textAt(number, BODY, 10, x, PDRectangle.A4.getHeight() - 57);
+            }
             stream.close();
             stream = null;
             page = null;
@@ -418,7 +538,7 @@ public final class AcademicPdfGenerator {
         closePage();
         newPage();
         recordedPages.put(title, pageNumber);
-        text(title, BOLD, 15, y);
+        text(title, BOLD, 12, y);
         markdown.append("## ").append(title).append("\n\n")
                 .append(caption).append("\n\n")
                 .append("![ ").append(title).append(" ](../../")
@@ -430,12 +550,13 @@ public final class AcademicPdfGenerator {
         }
         PDImageXObject image = PDImageXObject.createFromFile(imagePath.toAbsolutePath().toString(), document);
         float maxWidth = PDRectangle.A4.getWidth() - MARGIN - RIGHT;
-        float maxHeight = y - BOTTOM - 10;
+        float maxHeight = y - BOTTOM - 35;
         float scale = Math.min(maxWidth / image.getWidth(), maxHeight / image.getHeight());
         float width = image.getWidth() * scale;
         float height = image.getHeight() * scale;
         float x = MARGIN + (maxWidth - width) / 2;
         stream.drawImage(image, x, Math.max(BOTTOM, y - height - 10), width, height);
+        text("Fonte: elaboração própria a partir da implementação de Angelica (2026).", BODY, 10, BOTTOM + 12);
         closePage();
     }
 
@@ -443,15 +564,15 @@ public final class AcademicPdfGenerator {
         try (PDDocument pdf = Loader.loadPDF(output.toFile())) {
             String extracted = new PDFTextStripper().getText(pdf);
             if (pdf.getNumberOfPages() < 8
-                    || !extracted.contains("Angelica Dias Folgado")
+                    || !extracted.toUpperCase(java.util.Locale.ROOT).contains("ANGELICA DIAS FOLGADO")
                     || !extracted.contains("4937552")
                     || !extracted.contains("228.399")
                     || !extracted.contains("11,76 ms")
                     || !extracted.contains("100% Java")
                     || !extracted.contains("https://github.com/angelicafolgado/raizes-do-nordeste")
-                    || !extracted.contains("Curso: a informar")
-                    || !extracted.contains("Polo: a informar")
-                    || !extracted.contains("Semestre: a informar")
+                    || !extracted.contains("CURSO: A INFORMAR")
+                    || !extracted.contains("Polo de apoio: a informar")
+                    || !extracted.contains("Semestre/período: a informar")
                     || !extracted.contains("Docente: a informar")
                     || !extracted.contains("Plano de testes e evidências")
                     || !extracted.contains("88 asserções")

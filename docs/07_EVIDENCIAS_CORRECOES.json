@@ -33,7 +33,7 @@
   },
   "pdf": {
     "file": "output/pdf/4937552_Projeto_Back_End.pdf",
-    "pages": 14,
+    "pages": 44,
     "format": "A4",
     "embedded_font": "Liberation Serif (SIL OFL 1.1)",
     "body_size_pt": 12,
@@ -42,7 +42,25 @@
     "right_bottom_margin_pt": 57,
     "numbered_contents": true,
     "visual_review": true,
-    "academic_fields": "a informar, conforme orientação da autora"
+    "academic_fields": "a informar, conforme orientação da autora",
+    "structural_revision": {
+      "date": "2026-10-11",
+      "own_content_only": true,
+      "chapters": 8,
+      "appendices": 8,
+      "test_scenarios_included": 32,
+      "api_tests_rerun": false
+    },
+    "academic_layout": {
+      "reference": "modelo estrutural fornecido pela discente",
+      "centered_cover": true,
+      "title_page_right_half_note": true,
+      "justified_body": true,
+      "first_line_indent_cm": 1.25,
+      "numbering": "capa excluída da contagem; número exibido no alto à direita a partir da introdução",
+      "contents_right_aligned_numbers": true,
+      "full_institutional_abnt_certification": false
+    }
   },
   "not_run": [
     "Ensaio de carga de 60 segundos após as correções",
