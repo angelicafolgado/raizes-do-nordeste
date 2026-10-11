@@ -11,7 +11,7 @@ Atualização: 11/10/2026. Evidências desta revisão, sem reutilizar contagens 
 | Banco novo | Flyway V1 cria nove tabelas de domínio; migração repetida não reaplica V1 e valida checksums. |
 | Banco existente | Baseline 0 + V1 incorporados sem apagar dados; 2 pedidos anteriores preservados na base local. Teste automatizado também preserva registro de usuário em banco temporário. |
 | Reinício local | Pedido e pagamento preservados; startup, health e consulta HTTP confirmados. |
-| PDF | 44 páginas A4; fontes incorporadas, margens 3/2 cm aproximadas, corpo 12 com entrelinha 1,5, sumário paginado, diagramas e exemplos atuais; validação textual e revisão visual. |
+| PDF | 45 páginas A4; fontes incorporadas, margens 3/2 cm aproximadas, corpo 12 com entrelinha 1,5, sumário paginado, diagramas e exemplos atuais; validação textual e revisão visual. |
 | GitHub | Repositório público acessível por HTTP; atualizações desta revisão enviadas em commit de evolução real, sem reescrever histórico. |
 
 ## Reproduzir
@@ -32,7 +32,7 @@ O gerador PDF foi executado e validado separadamente; a recompilação/empacotam
 
 O ensaio de carga em [06_RESULTADOS_OPERACIONAIS.json](06_RESULTADOS_OPERACIONAIS.json) pertence à medição anterior: 20 clientes/60,01 s, 228.399 requisições e p95 11,76 ms. Não foi repetido após estas correções; não mede escrita, disponibilidade distribuída ou restauração de backup.
 
-Os materiais de referência fornecidos são cópias editadas para estudo, com omissões e prevalência do original. A conformidade ABNT deve ser conferida com as normas efetivas do AVA. Curso, polo, semestre e docente permanecem “a informar” por orientação expressa da autora.
+Os materiais de referência fornecidos são cópias editadas para estudo, com omissões e prevalência do original. A conformidade ABNT deve ser conferida com as normas efetivas do AVA. Curso e período foram preenchidos conforme informado; o polo permanece “a informar” por orientação expressa da autora.
 
 Cadastro público, gestão administrativa completa, entradas/ajustes de estoque, pontos e campanhas são propostas documentadas; não se apresentam como endpoints implementados. O sistema é uma demonstração local, sem integração financeira real.
 
@@ -43,3 +43,11 @@ O PDF foi reorganizado usando somente a estrutura acadêmica do modelo fornecido
 ### Apresentação acadêmica conforme o modelo
 
 Capa centralizada, folha de rosto com natureza do trabalho na metade direita em espaço simples, títulos de 12 pontos, corpo justificado com recuo inicial de 1,25 cm e entrelinha 1,5, sumário com páginas alinhadas à direita, referências em espaço simples e fontes dos diagramas. Mantidos A4, fonte serifada incorporada e margens 3/2 cm. A capa é excluída da contagem; as páginas seguintes são contadas e a numeração é exibida no alto à direita desde a introdução, como no modelo fornecido. Conferidos visualmente capa, folha de rosto e corpo; verificadas identificação, páginas do sumário e presença dos 32 cenários. O ajuste segue o modelo acadêmico fornecido, sem afirmar certificação integral pelas normas institucionais do AVA.
+
+Docente informada pela autora: Prof. Me. Luciane Yanase Kanashiro.
+
+## Refatoração de responsabilidades e documentação final
+
+ApiController delega os casos de uso a RaizesService; OrderRules valida as transições de domínio. `mvn verify` passou com 20 testes, zero falhas/erros/ignorados. A feature crítica foi consolidada em docs/09_FEATURE_CRITICA.md; matriz de requisitos, diagramas técnicos, bibliografia, PDF e Word foram atualizados. Polo e cidade permanecem pendentes de informação. O PDF foi gerado separadamente por compile exec:java e seu sumário e conteúdo foram conferidos.
+
+Após a refatoração, Newman 6.2.1 aprovou 32 requisições/88 asserções; pedido e pagamento foram preservados após reinício em SQLite isolado. Não se repetiu o ensaio histórico de carga.

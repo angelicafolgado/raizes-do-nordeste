@@ -6,22 +6,22 @@ Atualizado em 11/10/2026. Este mapa descreve o estado atual em `src/main/java` e
 
 | RF | Estado | Implementação Java | Evidência automatizada |
 |---|---|---|---|
-| RF01 autenticar | Implementado | `ApiController`, `JwtService`, `AuthenticationFilter` | `loginAndProtectedEndpointsReturnConsistentErrors` |
+| RF01 autenticar | Implementado | `ApiController`, `RaizesService`, `JwtService`, `AuthenticationFilter` | `loginAndProtectedEndpointsReturnConsistentErrors` |
 | RF02 autorizar | Implementado | `AuthenticationFilter`, `ApiController` | `loginAndProtectedEndpointsReturnConsistentErrors`; `orderPaymentAndStatusTransitionsPreserveOwnershipRules` |
 | RF03 cadastrar cliente | Proposto | Não há endpoint de cadastro público | Sem teste de cadastro |
-| RF04 unidades | Implementado | `ApiController`, `RaizesStore` | `catalogPaginationAndStockAreReturned`; `twentyConcurrentCatalogRequestsSucceed` |
-| RF05 cardápio e estoque por unidade | Implementado | `ApiController`, `RaizesStore` | `catalogPaginationAndStockAreReturned` |
-| RF06 criar pedido | Implementado | `ApiController`, `RaizesStore` | `orderValidationAndRepeatedProductsUseAggregatedQuantity` |
-| RF07 canal do pedido | Implementado | `ApiController`, `RaizesStore` | `orderValidationAndRepeatedProductsUseAggregatedQuantity` |
+| RF04 unidades | Implementado | `ApiController`, `RaizesService`, `RaizesStore` | `catalogPaginationAndStockAreReturned`; `twentyConcurrentCatalogRequestsSucceed` |
+| RF05 cardápio e estoque por unidade | Implementado | `ApiController`, `RaizesService`, `RaizesStore` | `catalogPaginationAndStockAreReturned` |
+| RF06 criar pedido | Implementado | `ApiController`, `RaizesService`, `RaizesStore` | `orderValidationAndRepeatedProductsUseAggregatedQuantity` |
+| RF07 canal do pedido | Implementado | `ApiController`, `RaizesService`, `RaizesStore` | `orderValidationAndRepeatedProductsUseAggregatedQuantity` |
 | RF08 reserva transacional de estoque | Implementado | `RaizesStore` | `failedOrderRollsBackReservationsAndCancellationReturnsStockOnce`; `concurrentOrderRequestsCannotReserveTheLastUnitTwice` |
-| RF09 listar pedidos | Implementado | `ApiController`, `RaizesStore` | `orderPaymentAndStatusTransitionsPreserveOwnershipRules`; `attendantCanCreateAndListWhileKitchenCannotCreate` |
-| RF10 pagamento mock | Implementado | `PaymentGateway`, `MockPaymentGateway`, `ApiController`, `RaizesStore` | `MockPaymentGatewayTest`; `orderPaymentAndStatusTransitionsPreserveOwnershipRules` |
+| RF09 listar pedidos | Implementado | `ApiController`, `RaizesService`, `RaizesStore` | `orderPaymentAndStatusTransitionsPreserveOwnershipRules`; `attendantCanCreateAndListWhileKitchenCannotCreate` |
+| RF10 pagamento mock | Implementado | `PaymentGateway`, `MockPaymentGateway`, `ApiController`, `RaizesService`, `RaizesStore` | `MockPaymentGatewayTest`; `orderPaymentAndStatusTransitionsPreserveOwnershipRules` |
 | RF11 recusa, falha e repetição | Implementado | `MockPaymentGateway`, `RaizesStore` | `technicalPaymentFailuresPreserveOrderStockAndPreviousPayment`; `concurrentPaymentOnlyTransitionsTheOrderOnce` |
-| RF12 atualizar status | Implementado | `ApiController`, `RaizesStore` | `orderPaymentAndStatusTransitionsPreserveOwnershipRules` |
-| RF13 cancelar pedido não pago | Implementado | `ApiController`, `RaizesStore` | `failedOrderRollsBackReservationsAndCancellationReturnsStockOnce` |
-| RF14 auditoria | Implementado | `ApiController`, `RaizesStore` | `consentIsIdempotentAndAuditIsRestrictedToAdministrators`; `auditProjectionHidesUnapprovedFieldsAndMalformedPayloads` |
-| RF15 consentimento opcional | Implementado | `ApiController`, `RaizesStore`, tabela `consentimentos` | `consentIsIdempotentAndAuditIsRestrictedToAdministrators`; `consentAuditFailureRollsBackTheConsentEvent` |
-| RF16 paginar produtos/unidades | Implementado | `ApiController`, `RaizesStore` | `catalogPaginationAndStockAreReturned`; `twentyConcurrentCatalogRequestsSucceed` |
+| RF12 atualizar status | Implementado | `ApiController`, `RaizesService`, `RaizesStore` | `orderPaymentAndStatusTransitionsPreserveOwnershipRules` |
+| RF13 cancelar pedido não pago | Implementado | `ApiController`, `RaizesService`, `RaizesStore` | `failedOrderRollsBackReservationsAndCancellationReturnsStockOnce` |
+| RF14 auditoria | Implementado | `ApiController`, `RaizesService`, `RaizesStore` | `consentIsIdempotentAndAuditIsRestrictedToAdministrators`; `auditProjectionHidesUnapprovedFieldsAndMalformedPayloads` |
+| RF15 consentimento opcional | Implementado | `ApiController`, `RaizesService`, `RaizesStore`, tabela `consentimentos` | `consentIsIdempotentAndAuditIsRestrictedToAdministrators`; `consentAuditFailureRollsBackTheConsentEvent` |
+| RF16 paginar produtos/unidades | Implementado | `ApiController`, `RaizesService`, `RaizesStore` | `catalogPaginationAndStockAreReturned`; `twentyConcurrentCatalogRequestsSucceed` |
 | RF17 gestão de catálogo | Proposto | Sem endpoints de CRUD | Sem teste |
 | RF18 ajuste administrativo de estoque | Proposto | Sem endpoint de movimentação administrativa | Sem teste |
 | RF19 pontos de fidelidade | Proposto | Consentimento demonstrativo; sem pontos/resgate | Sem teste |

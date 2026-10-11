@@ -1,12 +1,12 @@
 sequenceDiagram
     actor C as Cliente ou Atendente
-    participant API as AuthenticationFilter/JWT
-    participant A as ApiController
+    participant API as AuthenticationFilter/JWT/ApiController
+    participant A as RaizesService
     participant DB as RaizesStore/JDBC/SQLite/Flyway
     participant G as MockPaymentGateway
     actor K as Cozinha ou ADMIN
     C->>API: POST /api/pedidos + JWT (unidade, canal, itens)
-    API->>A: createOrder(body, request)
+    API->>A: createOrder(body, identity)
     A->>DB: BEGIN; validar unidade/produtos; reservar saldo
     A->>DB: Criar pedido/itens e auditar
     DB-->>A: COMMIT; AGUARDANDO_PAGAMENTO
@@ -14,7 +14,7 @@ sequenceDiagram
     API-->>C: 201 + pedido
     Note over A,DB: Falha em item/estoque reverte toda a transação
     C->>API: POST /api/pedidos/{id}/pagamento + statusSimulado
-    API->>A: pay(id, body, request)
+    API->>A: pay(id, body, identity)
     A->>DB: BEGIN; ler pedido; validar titular e estado
     DB-->>A: Pedido aguardando pagamento
     A->>G: pedidoId, valorCentavos, BRL, correlacaoId, cenario
@@ -31,7 +31,7 @@ sequenceDiagram
         API-->>C: 503 ou 504 + erro padronizado
     end
     K->>API: PATCH status PRONTO; depois ENTREGUE (chamadas separadas)
-    API->>A: changeStatus(id, body, request)
+    API->>A: changeStatus(id, body, identity)
     A->>DB: BEGIN; mudar estado + auditoria; COMMIT
     DB-->>A: Pedido atualizado
     A-->>API: Pedido

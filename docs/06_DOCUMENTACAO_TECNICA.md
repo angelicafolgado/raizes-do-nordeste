@@ -29,7 +29,7 @@ Flyway aplica [V1__initial_schema.sql](../src/main/resources/db/migration/V1__in
 
 | Componente | Responsabilidade |
 |---|---|
-| [ApiController](../src/main/java/br/com/raizesdonordeste/api/ApiController.java) | Rotas REST, autorização por perfil e coordenação dos fluxos de API. |
+| [ApiController](../src/main/java/br/com/raizesdonordeste/api/ApiController.java) | Rotas REST, resolução da identidade e delegação para RaizesService. |
 | [AuthenticationFilter](../src/main/java/br/com/raizesdonordeste/config/AuthenticationFilter.java) e [JwtService](../src/main/java/br/com/raizesdonordeste/config/JwtService.java) | Validação de tokens e identidade da requisição. |
 | [RaizesStore](../src/main/java/br/com/raizesdonordeste/infrastructure/RaizesStore.java) | Persistência JDBC, consultas e operações transacionais sobre SQLite. |
 | [PaymentGateway](../src/main/java/br/com/raizesdonordeste/application/payments/PaymentGateway.java) | Contrato Java de solicitação e resposta de pagamento. |
@@ -109,3 +109,9 @@ mvn.cmd @argsMaven
 ```
 
 Consulte o [resultado do ensaio](06_RESULTADOS_OPERACIONAIS.json) para as métricas e os limites medidos. O teste publicado é de leituras locais; não mede escrita, recuperação, múltiplas instâncias ou disponibilidade de produção. Reinício local com preservação de pedido/pagamento foi confirmado nesta revisão; restauração de backup permanece sem ensaio.
+
+Casos de uso em `application/RaizesService`; regras de transição em `domain/OrderRules`. Consulte a [feature crítica](09_FEATURE_CRITICA.md).
+
+## Responsabilidades após a revisão
+
+ApiController resolve a identidade HTTP e delega. RaizesService implementa os casos de uso e coordena transações, autorização e gateway. OrderRules valida transições de estado sem dependências de infraestrutura. RaizesStore mantém JDBC. A implementação usa mapas/records, sem ORM.

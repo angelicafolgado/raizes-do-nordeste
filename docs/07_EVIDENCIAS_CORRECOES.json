@@ -3,7 +3,7 @@
   "base_commit": "b4eaa4adb809f59d7d6c472d4af09d81d94ed837",
   "workflow": "Java 21 / Spring Boot / SQLite / Flyway",
   "maven": {
-    "command": "mvn test package",
+    "command": "mvn verify",
     "exit_code": 0,
     "tests": 20,
     "failures": 0,
@@ -33,7 +33,7 @@
   },
   "pdf": {
     "file": "output/pdf/4937552_Projeto_Back_End.pdf",
-    "pages": 44,
+    "pages": 45,
     "format": "A4",
     "embedded_font": "Liberation Serif (SIL OFL 1.1)",
     "body_size_pt": 12,
@@ -42,7 +42,7 @@
     "right_bottom_margin_pt": 57,
     "numbered_contents": true,
     "visual_review": true,
-    "academic_fields": "a informar, conforme orientação da autora",
+    "academic_fields": "Curso: CST Análise e desenvolvimento de sistemas; período: B fase II 2026 - regular; trabalho: Projeto: Desenvolvimento Back-end (898968); docente: Prof. Me. Luciane Yanase Kanashiro; polo: a informar",
     "structural_revision": {
       "date": "2026-10-11",
       "own_content_only": true,
@@ -67,5 +67,18 @@
     "Restauração de backup",
     "Alta disponibilidade em produção",
     "Certificação ABNT contra normas do AVA"
-  ]
+  ],
+  "architecture_revision": {
+    "api": "ApiController: HTTP e identidade",
+    "application": "RaizesService: casos de uso e transações",
+    "domain": "OrderRules: transições de estado",
+    "feature": "docs/09_FEATURE_CRITICA.md",
+    "tests": 20,
+    "failures": 0,
+    "newman_requests": 32,
+    "newman_assertions": 88,
+    "newman_failures": 0,
+    "restart_orders_preserved": 1,
+    "restart_payments_preserved": 1
+  }
 }

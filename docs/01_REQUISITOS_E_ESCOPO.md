@@ -2,7 +2,7 @@
 
 Projeto: Raízes do Nordeste — API Back-end  
 Versão: 1.0 — 11/10/2026  
-Situação: baseline de requisitos e decisões de escopo da etapa 1. Para o estado implementado e suas evidências atuais, consulte [rastreabilidade](06_RASTREABILIDADE.md) e [resultado de validação](04_RESULTADO_VALIDACAO.md).
+Situação: matriz revisada de requisitos e decisões de escopo. Para o estado implementado e suas evidências atuais, consulte [rastreabilidade](06_RASTREABILIDADE.md) e [resultado de validação](04_RESULTADO_VALIDACAO.md).
 
 ## 1. Objetivo e contexto
 
@@ -55,35 +55,35 @@ As prioridades são decisões do projeto. Não representam pesos oficiais de ava
 | RF07 | Registrar e filtrar o canal de origem do pedido. | P1 / Implementado | Exigir APP, TOTEM, BALCAO, PICKUP ou WEB; ausência/valor inválido retorna 400/422; filtro retorna somente pedidos do canal solicitado. |
 | RF08 | Reservar estoque da unidade transacionalmente. | P1 / Implementado | Falta de saldo retorna 409; falha em qualquer item reverte toda a reserva; pedidos concorrentes não tornam o saldo negativo. |
 | RF09 | Consultar pedidos com paginação e isolamento por cliente. | P1 / Implementado | Validar page/limit, limitar a 100 itens por página e retornar metadados; cliente vê apenas seus pedidos; perfis operacionais consultam a rede. |
-| RF10 | Solicitar e registrar pagamento mock por contrato de gateway. | P1 / Parcial | Preservar aprovação/recusa atuais; mover simulação para adaptador da infraestrutura, acessado por interface da aplicação; comprovar envio, retorno e correlação com o pedido. |
-| RF11 | Tratar recusa, falha técnica e repetição de pagamento. | P1 / Parcial | Recusa mantém pedido aguardando pagamento; nova tentativa é permitida; pedido aprovado não é cobrado novamente. Falha técnica simulada retorna erro padronizado e não aprova pedido nem grava pagamento aprovado. |
+| RF10 | Solicitar e registrar pagamento mock por contrato de gateway. | P1 / Implementado | Preservar aprovação/recusa atuais; mover simulação para adaptador da infraestrutura, acessado por interface da aplicação; comprovar envio, retorno e correlação com o pedido. |
+| RF11 | Tratar recusa, falha técnica e repetição de pagamento. | P1 / Implementado | Recusa mantém pedido aguardando pagamento; nova tentativa é permitida; pedido aprovado não é cobrado novamente. Falha técnica simulada retorna erro padronizado e não aprova pedido nem grava pagamento aprovado. |
 | RF12 | Atualizar status respeitando a sequência operacional. | P1 / Implementado | Permitir EM_PREPARO → PRONTO → ENTREGUE apenas a COZINHA/ADMIN; rejeitar saltos/regressões com 409. |
 | RF13 | Cancelar pedido ainda não pago e devolver estoque. | P1 / Implementado | COZINHA/ADMIN pode mudar AGUARDANDO_PAGAMENTO para CANCELADO; restituição ocorre uma vez; pedido cancelado não aceita pagamento. |
-| RF14 | Auditar ações sensíveis e acessos operacionais a pedidos. | P1 / Parcial | Manter logs de login, criação, pagamento e status; acrescentar registro de consultas operacionais com ator, ação e instante, sem senha, JWT ou cópia integral de dados pessoais. Definir evidência reproduzível de auditoria para o avaliador. |
-| RF15 | Registrar e permitir revogar consentimento opcional. | P1 / Planejado | Usuário autenticado registra apenas sua própria decisão para finalidade identificada, com data e versão do aviso; revogação fica rastreável e não bloqueia pedidos comuns. Consentimento de demonstração inserido pelo seed deve ser identificado como fictício. |
-| RF16 | Paginar consultas de produtos e unidades. | P2 / Planejado | Aceitar page/limit, com padrão 1/10 e máximo 100; retornar dados e metadados, preservando filtros. Atualizar Swagger, Postman e consumidores de teste para o novo formato. |
+| RF14 | Auditar ações sensíveis e acessos operacionais a pedidos. | P1 / Implementado | Manter logs de login, criação, pagamento e status; acrescentar registro de consultas operacionais com ator, ação e instante, sem senha, JWT ou cópia integral de dados pessoais. Definir evidência reproduzível de auditoria para o avaliador. |
+| RF15 | Registrar e permitir revogar consentimento opcional. | P1 / Implementado | Usuário autenticado registra apenas sua própria decisão para finalidade identificada, com data e versão do aviso; revogação fica rastreável e não bloqueia pedidos comuns. Consentimento de demonstração inserido pelo seed deve ser identificado como fictício. |
+| RF16 | Paginar consultas de produtos e unidades. | P2 / Implementado | Aceitar page/limit, com padrão 1/10 e máximo 100; retornar dados e metadados, preservando filtros. Atualizar Swagger, Postman e consumidores de teste para o novo formato. |
 | RF17 | Administrar produtos e unidades. | P3 / Proposto | Especificar criação/edição/inativação por ADMIN; impedir remoções que quebrem pedidos históricos e manter identificação estável. |
 | RF18 | Registrar entradas e ajustes administrativos de estoque. | P3 / Proposto | Descrever movimentação com unidade, produto, quantidade, tipo, motivo, autor e data; bloquear saída sem saldo e preservar histórico. O MVP já implementa saída por pedido e devolução por cancelamento. |
 | RF19 | Acumular e resgatar pontos mediante adesão opcional. | P3 / Proposto | Especificar saldo, lançamentos, acúmulo único por pedido entregue e resgate sem saldo negativo; detalhamento na seção 7. |
 | RF20 | Aplicar promoções/campanhas elegíveis. | P3 / Proposto | Especificar vigência, unidade, canal, produtos elegíveis e desconto calculado pelo servidor; detalhamento na seção 7. |
 
-RF15 não implica implementar o programa de pontos: nesta entrega, o consentimento será uma capacidade técnica demonstrável para uma finalidade opcional claramente descrita. A política documental deverá manter coerência com as funcionalidades realmente executadas.
+RF15 não implica implementar o programa de pontos: nesta entrega, o consentimento é uma capacidade técnica demonstrável para uma finalidade opcional claramente descrita. A política documental deverá manter coerência com as funcionalidades realmente executadas.
 
 ## 5. Requisitos não funcionais
 
 | ID | Requisito | Prioridade / estado | Critério de aceite |
 |---|---|---|---|
-| RNF01 | Separar responsabilidades de API, segurança, persistência e pagamento. | P1 / Implementado | Implementação Java separa `ApiController`, filtros/configuração, `RaizesStore` e o contrato `PaymentGateway`; limites e responsabilidades estão descritos na documentação técnica. |
+| RNF01 | Separar responsabilidades de API, segurança, persistência e pagamento. | P1 / Implementado | Implementação Java separa `ApiController`, `RaizesService`, `OrderRules`, filtros/configuração, `RaizesStore` e o contrato `PaymentGateway`; limites e responsabilidades estão descritos na documentação técnica. |
 | RNF02 | Persistir dados com integridade e migrações reproduzíveis. | P1 / Implementado | Banco recriado por migrações; PK/FK e unicidade coerentes; seed repetido não apaga pedidos nem repõe estoque consumido. |
 | RNF03 | Proteger credenciais e segredos. | P1 / Implementado | Senhas com bcrypt, JWT assinado e validado, segredo externo ao código e ignorado pelo versionamento; responses sem hashes/tokens de terceiros. |
-| RNF04 | Explicitar finalidade, minimização e ciclo de vida dos dados. | P1 / Planejado | Inventário por campo e finalidade, base de tratamento a fundamentar, controle de acesso, estratégia de retenção/anonimização e procedimento de revogação; distinguir política proposta de mecanismo implementado. |
+| RNF04 | Explicitar finalidade, minimização e ciclo de vida dos dados. | P1 / Documentado; procedimentos propostos | Inventário por campo e finalidade, base de tratamento a fundamentar, controle de acesso, estratégia de retenção/anonimização e procedimento de revogação; distinguir política proposta de mecanismo implementado. |
 | RNF05 | Padronizar erros e validar entradas. | P1 / Implementado | Envelope com error, message, details, timestamp, path e requestId; sem stack trace no cliente; status coerentes para validação, acesso e conflito. |
-| RNF06 | Manter contratos OpenAPI completos e compatíveis. | P1 / Parcial | Cada operação tem parâmetros, permissões, exemplos de request quando aplicável, response de sucesso e erro, além dos códigos possíveis. |
+| RNF06 | Manter contratos OpenAPI completos e compatíveis. | P1 / Implementado | Cada operação tem parâmetros, permissões, exemplos de request quando aplicável, response de sucesso e erro, além dos códigos possíveis. |
 | RNF07 | Permitir instalação e execução local reproduzíveis. | P1 / Implementado | Em diretório limpo, instruções do README instalam dependências, configuram ambiente, migram, populam e iniciam a API. Revalidar ao fechar a entrega. |
-| RNF08 | Garantir evidências de teste reproduzíveis. | P1 / Parcial | Build e testes passam; coleção organizada em pastas com pelo menos 10 cenários, 6 positivos e 4 negativos, cobrindo os casos obrigatórios e evidência de auditoria; cada cenário possui pré-condição e resultado esperado. |
-| RNF09 | Limitar custo das consultas e avaliar concorrência. | P2 / Parcial | Aplicar RF16; preservar testes de última unidade e pagamento concorrente. Proposta de medição local: 20 clientes concorrentes durante 60 s em consultas, registrar ambiente, p95 e erros; meta inicial p95 ≤ 1 s e menos de 1% de 5xx. Meta ainda não medida; não é garantia de produção. |
+| RNF08 | Garantir evidências de teste reproduzíveis. | P1 / Implementado | Build e testes passam; coleção organizada em pastas com pelo menos 10 cenários, 6 positivos e 4 negativos, cobrindo os casos obrigatórios e evidência de auditoria; cada cenário possui pré-condição e resultado esperado. |
+| RNF09 | Limitar custo das consultas e avaliar concorrência. | P2 / Parcial | Aplicar RF16; preservar testes de última unidade e pagamento concorrente. Proposta de medição local: 20 clientes concorrentes durante 60 s em consultas, registrar ambiente, p95 e erros; meta inicial p95 ≤ 1 s e menos de 1% de 5xx. Medição de leituras anterior registrada em docs/06_RESULTADOS_OPERACIONAIS.json; não repetida nesta revisão e não é garantia de produção. |
 | RNF10 | Recuperar a operação após falhas locais. | P2 / Parcial | Após reiniciar a API, pedidos persistidos permanecem consultáveis; manter health de processo e encerramento controlado; documentar backup/restauração do SQLite e verificar restauração em cópia de teste. Sem compromisso de disponibilidade 24×7. |
-| RNF11 | Tolerar falhas do gateway simulado. | P1 / Planejado | Simular indisponibilidade e timeout determinísticos, sem rede financeira real; estado do pedido e reserva permanecem coerentes; registrar resultado técnico sem transformar falha em aprovação. |
+| RNF11 | Tolerar falhas do gateway simulado. | P1 / Implementado | Simular indisponibilidade e timeout determinísticos, sem rede financeira real; estado do pedido e reserva permanecem coerentes; registrar resultado técnico sem transformar falha em aprovação. |
 | RNF12 | Preservar rastreabilidade entre requisito, código e evidência. | P1 / Parcial | Cada requisito implementado aponta para caso de uso/rota e teste; cada proposta é identificada como tal; diagramas e texto não apresentam funcionalidade inexistente como executável. |
 
 ## 6. Regras de negócio e limites do MVP
@@ -165,7 +165,7 @@ Rotas candidatas, **não implementadas**: gestão de `/api/campanhas` por ADMIN 
 
 - RF16 muda o formato de retorno de produtos e unidades; ajustar documentação e testes na mesma entrega técnica, sem apresentar o contrato antigo como atual.
 - O gateway mock deve produzir falhas determinísticas para testes. Não introduzir dependência de provedor real nem credenciais financeiras.
-- Captura de consentimento não deve reutilizar um booleano genérico sem finalidade identificada; o modelo detalhado e a migração serão definidos na etapa 3.
+- Consentimento é persistido com finalidade, versão, decisão e histórico; o booleano legado não substitui esses registros. A migração V1 mantém o modelo atual.
 - A auditoria deverá ter uma forma segura de verificação pelo avaliador: consulta controlada por ADMIN ou evidência automatizada/local documentada, sem endpoint público de logs.
 - A migração V1 SQLite é adequado à demonstração local escolhida. Escala de produção e disponibilidade elevada exigem avaliação adicional e ficam fora das promessas desta entrega.
 - Cinco commits de evolução são recomendados no roteiro; registrar as alterações reais a partir do estado disponível, sem inventar histórico retroativo.
@@ -181,7 +181,7 @@ Rotas candidatas, **não implementadas**: gestão de `/api/campanhas` por ADMIN 
 - [x] Fidelização, promoções, cadastro e gestão especificados conceitualmente.
 - [x] Entregáveis e dependências das etapas 2 a 8 definidos.
 
-A conclusão desta etapa não significa que os complementos planejados já foram implementados. O próximo trabalho é a **etapa 2: complementos da API**, guiada por RF10, RF11 e RF16.
+Esta matriz foi atualizada após a implementação dos complementos RF10, RF11, RF14, RF15 e RF16. Permanecem propostas as capacidades administrativas, de pontos, campanhas e produção explicitamente identificadas.
 
 ## Referências locais
 
@@ -190,3 +190,5 @@ A conclusão desta etapa não significa que os complementos planejados já foram
 - [README e funcionalidades atuais](../README.md).
 - [Schema SQL implementado](../src/main/resources/db/migration/V1__initial_schema.sql).
 - [Testes Java](../src/test/java/br/com/raizesdonordeste/ApiIntegrationTest.java).
+
+Feature crítica consolidada: [pedido, pagamento e status](09_FEATURE_CRITICA.md).

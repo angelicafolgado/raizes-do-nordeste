@@ -4,13 +4,13 @@ digraph Fluxo {
  edge [fontname="Arial",fontsize=10,color="#46616f"];
  start [shape=oval,label="Cliente ou Atendente
 JWT validado pelo AuthenticationFilter"];
- create [label="ApiController.createOrder
+ create [label="RaizesService.createOrder
 Validar unidade, canal e itens; preço do catálogo"];
  reserve [label="RaizesStore.transaction (JDBC)
 Reservar estoque + pedido/itens + auditoria"];
  waiting [label="COMMIT → AGUARDANDO_PAGAMENTO
 Erro em item/saldo: ROLLBACK, resposta 404/409/422"];
- pay [label="ApiController.pay
+ pay [label="RaizesService.pay
 Validar titular e estado; abrir transação"];
  gateway [label="PaymentGateway.process(Request)
 MockPaymentGateway: resultado correlacionado"];
@@ -27,7 +27,7 @@ ROLLBACK; 502"];
 Pagamento + EM_PREPARO + auditoria; COMMIT
 200, sucesso=true"];
  ready [label="COZINHA ou ADMIN
-ApiController.changeStatus: PRONTO
+RaizesService.changeStatus: PRONTO
 Status + auditoria; COMMIT"];
  delivered [label="COZINHA ou ADMIN
 changeStatus: ENTREGUE

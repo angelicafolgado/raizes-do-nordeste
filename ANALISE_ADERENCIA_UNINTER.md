@@ -9,11 +9,11 @@ O projeto fecha o MVP do **Fluxo A: Pedido → Pagamento mock → Atualização 
 | Critério do material | Evidência atual | Limite |
 |---|---|---|
 | Análise e requisitos (20 pontos) | RF/RNF, prioridades, atores e propostas no documento de escopo; rastreabilidade atual. | Cadastro, pontos, campanhas e gestão administrativa são propostas, conforme possibilidade de recorte conceitual fora do MVP. |
-| Modelagem e arquitetura (20 pontos) | DER, casos de uso, classes conceituais, classes técnicas reais e atividade/ sequência com componentes Java atuais. | Implementação JDBC usa mapas/records, não entidades ORM; ApiController coordena regras e RaizesStore persiste. Arquitetura simplificada é explicitada. |
+| Modelagem e arquitetura (20 pontos) | DER, casos de uso, classes conceituais, classes técnicas reais e atividade/ sequência com componentes Java atuais. | Implementação JDBC usa mapas/records, não entidades ORM; ApiController traduz HTTP, RaizesService coordena casos de uso, OrderRules valida transições e RaizesStore persiste. Arquitetura simplificada é explicitada. |
 | API e regras (25 pontos) | Fluxo completo validado, paginação, estoque transacional, pagamento aprovado/recusado/falha, status e OpenAPI detalhado. Flyway versiona o esquema e valida checksums. | Gateway é local simulado. Bases divergentes da versão anterior exigem avaliação antes de migrar. |
 | Segurança, LGPD e auditoria (15 pontos) | JWT, BCrypt, perfis/titularidade, logs de operações/leitura, consentimento opcional e inventário/políticas documentados. | Sem anonimização/expurgo automático ou operação comercial de direitos; não é certificação jurídica. |
 | Plano e evidências de testes (10 pontos) | 20 testes Java/Flyway e coleção com 32 requisições/88 asserções sem falhas; 17 positivos e 15 negativos em 9 pastas, matriz T01–T32. | JUnit e coleção são executados separadamente. |
-| Entrega/documentação (10 pontos) | Repositório público, README reproduzível, .env.example Java, Swagger local, coleção vinculada, PDF atualizado e referências. | Campos acadêmicos permanecem “a informar” por orientação da autora; conferir normas ABNT do AVA antes da entrega. |
+| Entrega/documentação (10 pontos) | Repositório público, README reproduzível, .env.example Java, Swagger local, coleção vinculada, PDF atualizado e referências. | Curso, período e trabalho preenchidos conforme informado; o polo permanece “a informar” por orientação da autora; conferir normas ABNT do AVA antes da entrega. |
 
 Os pesos são os do material fornecido, não notas atribuídas ao trabalho. A avaliação final cabe ao docente.
 
@@ -35,3 +35,7 @@ Os pesos são os do material fornecido, não notas atribuídas ao trabalho. A av
 - O ensaio de carga anterior não foi repetido; restauração de backup e alta disponibilidade em produção não foram ensaiadas.
 
 Resultados e comandos: [validação](docs/04_RESULTADO_VALIDACAO.md), [evidência estruturada](docs/07_EVIDENCIAS_CORRECOES.json), [plano de testes](docs/04_PLANO_DE_TESTES.md), [rastreabilidade](docs/06_RASTREABILIDADE.md) e [diagramas](docs/05_DIAGRAMAS.md).
+
+Docente informada pela autora: Prof. Me. Luciane Yanase Kanashiro.
+
+Feature crítica consolidada em docs/09_FEATURE_CRITICA.md; API delega aos casos de uso de application.

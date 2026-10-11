@@ -21,7 +21,7 @@
 <g id="node2" class="node">
 <title>create</title>
 <path fill="#edf6f5" stroke="#46616f" d="M990,-792C990,-792 727,-792 727,-792 721,-792 715,-786 715,-780 715,-780 715,-760 715,-760 715,-754 721,-748 727,-748 727,-748 990,-748 990,-748 996,-748 1002,-754 1002,-760 1002,-760 1002,-780 1002,-780 1002,-786 996,-792 990,-792"/>
-<text text-anchor="middle" x="858.5" y="-773.4" font-family="Arial" font-size="12.00">ApiController.createOrder</text>
+<text text-anchor="middle" x="858.5" y="-773.4" font-family="Arial" font-size="12.00">RaizesService.createOrder</text>
 <text text-anchor="middle" x="858.5" y="-760.4" font-family="Arial" font-size="12.00">Validar unidade, canal e itens; preço do catálogo</text>
 </g>
 <!-- start&#45;&gt;create -->
@@ -60,7 +60,7 @@
 <g id="node5" class="node">
 <title>pay</title>
 <path fill="#edf6f5" stroke="#46616f" d="M831.5,-532.5C831.5,-532.5 623.5,-532.5 623.5,-532.5 617.5,-532.5 611.5,-526.5 611.5,-520.5 611.5,-520.5 611.5,-500.5 611.5,-500.5 611.5,-494.5 617.5,-488.5 623.5,-488.5 623.5,-488.5 831.5,-488.5 831.5,-488.5 837.5,-488.5 843.5,-494.5 843.5,-500.5 843.5,-500.5 843.5,-520.5 843.5,-520.5 843.5,-526.5 837.5,-532.5 831.5,-532.5"/>
-<text text-anchor="middle" x="727.5" y="-513.9" font-family="Arial" font-size="12.00">ApiController.pay</text>
+<text text-anchor="middle" x="727.5" y="-513.9" font-family="Arial" font-size="12.00">RaizesService.pay</text>
 <text text-anchor="middle" x="727.5" y="-500.9" font-family="Arial" font-size="12.00">Validar titular e estado; abrir transação</text>
 </g>
 <!-- waiting&#45;&gt;pay -->
@@ -178,9 +178,9 @@
 <!-- ready -->
 <g id="node12" class="node">
 <title>ready</title>
-<path fill="#edf6f5" stroke="#46616f" d="M653.5,-151C653.5,-151 445.5,-151 445.5,-151 439.5,-151 433.5,-145 433.5,-139 433.5,-139 433.5,-106 433.5,-106 433.5,-100 439.5,-94 445.5,-94 445.5,-94 653.5,-94 653.5,-94 659.5,-94 665.5,-100 665.5,-106 665.5,-106 665.5,-139 665.5,-139 665.5,-145 659.5,-151 653.5,-151"/>
+<path fill="#edf6f5" stroke="#46616f" d="M657.5,-151C657.5,-151 441.5,-151 441.5,-151 435.5,-151 429.5,-145 429.5,-139 429.5,-139 429.5,-106 429.5,-106 429.5,-100 435.5,-94 441.5,-94 441.5,-94 657.5,-94 657.5,-94 663.5,-94 669.5,-100 669.5,-106 669.5,-106 669.5,-139 669.5,-139 669.5,-145 663.5,-151 657.5,-151"/>
 <text text-anchor="middle" x="549.5" y="-132.4" font-family="Arial" font-size="12.00">COZINHA ou ADMIN</text>
-<text text-anchor="middle" x="549.5" y="-119.4" font-family="Arial" font-size="12.00">ApiController.changeStatus: PRONTO</text>
+<text text-anchor="middle" x="549.5" y="-119.4" font-family="Arial" font-size="12.00">RaizesService.changeStatus: PRONTO</text>
 <text text-anchor="middle" x="549.5" y="-106.4" font-family="Arial" font-size="12.00">Status + auditoria; COMMIT</text>
 </g>
 <!-- approved&#45;&gt;ready -->

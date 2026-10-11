@@ -5,17 +5,17 @@
 
 Projeto acadêmico: API REST para pedidos multicanal, estoque por unidade e pagamento simulado. Relatório técnico da implementação Java 21 e Spring Boot 3.5.
 
-Disciplina: Projeto Multidisciplinar - Trilha Back-end  
-Curso: a informar  
+Trabalho: Projeto: Desenvolvimento Back-end (898968)  
+Curso: CST Análise e desenvolvimento de sistemas  
 Polo: a informar  
-Semestre: a informar  
-Docente: a informar
+Semestre: B fase II 2026 - regular  
+Docente: Prof. Me. Luciane Yanase Kanashiro
 
 ## Folha de rosto
 
 Angelica Dias Folgado — RU 4937552
 
-Trabalho apresentado à disciplina Projeto Multidisciplinar, do curso a informar, no Centro Universitário Internacional UNINTER. Relatório da implementação própria de uma API REST em Java para a rede Raízes do Nordeste. Docente: a informar.
+Trabalho apresentado à disciplina Projeto: Desenvolvimento Back-end (898968), do curso CST Análise e desenvolvimento de sistemas, no Centro Universitário Internacional UNINTER. Relatório da implementação própria de uma API REST em Java para a rede Raízes do Nordeste. Docente: Prof. Me. Luciane Yanase Kanashiro.
 
 ## Sumário
 
@@ -23,35 +23,35 @@ Trabalho apresentado à disciplina Projeto Multidisciplinar, do curso a informar
 
 2. Análise e requisitos ... 4
 
-3. Modelagem e arquitetura ... 5
+3. Modelagem e arquitetura ... 6
 
-4. API e contratos ... 6
+4. API e contratos ... 7
 
-5. LGPD, privacidade, segurança e auditoria ... 7
+5. LGPD, privacidade, segurança e auditoria ... 8
 
-6. Plano de testes e evidências ... 8
+6. Plano de testes e evidências ... 9
 
-7. Entrega técnica ... 9
+7. Entrega técnica ... 10
 
-8. Conclusão ... 10
+8. Conclusão ... 11
 
-Referências ... 11
+Referências ... 12
 
-Apêndice A - Contratos e exemplos da API ... 12
+Apêndice A - Contratos e exemplos da API ... 13
 
-Apêndice B - Cenários de teste da API ... 28
+Apêndice B - Cenários de teste da API ... 29
 
-Apêndice C - Evidências de execução ... 38
+Apêndice C - Evidências de execução ... 39
 
-Apêndice D - Casos de uso ... 39
+Apêndice D - Casos de uso ... 40
 
-Apêndice E - Classes conceituais de domínio ... 40
+Apêndice E - Classes conceituais de domínio ... 41
 
-Apêndice F - Arquitetura Java ... 41
+Apêndice F - Arquitetura Java ... 42
 
-Apêndice G - Diagrama entidade-relacionamento ... 42
+Apêndice G - Diagrama entidade-relacionamento ... 43
 
-Apêndice H - Atividade do fluxo crítico ... 43
+Apêndice H - Atividade do fluxo crítico ... 44
 
 ## 1. Introdução e objetivos
 
@@ -85,11 +85,21 @@ Migrações Flyway versionadas inicializam bancos novos e registram a atualizaç
 
 Requisitos propostos: cadastro, CRUD administrativo de catálogo, movimentação de estoque, fidelidade por pontos, promoções e persistência distribuída multiwriter.
 
+## 2.1 Feature crítica: pedido, pagamento e status
+
+Pré-condições: API/banco disponíveis, migrations aplicadas, JWT e perfil permitidos, unidade/produtos existentes, canal válido e saldo suficiente. Para pagar, pedido do titular cliente em AGUARDANDO_PAGAMENTO.
+
+Fluxo: validar e agrupar itens; reservar estoque, persistir pedido/itens e auditoria na transação; solicitar gateway com valor e correlação; validar retorno; persistir pagamento e EM_PREPARO; COZINHA/ADMIN avança para PRONTO e ENTREGUE.
+
+Pós-condições: dados persistentes e estoque consistente. Criação falha reverte a reserva; recusa mantém pedido aguardando; falha técnica não aprova pagamento. Cancelamento autorizado de pedido não pago devolve estoque uma vez.
+
+Exceções: 401 token, 403 perfil/titular, 400/422 entrada, 404 referências, 409 estoque/estado, 502 retorno inválido, 503/504 gateway. Não há Idempotency-Key: repetir criação pode criar outro pedido; pagamento repetido aprovado é bloqueado por estado. Descrição completa: docs/09_FEATURE_CRITICA.md.
+
 ## 3. Modelagem e arquitetura
 
 A aplicação foi implementada em Java 21 com Spring Boot 3.5, API REST, JDBC e SQLite. A documentação OpenAPI está disponível em /api-docs.
 
-ApiController atende HTTP; AuthenticationFilter e JwtService validam identidade; RaizesStore centraliza JDBC e transações; PaymentGateway é a porta de pagamento e MockPaymentGateway seu adaptador local; ApiExceptionHandler projeta erros JSON.
+ApiController traduz HTTP e resolve a identidade; RaizesService coordena os casos de uso; OrderRules valida transições; AuthenticationFilter e JwtService validam identidade; RaizesStore centraliza JDBC e transações; PaymentGateway é a porta de pagamento e MockPaymentGateway seu adaptador local; ApiExceptionHandler projeta erros JSON.
 
 O banco tem nove tabelas: usuarios, unidades, produtos, estoques_unidades, pedidos, itens_pedido, pagamentos, audit_logs e consentimentos. O par unidade/produto do estoque é único; pedidos têm usuário e unidade; itens referenciam pedido e produto; há no máximo um pagamento por pedido.
 
@@ -165,19 +175,21 @@ Os materiais fornecidos foram adotados como referência por instrução da disce
 
 A implementação Java entrega o fluxo acadêmico de pedidos, reserva de estoque, pagamento simulado e acompanhamento operacional. Os testes e a medição documentam somente o comportamento observado no ambiente local.
 
-O código executável da API, testes e ferramentas mantidas está em Java 21. O repositório público contém a entrega Java. A coleção Postman foi validada: 32 requisições e 88 asserções aprovadas. Os campos acadêmicos foram mantidos por orientação da discente e marcados como a informar. A referência fornecida foi usada conforme orientação da discente, preservada a ressalva indicada pelos próprios arquivos.
+O código executável da API, testes e ferramentas mantidas está em Java 21. O repositório público contém a entrega Java. A coleção Postman foi validada: 32 requisições e 88 asserções aprovadas. Curso, período e identificação do trabalho foram fornecidos pela discente. O polo permanece marcado como a informar. A referência fornecida foi usada conforme orientação da discente, preservada a ressalva indicada pelos próprios arquivos.
 
 ## Referências
 
-Materiais de referência designados pela discente: PDFs fornecidos para estudo, não distribuídos no repositório; os materiais indicam versão editada para estudo.
+UNINTER. Projeto Multidisciplinar: estudo de caso - Raízes do Nordeste. 2026. Versão editada para estudo fornecida pela discente; original institucional prevalece.
 
-Projeto Raízes do Nordeste. Documentação técnica, requisitos, privacidade e desempenho. docs/.
+UNINTER. Projeto Multidisciplinar: trilha Back-End. 2026. Versão editada para estudo fornecida pela discente; original institucional prevalece.
 
-Oracle. Java Documentation. docs.oracle.com/en/java/.
+FOLGADO, Angelica Dias. Raízes do Nordeste: documentação técnica, requisitos e evidências. 2026. Disponível em: https://github.com/angelicafolgado/raizes-do-nordeste. Acesso em: 11 out. 2026.
 
-Spring. Spring Boot Reference Documentation. docs.spring.io/spring-boot/.
+ORACLE. Java Platform, Standard Edition 21: documentação técnica. [s. d.]. Disponível em: https://docs.oracle.com/en/java/javase/21/. Referência técnica da versão utilizada.
 
-Brasil. Lei nº 13.709, de 14 de agosto de 2018 (LGPD). Texto compilado no Portal da Legislação.
+SPRING. Spring Boot: reference documentation. [s. d.]. Disponível em: https://docs.spring.io/spring-boot/reference/. Referência técnica do framework utilizado.
+
+BRASIL. Lei nº 13.709, de 14 de agosto de 2018. Lei Geral de Proteção de Dados Pessoais. Brasília, DF: Presidência da República, 2018. Disponível em: https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709compilado.htm. Referência normativa; não representa parecer jurídico.
 
 ## Apêndice A - Contratos e exemplos da API
 

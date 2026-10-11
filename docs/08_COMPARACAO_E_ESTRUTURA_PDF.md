@@ -21,7 +21,7 @@ A referência foi usada somente para organização: capa, folha de rosto, sumár
 
 O conteúdo dos capítulos foi reorganizado a partir do relatório próprio. Os contratos vêm de `src/main/resources/openapi-contract.json`; os cenários vêm de `docs/04_PLANO_DE_TESTES.md`; diagramas e resultados vêm dos artefatos do projeto de Angelica. Não foram incorporados código, textos narrativos, figuras, regras de fidelidade/promoção, dados de identificação ou resultados de execução do projeto de referência. Títulos acadêmicos e categorias do roteiro servem apenas à organização comum.
 
-O PDF de referência não foi incluído no repositório. Docente, curso, polo e semestre continuam “a informar”, conforme orientação da discente. Os exemplos de contratos são ilustrativos e a medição anterior de desempenho é identificada como histórica; esta reorganização não representa nova execução das suítes da API.
+O PDF de referência não foi incluído no repositório. Curso, período e trabalho foram preenchidos com os dados fornecidos pela discente. Docente: Prof. Me. Luciane Yanase Kanashiro, conforme informado pela discente. O polo continua “a informar”. Os exemplos de contratos são ilustrativos e a medição anterior de desempenho é identificada como histórica; esta reorganização não representa nova execução das suítes da API.
 
 ## Pendências e limites
 
@@ -29,3 +29,5 @@ O PDF de referência não foi incluído no repositório. Docente, curso, polo e 
 - Não interpretar consentimento como implementação de pontos ou campanha no projeto de Angelica.
 - Não apresentar teste de leitura local como validação de disponibilidade ou desempenho de produção.
 - Para comparar o código de ambos, ainda é necessário acesso ao repositório ou ZIP de Jeferson. O PDF fornecido permite avaliar estrutura e declarações, sem comprovar sozinho a execução.
+
+Atualização posterior: o repositório de Jeferson tornou-se público e foi disponibilizado em ZIP. As observações de inacessibilidade acima registram a comparação inicial baseada no PDF. Esta atualização do projeto de Angelica não incorpora arquivos ou resultados de Jeferson.

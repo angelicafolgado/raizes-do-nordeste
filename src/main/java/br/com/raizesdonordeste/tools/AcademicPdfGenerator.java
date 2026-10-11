@@ -138,10 +138,17 @@ public final class AcademicPdfGenerator {
                             + "fidelidade por pontos, promoções e persistência distribuída multiwriter."
             ));
             closePage();
+            section("2.1 Feature crítica: pedido, pagamento e status", List.of(
+                    "Pré-condições: API/banco disponíveis, migrations aplicadas, JWT e perfil permitidos, unidade/produtos existentes, canal válido e saldo suficiente. Para pagar, pedido do titular cliente em AGUARDANDO_PAGAMENTO.",
+                    "Fluxo: validar e agrupar itens; reservar estoque, persistir pedido/itens e auditoria na transação; solicitar gateway com valor e correlação; validar retorno; persistir pagamento e EM_PREPARO; COZINHA/ADMIN avança para PRONTO e ENTREGUE.",
+                    "Pós-condições: dados persistentes e estoque consistente. Criação falha reverte a reserva; recusa mantém pedido aguardando; falha técnica não aprova pagamento. Cancelamento autorizado de pedido não pago devolve estoque uma vez.",
+                    "Exceções: 401 token, 403 perfil/titular, 400/422 entrada, 404 referências, 409 estoque/estado, 502 retorno inválido, 503/504 gateway. Não há Idempotency-Key: repetir criação pode criar outro pedido; pagamento repetido aprovado é bloqueado por estado. Descrição completa: docs/09_FEATURE_CRITICA.md."
+            ));
+            closePage();
             section("3. Modelagem e arquitetura", List.of(
                     "A aplicação foi implementada em Java 21 com Spring Boot 3.5, API REST, JDBC e SQLite. "
                             + "A documentação OpenAPI está disponível em /api-docs.",
-                    "ApiController atende HTTP; AuthenticationFilter e JwtService validam identidade; "
+                    "ApiController traduz HTTP e resolve a identidade; RaizesService coordena os casos de uso; OrderRules valida transições; AuthenticationFilter e JwtService validam identidade; "
                             + "RaizesStore centraliza JDBC e transações; PaymentGateway é a porta de pagamento "
                             + "e MockPaymentGateway seu adaptador local; ApiExceptionHandler projeta erros JSON.",
                     "O banco tem nove tabelas: usuarios, unidades, produtos, estoques_unidades, pedidos, "
@@ -236,18 +243,18 @@ public final class AcademicPdfGenerator {
                             + "o comportamento observado no ambiente local.",
                     "O código executável da API, testes e ferramentas mantidas está em Java 21. O repositório "
                             + "público contém a entrega Java. A coleção Postman foi validada: 32 requisições e 88 asserções "
-                            + "aprovadas. Os campos acadêmicos foram mantidos por orientação da discente e "
-                            + "marcados como a informar. A referência fornecida foi usada conforme orientação "
+                            + "aprovadas. Curso, período e identificação do trabalho foram fornecidos pela discente. O polo permanece "
+                            + "marcado como a informar. A referência fornecida foi usada conforme orientação "
                             + "da discente, preservada a ressalva indicada pelos próprios arquivos."
             ));
             closePage();
             section("Referências", List.of(
-                    "Materiais de referência designados pela discente: PDFs fornecidos para estudo, não distribuídos no repositório; os "
-                            + "materiais indicam versão editada para estudo.",
-                    "Projeto Raízes do Nordeste. Documentação técnica, requisitos, privacidade e desempenho. docs/.",
-                    "Oracle. Java Documentation. docs.oracle.com/en/java/.",
-                    "Spring. Spring Boot Reference Documentation. docs.spring.io/spring-boot/.",
-                    "Brasil. Lei nº 13.709, de 14 de agosto de 2018 (LGPD). Texto compilado no Portal da Legislação."
+                    "UNINTER. Projeto Multidisciplinar: estudo de caso - Raízes do Nordeste. 2026. Versão editada para estudo fornecida pela discente; original institucional prevalece.",
+                    "UNINTER. Projeto Multidisciplinar: trilha Back-End. 2026. Versão editada para estudo fornecida pela discente; original institucional prevalece.",
+                    "FOLGADO, Angelica Dias. Raízes do Nordeste: documentação técnica, requisitos e evidências. 2026. Disponível em: https://github.com/angelicafolgado/raizes-do-nordeste. Acesso em: 11 out. 2026.",
+                    "ORACLE. Java Platform, Standard Edition 21: documentação técnica. [s. d.]. Disponível em: https://docs.oracle.com/en/java/javase/21/. Referência técnica da versão utilizada.",
+                    "SPRING. Spring Boot: reference documentation. [s. d.]. Disponível em: https://docs.spring.io/spring-boot/reference/. Referência técnica do framework utilizado.",
+                    "BRASIL. Lei nº 13.709, de 14 de agosto de 2018. Lei Geral de Proteção de Dados Pessoais. Brasília, DF: Presidência da República, 2018. Disponível em: https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709compilado.htm. Referência normativa; não representa parecer jurídico."
             ));
             contractAppendix();
             testAppendix();
@@ -345,17 +352,17 @@ public final class AcademicPdfGenerator {
                 .append("**Angelica Dias Folgado**  \n**RU: 4937552**\n\n")
                 .append("Projeto acadêmico: API REST para pedidos multicanal, estoque por unidade e pagamento simulado. ")
                 .append("Relatório técnico da implementação Java 21 e Spring Boot 3.5.\n\n")
-                .append("Disciplina: Projeto Multidisciplinar - Trilha Back-end  \n")
-                .append("Curso: a informar  \nPolo: a informar  \nSemestre: a informar  \nDocente: a informar\n\n");
+                .append("Trabalho: Projeto: Desenvolvimento Back-end (898968)  \n")
+                .append("Curso: CST Análise e desenvolvimento de sistemas  \nPolo: a informar  \nSemestre: B fase II 2026 - regular  \nDocente: Prof. Me. Luciane Yanase Kanashiro\n\n");
         centered("CENTRO UNIVERSITÁRIO INTERNACIONAL UNINTER", BOLD, 12, 750);
-        centered("CURSO: A INFORMAR", BODY, 12, 723);
+        centered("CURSO: CST Análise e desenvolvimento de sistemas", BODY, 12, 723);
         centered("ANGELICA DIAS FOLGADO", BOLD, 12, 650);
         centered("RU: 4937552", BODY, 12, 628);
         centered("RAÍZES DO NORDESTE", BOLD, 12, 465);
-        centered("PROJETO MULTIDISCIPLINAR - TRILHA BACK-END", BOLD, 12, 435);
+        centered("PROJETO: DESENVOLVIMENTO BACK-END (898968)", BOLD, 12, 435);
         centered("Polo de apoio: a informar", BODY, 12, 345);
-        centered("Semestre/período: a informar", BODY, 12, 323);
-        centered("Docente: a informar", BODY, 12, 301);
+        centered("Semestre/período: B fase II 2026 - regular", BODY, 12, 323);
+        centered("Docente: Prof. Me. Luciane Yanase Kanashiro", BODY, 12, 301);
         centered("A INFORMAR", BODY, 12, 105);
         centered("2026", BODY, 12, 83);
         closePage();
@@ -371,10 +378,10 @@ public final class AcademicPdfGenerator {
         centered("ANGELICA DIAS FOLGADO", BOLD, 12, 750);
         centered("RU: 4937552", BODY, 12, 728);
         centered("RAÍZES DO NORDESTE", BOLD, 12, 575);
-        centered("PROJETO MULTIDISCIPLINAR - TRILHA BACK-END", BOLD, 12, 547);
-        String note = "Trabalho apresentado à disciplina Projeto Multidisciplinar, do curso a informar, "
+        centered("PROJETO: DESENVOLVIMENTO BACK-END (898968)", BOLD, 12, 547);
+        String note = "Trabalho apresentado à disciplina Projeto: Desenvolvimento Back-end (898968), do curso CST Análise e desenvolvimento de sistemas, "
                 + "no Centro Universitário Internacional UNINTER. Relatório da implementação própria "
-                + "de uma API REST em Java para a rede Raízes do Nordeste. Docente: a informar.";
+                + "de uma API REST em Java para a rede Raízes do Nordeste. Docente: Prof. Me. Luciane Yanase Kanashiro.";
         float noteX = MARGIN + (PDRectangle.A4.getWidth() - MARGIN - RIGHT) / 2;
         float baseline = 420;
         for (String line : wrap(note, BODY, 12, PDRectangle.A4.getWidth() - RIGHT - noteX)) {
@@ -415,7 +422,7 @@ public final class AcademicPdfGenerator {
         float width = PDRectangle.A4.getWidth() - MARGIN - RIGHT;
         boolean contents = title.equals("Sumário");
         boolean references = title.equals("Referências");
-        boolean narrative = title.matches("[1-8]\\. .*");
+        boolean narrative = title.matches("[1-8](?:\\.[0-9]+)?\\.? .*");
         if (contents || references) centered(title.toUpperCase(java.util.Locale.ROOT), BOLD, 12, y);
         else {
             for (String line : wrap(title, BOLD, 12, width)) {
@@ -570,10 +577,10 @@ public final class AcademicPdfGenerator {
                     || !extracted.contains("11,76 ms")
                     || !extracted.contains("100% Java")
                     || !extracted.contains("https://github.com/angelicafolgado/raizes-do-nordeste")
-                    || !extracted.contains("CURSO: A INFORMAR")
+                    || !extracted.contains("CURSO: CST Análise e desenvolvimento de sistemas")
                     || !extracted.contains("Polo de apoio: a informar")
-                    || !extracted.contains("Semestre/período: a informar")
-                    || !extracted.contains("Docente: a informar")
+                    || !extracted.contains("Semestre/período: B fase II 2026 - regular")
+                    || !extracted.replaceAll("\\s+", " ").contains("Prof. Me. Luciane Yanase Kanashiro")
                     || !extracted.contains("Plano de testes e evidências")
                     || !extracted.contains("88 asserções")
                     || !extracted.contains("Flyway")) {

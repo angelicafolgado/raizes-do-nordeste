@@ -15,7 +15,7 @@ Atualização: 11/10/2026. Os modelos refletem a API Java, suas regras e a migra
 
 A fonte física é [V1__initial_schema.sql](../src/main/resources/db/migration/V1__initial_schema.sql). São nove tabelas de domínio, além do histórico técnico Flyway. PK/FK, unicidade e cardinalidades são representadas no DER. Um pedido pode ter no máximo um registro de pagamento; a auditoria mantém os eventos das tentativas. A aplicação exige itens, embora a FK não imponha quantidade mínima. Moeda é calculada em centavos e persistida em REAL; datas SQLite são texto UTC.
 
-O desenho de classes é **conceitual**: Usuario, Unidade, Produto, Pedido, ItemPedido, EstoqueUnidade, Pagamento, Consentimento e RegistroAuditoria representam o modelo de dados. Não se afirma que existam entidades Java/ORM com esses nomes: RaizesStore projeta JDBC em mapas e records pontuais. As regras são coordenadas por ApiController e transações RaizesStore. O desenho técnico separado registra as classes reais e o contrato PaymentGateway.process.
+O desenho de classes é **conceitual**: Usuario, Unidade, Produto, Pedido, ItemPedido, EstoqueUnidade, Pagamento, Consentimento e RegistroAuditoria representam o modelo de dados. Não se afirma que existam entidades Java/ORM com esses nomes: RaizesStore projeta JDBC em mapas e records pontuais. As regras são coordenadas por RaizesService; ApiController apenas traduz HTTP; RaizesStore implementa as transações. O desenho técnico separado registra as classes reais e o contrato PaymentGateway.process.
 
 ## Atores e permissões
 
@@ -39,3 +39,5 @@ dot -Tsvg docs/diagramas/01_der.dot -o docs/diagramas/01_der.svg
 ```
 
 Repita para as cinco fontes DOT. Depois execute o gerador Java do PDF conforme o README. A renderização externa de documentação não é dependência da API.
+
+Casos de uso em `application/RaizesService`; regras de transição em `domain/OrderRules`. Consulte a [feature crítica](09_FEATURE_CRITICA.md).

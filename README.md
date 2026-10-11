@@ -180,7 +180,7 @@ $pdfArgs = @(
 mvn.cmd @pdfArgs
 ```
 
-O arquivo é criado em `output/pdf/4937552_Projeto_Back_End.pdf`, acompanhado de uma versão textual Markdown. O documento identifica a autora e o RU, contém diagramas atuais, sumário paginado e evidências. Usa A4, margens esquerda/superior de 3 cm, direita/inferior de 2 cm e fonte Liberation Serif incorporada, tamanho 12 no corpo. Curso, polo, semestre e docente permanecem “a informar” por orientação da autora; conferir as normas efetivas do AVA antes da entrega.
+O arquivo é criado em `output/pdf/4937552_Projeto_Back_End.pdf`, acompanhado de uma versão textual Markdown. O documento identifica a autora e o RU, contém diagramas atuais, sumário paginado e evidências. Usa A4, margens esquerda/superior de 3 cm, direita/inferior de 2 cm e fonte Liberation Serif incorporada, tamanho 12 no corpo. Curso e período foram preenchidos conforme informado; o polo permanece “a informar” por orientação da autora; conferir as normas efetivas do AVA antes da entrega.
 
 ## Linguagem e escopo
 
@@ -189,3 +189,7 @@ A API, os testes automatizados e as ferramentas de execução, carga e geração
 O roteiro do AVA fornecido para a entrega é uma cópia adaptada para estudo; requisitos acadêmicos devem ser conferidos com o roteiro oficial disponibilizado no AVA.
 
 A organização do relatório segue capa, folha de rosto, sumário, oito capítulos e apêndices com contratos, cenários, evidências e diagramas próprios. Consulte a [comparação documental e os limites da referência estrutural](docs/08_COMPARACAO_E_ESTRUTURA_PDF.md).
+
+Docente informada pela autora: Prof. Me. Luciane Yanase Kanashiro.
+
+A [feature crítica](docs/09_FEATURE_CRITICA.md) consolida atores, pré/pós-condições, fluxo, exceções e limites de idempotência. ApiController delega a RaizesService; OrderRules concentra as transições de domínio.
