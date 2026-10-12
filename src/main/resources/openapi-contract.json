@@ -511,7 +511,7 @@
         ],
         "summary": "Criar pedido e reservar estoque",
         "operationId": "post_api_pedidos",
-        "description": "Reserva, itens e auditoria são transacionais. Canal ausente/inválido: 400 CANAL_INVALIDO. Falta de saldo: 409 ESTOQUE_INSUFICIENTE. Preços são lidos do banco. Permissão: CLIENTE, ATENDENTE ou ADMIN; titular obtido do JWT.",
+        "description": "Reserva, itens e auditoria são transacionais. Canal ausente/inválido: 400 CANAL_INVALIDO. Falta de saldo: 409 ESTOQUE_INSUFICIENTE. Preços são lidos do banco. Permissão: CLIENTE, ATENDENTE ou ADMIN; titular obtido do JWT. ATENDENTE só cria na unidade vinculada; ADMIN pode operar em qualquer unidade.",
         "responses": {
           "201": {
             "description": "Operação concluída.",
@@ -725,7 +725,7 @@
         ],
         "summary": "Consultar pedidos por canal",
         "operationId": "get_api_pedidos",
-        "description": " Permissão: qualquer perfil autenticado; CLIENTE consulta somente seus pedidos; perfis operacionais consultam a rede.",
+        "description": "Permissão: qualquer perfil autenticado. CLIENTE consulta somente pedidos próprios; ATENDENTE e COZINHA consultam pedidos da unidade vinculada; ADMIN consulta toda a rede. Perfil operacional sem unidade vinculada recebe 403 ACESSO_NEGADO.",
         "responses": {
           "200": {
             "description": "Operação concluída.",
@@ -901,7 +901,7 @@
         ],
         "summary": "Solicitar pagamento simulado",
         "operationId": "post_api_pedidos_id_pagamento",
-        "description": "Recusa retorna 200, sucesso=false e AGUARDANDO_PAGAMENTO; permite nova tentativa. Aprovação muda para EM_PREPARO. Pedido já aprovado retorna 409. Falhas técnicas são simuladas imediatamente; não há cobrança externa. Permissão: CLIENTE titular do pedido, ATENDENTE ou ADMIN.",
+        "description": "Recusa retorna 200, sucesso=false e AGUARDANDO_PAGAMENTO; permite nova tentativa. Aprovação muda para EM_PREPARO. Pedido já aprovado retorna 409. Falhas técnicas são simuladas imediatamente; não há cobrança externa. Permissão: CLIENTE titular do pedido, ATENDENTE da unidade do pedido ou ADMIN.",
         "responses": {
           "200": {
             "description": "Operação concluída.",
@@ -1167,7 +1167,7 @@
         ],
         "summary": "Atualizar status ou cancelar pedido não pago",
         "operationId": "patch_api_pedidos_id_status",
-        "description": "Cancelamento devolve estoque uma única vez. Saltos/regressões de status retornam 409 TRANSICAO_INVALIDA. Permissão: COZINHA ou ADMIN.",
+        "description": "Cancelamento devolve estoque uma única vez. Saltos/regressões de status retornam 409 TRANSICAO_INVALIDA. Permissão: COZINHA vinculada à unidade do pedido ou ADMIN.",
         "responses": {
           "200": {
             "description": "Operação concluída.",
@@ -1411,7 +1411,7 @@
                     "Versão",
                     "Data"
                   ],
-                  "revogacao": "Envie aceito=false na rota de consentimento.",
+                  "revogacao": "A revogação ocorre com aceito=false na rota de consentimento.",
                   "retencao": "Revisão manual ao encerrar a avaliação; sem expurgo automático.",
                   "compartilhamento": "Nenhum provedor externo nesta demonstração."
                 }

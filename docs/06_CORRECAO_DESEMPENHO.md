@@ -29,7 +29,7 @@ Ambiente medido: Windows 11 amd64, JDK 21.0.10, 12 CPUs lógicas e servidor Spri
 
 ## Reproduzir
 
-Em um terminal, prepare uma base isolada e inicie a aplicação:
+O ensaio utiliza uma base isolada e a aplicação iniciada em um terminal:
 
 ```powershell
 $env:JWT_SECRET = 'um-segredo-aleatorio-com-mais-de-32-caracteres'

@@ -1,18 +1,18 @@
 # Etapa 4 — Plano de testes da API
 
-> **Escopo atual:** coleção validada contra a API Java em 11/10/2026: 32 requisições e 88 asserções, nenhuma falha. A suíte Java/Flyway é executada por `mvn test` e não executa a coleção automaticamente.
+> **Evidência da coleção:** a execução anterior registrou 32 requisições/88 asserções em 11/10/2026. Ela não foi repetida na revisão de 12/10/2026; não confundir com a execução Maven atual, que não executa a coleção automaticamente.
 
 ## Ambiente e execução
 
-Requisitos para a suíte automatizada: JDK 21 e Maven 3.9 ou superior. `mvn test` inicia a aplicação em ambiente de teste com SQLite isolado. Para inspeção manual, execute a API conforme o [README](../README.md), configure `baseUrl` no Postman e importe `postman/raizes_nordeste_clean_collection.json`; execute as pastas em ordem com seed em uma base de demonstração separada.
+Requisitos para a suíte automatizada: JDK 21 e Maven 3.9 ou superior. `mvn test` inicia a aplicação em ambiente de teste com SQLite isolado. A inspeção manual utiliza a API iniciada conforme o [README](../README.md), a variável `baseUrl` configurada no Postman e a coleção `postman/raizes_nordeste_clean_collection.json` importada. As pastas são executadas em ordem, com seed em uma base de demonstração separada.
 
-`baseUrl` é a única variável que precisa de ajuste para outra porta. `token_cliente`, `token_cozinha`, `token_admin` e `pedidoId` são capturados pelas requisições. Todas as contas são fictícias, com senha de demonstração `123456`. Não exporte a coleção com valores reais de tokens preenchidos.
+`baseUrl` é a única variável que precisa de ajuste para outra porta. `token_cliente`, `token_cozinha`, `token_admin` e `pedidoId` são capturados pelas requisições. Todas as contas são fictícias, com senha de demonstração `123456`. Os valores reais de tokens devem permanecer fora da coleção exportada.
 
-A coleção contém **32 cenários**, **17 planejados com resposta 2xx** e **15 cenários de erro**, em 9 pastas. Os 32 cenários e suas 88 asserções passaram na implementação Java. Recusa de pagamento é resultado de negócio respondido com HTTP 200 e tem asserção declarada na coleção.
+A coleção descreve **32 cenários**, **17 planejados com resposta 2xx** e **15 cenários de erro**, em 9 pastas. A execução registrada em 11/10/2026 aprovou esses cenários e 88 asserções; esse resultado é histórico, não retestado nesta revisão. Recusa de pagamento é resultado de negócio respondido com HTTP 200 e tem asserção declarada na coleção.
 
-Para validação automatizada da implementação Java, execute `mvn test`. Os 20 testes atuais cobrem fluxos de API, segurança, transações e concorrência, mas não executam automaticamente as 32 requisições desta coleção nem substituem a execução separada da coleção no Postman ou Newman.
+A validação automatizada da implementação Java utiliza `mvn test`. Na revisão de 12/10/2026 foram aprovados 21 testes (17 de integração, 2 de migração Flyway e 2 do gateway). Eles cobrem fluxos de API, segurança, transações, concorrência e isolamento por unidade, mas não executam automaticamente as 32 requisições desta coleção nem substituem a execução separada no Postman ou Newman.
 
-A coleção manual usa a base da API em execução e consome uma unidade do produto 1 por execução bem-sucedida. O seed preserva saldo e pedidos; ele não repõe estoque. Use uma base separada nova para avaliações repetidas, sem apagar a base existente. IDs 99999 usados nos casos 404 pressupõem o conjunto do seed, sem recursos com esses IDs.
+A coleção manual usa a base da API em execução e consome uma unidade do produto 1 por execução bem-sucedida. O seed preserva saldo e pedidos; ele não repõe estoque. As avaliações repetidas utilizam uma base separada nova, preservando a base existente. IDs 99999 usados nos casos 404 pressupõem o conjunto do seed, sem recursos com esses IDs.
 
 ## Matriz de cenários e evidências
 
@@ -50,6 +50,10 @@ A coleção manual usa a base da API em execução e consome uma unidade do prod
 | T30 | Tipo de quantidade inválido | `POST /api/pedidos` | API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior | `{"unidadeId":1,"canalPedido":"TOTEM","itens":[{"produtoId":1,"quantidade":"1"}]}` | 422; PARAMETRO_INVALIDO | 09 Validações adicionais/T30 - Tipo de quantidade inválido |
 | T31 | Unidade inexistente | `POST /api/pedidos` | API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior | `{"unidadeId":99999,"canalPedido":"TOTEM","itens":[{"produtoId":1,"quantidade":1}]}` | 404; UNIDADE_NAO_ENCONTRADA | 09 Validações adicionais/T31 - Unidade inexistente |
 | T32 | Produto inexistente | `POST /api/pedidos` | API iniciada; migrations e seed aplicados; {{token_cliente}} obtido no login anterior | `{"unidadeId":1,"canalPedido":"TOTEM","itens":[{"produtoId":99999,"quantidade":1}]}` | 404; PRODUTO_NAO_ENCONTRADO | 09 Validações adicionais/T32 - Produto inexistente |
+
+## Testes de integração adicionais desta revisão
+
+O escopo por unidade é coberto por `ApiIntegrationTest.operationalUsersAreRestrictedToTheirAssignedUnit`, fora da coleção Postman T01–T32: ATENDENTE/COZINHA consultam somente Recife; criação, pagamento e atualização de status de pedido de João Pessoa são negados; ADMIN consulta ambas as unidades; remover o vínculo do perfil operacional resulta em 403. A suíte completa executada em 12/10/2026 aprovou 17 testes de integração, 2 de migração e 2 do gateway.
 
 ## Cobertura e rastreabilidade
 

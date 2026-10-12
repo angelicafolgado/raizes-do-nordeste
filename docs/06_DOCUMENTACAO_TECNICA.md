@@ -17,13 +17,13 @@ Configuração padrão: API na porta 3000; banco SQLite `raizes.db`; seed de dem
 |---|---|
 | `PORT` | Porta HTTP; padrão `3000`. |
 | `SPRING_DATASOURCE_URL` | JDBC URL do SQLite; padrão `jdbc:sqlite:raizes.db`. |
-| `JWT_SECRET` | Segredo externo de no mínimo 32 caracteres; não o publique. |
+| `JWT_SECRET` | Segredo externo de no mínimo 32 caracteres; o valor deve permanecer privado. |
 | `JWT_EXPIRES_IN` | Validade do token; padrão `8h`. |
-| `SEED_ENABLED` | Controla o seed; padrão `true`. Desative com `false` quando necessário. |
+| `SEED_ENABLED` | Controla o seed; padrão `true`. O valor `false` desativa a inserção de dados de demonstração. |
 
-Swagger: `http://localhost:3000/api-docs`; contrato JSON: `/api-docs.json`; health: `/api/health`. O seed cria contas fictícias e não sobrescreve usuários, produtos, unidades, pedidos ou estoque existentes. Use `SEED_ENABLED=false` em ambiente que não deve receber dados de demonstração.
+Swagger: `http://localhost:3000/api-docs`; contrato JSON: `/api-docs.json`; health: `/api/health`. O seed cria contas fictícias e não sobrescreve usuários, produtos, unidades, pedidos ou estoque existentes. Ambientes sem dados de demonstração utilizam `SEED_ENABLED=false`.
 
-Flyway aplica [V1__initial_schema.sql](../src/main/resources/db/migration/V1__initial_schema.sql) e mantém versões/checksums em flyway_schema_history. Bases anteriores sem histórico usam baseline 0 e V1 idempotente; bases novas começam em V1. Faça backup antes de atualizar bases existentes e não edite migrações já aplicadas. O teste automatizado usa banco separado em target/test-api.db.
+Flyway aplica V1 e [V2__vinculo_unidade_operacional.sql](../src/main/resources/db/migration/V2__vinculo_unidade_operacional.sql) e mantém versões/checksums em flyway_schema_history. Bases anteriores sem histórico usam baseline 0; V2 adiciona o vínculo da unidade operacional sem apagar dados. A atualização de bases existentes requer backup prévio e preservação das migrações já aplicadas. O teste automatizado usa banco separado em target/test-api.db.
 
 ## Arquitetura
 
@@ -72,7 +72,7 @@ Listagens retornam `{ "dados": [], "paginacao": { ... } }`. Paginação usa padr
 
 ## Privacidade e segurança
 
-As contas de demonstração são fictícias e usam senha `123456`; não use essas credenciais em produção. Configure segredo JWT aleatório, restrinja o acesso a banco e segredos e desative o seed em ambiente publicado. O consentimento de fidelidade é opcional e demonstrativo, não ativa pontos ou marketing. Retenção/anonimização automatizadas, atendimento operacional de direitos, cifragem do arquivo SQLite e integração financeira real não fazem parte desta implementação.
+As contas de demonstração são fictícias e usam senha `123456`; essas credenciais são restritas ao desenvolvimento. O ambiente de produção requer segredo JWT aleatório, acesso restrito ao banco e aos segredos e seed desativado. O consentimento de fidelidade é opcional e demonstrativo, não ativa pontos ou marketing. Retenção/anonimização automatizadas, atendimento operacional de direitos, cifragem do arquivo SQLite e integração financeira real não fazem parte desta implementação.
 
 ## Build, testes e ferramentas
 
@@ -81,7 +81,7 @@ mvn test
 mvn package
 ```
 
-A suíte atual contém 16 testes de integração, 2 do gateway e 2 de migrações, executados com SQLite isolado. Ela verifica autenticação, pedidos, estoque, pagamentos, transições, privacidade, auditoria, rollback, seed e concorrência. A coleção Postman é executada separadamente e passou com 32 requisições/88 asserções na API Java.
+A suíte executada em 12/10/2026 contém 17 testes de integração, 2 do gateway e 2 de migração, executados com SQLite isolado. Ela verifica autenticação, pedidos, estoque, pagamentos, transições, privacidade, auditoria, rollback, seed, concorrência e escopo por unidade. A coleção Postman é executada separadamente; sua última execução registrada (11/10/2026) passou com 32 requisições/88 asserções, sem repetição nesta revisão.
 
 Para gerar o PDF e o Markdown:
 
@@ -95,7 +95,7 @@ $pdfArgs = @(
 mvn.cmd @pdfArgs
 ```
 
-Para repetir o ensaio com 20 clientes por 60 segundos, inicie a API em uma base isolada; em outro terminal:
+A repetição do ensaio com 20 clientes por 60 segundos utiliza a API iniciada em uma base isolada e o seguinte comando em outro terminal:
 
 ```powershell
 $argsMaven = @(
@@ -108,9 +108,9 @@ $argsMaven = @(
 mvn.cmd @argsMaven
 ```
 
-Consulte o [resultado do ensaio](06_RESULTADOS_OPERACIONAIS.json) para as métricas e os limites medidos. O teste publicado é de leituras locais; não mede escrita, recuperação, múltiplas instâncias ou disponibilidade de produção. Reinício local com preservação de pedido/pagamento foi confirmado nesta revisão; restauração de backup permanece sem ensaio.
+As informações constam no [resultado do ensaio](06_RESULTADOS_OPERACIONAIS.json) para as métricas e os limites medidos. O teste publicado é de leituras locais; não mede escrita, recuperação, múltiplas instâncias ou disponibilidade de produção. Reinício local com preservação de pedido/pagamento foi confirmado nesta revisão; restauração de backup permanece sem ensaio.
 
-Casos de uso em `application/RaizesService`; regras de transição em `domain/OrderRules`. Consulte a [feature crítica](09_FEATURE_CRITICA.md).
+Casos de uso em `application/RaizesService`; regras de transição em `domain/OrderRules`. As informações constam na [feature crítica](09_FEATURE_CRITICA.md).
 
 ## Responsabilidades após a revisão
 

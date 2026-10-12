@@ -1,53 +1,35 @@
-# Resultado de validação — correções da API Java
+# Resultado de validação — revisão de 12/10/2026
 
-Atualização: 11/10/2026. Evidências desta revisão, sem reutilizar contagens da implementação removida. [Resumo estruturado](07_EVIDENCIAS_CORRECOES.json).
+## Execuções desta revisão
 
-| Verificação | Resultado |
+| Verificação | Resultado observado |
 |---|---|
-| Build e testes | `mvn test package`: BUILD SUCCESS; 20 testes, zero falhas, erros ou ignorados. |
-| Composição da suíte | 16 de integração, 2 do gateway e 2 de migrações Flyway. |
-| Coleção Postman | Newman 6.2.1: 32 requisições e 88 asserções aprovadas; 9 pastas, 17 cenários 2xx e 15 negativos. |
-| Contrato OpenAPI | Schemas, campos obrigatórios, enumerações, permissões, exemplos e erros servidos pela API; 76 exemplos compatíveis com schemas e 4 respostas públicas reais validadas. |
-| Banco novo | Flyway V1 cria nove tabelas de domínio; migração repetida não reaplica V1 e valida checksums. |
-| Banco existente | Baseline 0 + V1 incorporados sem apagar dados; 2 pedidos anteriores preservados na base local. Teste automatizado também preserva registro de usuário em banco temporário. |
-| Reinício local | Pedido e pagamento preservados; startup, health e consulta HTTP confirmados. |
-| PDF | 45 páginas A4; fontes incorporadas, margens 3/2 cm aproximadas, corpo 12 com entrelinha 1,5, sumário paginado, diagramas e exemplos atuais; validação textual e revisão visual. |
-| GitHub | Repositório público acessível por HTTP; atualizações desta revisão enviadas em commit de evolução real, sem reescrever histórico. |
+| Java e suíte Maven | JDK 21.0.10; `mvn test` terminou com BUILD SUCCESS: 21 testes, 0 falhas, 0 erros e 0 ignorados. |
+| Composição da suíte | 17 testes em `ApiIntegrationTest`, 2 em `DatabaseMigrationTest` e 2 em `MockPaymentGatewayTest`. |
+| Isolamento por unidade | Coberto pela integração: empregado Recife não consulta/cria/paga/atualiza pedido de João Pessoa; ADMIN mantém visão da rede; vínculo operacional ausente falha com 403. |
+| Migrações | Base temporária nova e base legada aplicaram V1/V2, repetição não reaplicou alterações e checksums foram validados; registro de usuário legado preservado. |
+| PDF | Gerador `AcademicPdfGenerator` executado novamente por Maven; validação textual interna passou. PDFBox confirmou 46 páginas. Capa conferida em captura do navegador; identificação, sumário e conteúdo conferidos por extração textual. Não foi feita inspeção visual página a página. |
+| GitHub | Nenhuma alteração desta revisão foi enviada ao GitHub. `output/` continua ignorado pelo Git. |
 
 ## Reproduzir
 
-Prepare variáveis e seed conforme o [README](../README.md), usando banco separado para execução repetida da coleção.
+Com JDK 21 e Maven:
 
-```bash
-mvn test package
-npx --yes newman@6.2.1 run postman/raizes_nordeste_clean_collection.json --env-var baseUrl=http://127.0.0.1:3000
-mvn -Dexec.mainClass=br.com.raizesdonordeste.tools.AcademicPdfGenerator compile exec:java
+```powershell
+mvn test
+mvn "-Dexec.mainClass=br.com.raizesdonordeste.tools.AcademicPdfGenerator" compile exec:java
 ```
 
-Newman é runner externo opcional; Postman permite executar a mesma coleção sem Node/npm. Não exportar tokens preenchidos. Maven não executa a coleção automaticamente.
+A primeira linha executa build de teste e toda a suíte Java/Flyway. A segunda gera o PDF local em `output/pdf/4937552_Projeto_Back_End.pdf` e o Markdown textual auxiliar. A pasta inteira permanece fora do Git.
 
-O gerador PDF foi executado e validado separadamente; a recompilação/empacotamento após seus últimos ajustes usou `-DskipTests`, pois os ajustes finais foram somente no gerador e nas fontes incorporadas. A execução efetiva dos 20 testes é a de `mvn test package` acima, não a etapa que pulou os testes.
+## Evidências históricas que não foram repetidas
 
-## Evidência anterior e limites
+- A coleção Postman/Newman registra 32 requisições, 88 asserções, 17 respostas 2xx e 15 cenários negativos em nove pastas na execução anterior de 11/10/2026. Newman não foi executado nesta revisão; esses números não são resultado atual.
+- O ensaio de carga anterior registrou 20 clientes, 60,01 s, 228.399 requisições e p95 de 11,76 ms. Não foi repetido após o escopo por unidade; não representa a carga desta versão.
+- A validação em lote dos exemplos OpenAPI e a reinicialização HTTP local não foram repetidas.
 
-O ensaio de carga em [06_RESULTADOS_OPERACIONAIS.json](06_RESULTADOS_OPERACIONAIS.json) pertence à medição anterior: 20 clientes/60,01 s, 228.399 requisições e p95 11,76 ms. Não foi repetido após estas correções; não mede escrita, disponibilidade distribuída ou restauração de backup.
+Nesta revisão não foram executados teste de restauração de backup, carga, Newman, validação completa de cada norma ABNT nem certificação jurídica. Os PNG/SVG dos diagramas não foram regenerados após V2; o PDF inclui a renderização anterior, identificada como tal, e as fontes DOT atualizadas. As referências consultadas são versões adaptadas para estudo; prevalece a orientação institucional oficial do AVA. O PDF registra polo e cidade como não informados; não foram inventados dados.
 
-Os materiais de referência fornecidos são cópias editadas para estudo, com omissões e prevalência do original. A conformidade ABNT deve ser conferida com as normas efetivas do AVA. Curso e período foram preenchidos conforme informado; o polo permanece “a informar” por orientação expressa da autora.
+## Limites funcionais documentados
 
-Cadastro público, gestão administrativa completa, entradas/ajustes de estoque, pontos e campanhas são propostas documentadas; não se apresentam como endpoints implementados. O sistema é uma demonstração local, sem integração financeira real.
-
-## Reorganização estrutural do relatório
-
-O PDF foi reorganizado usando somente a estrutura acadêmica do modelo fornecido: capa, folha de rosto, sumário, oito capítulos, referências e oito apêndices. Contratos, 32 cenários, evidências e diagramas são do projeto de Angelica. O gerador compilou e executou com sucesso; identidade e cenários foram conferidos por extração de texto, e capa e sumário por inspeção visual. Esta etapa documental não repetiu os testes da API ou a coleção. [Comparação e limites](08_COMPARACAO_E_ESTRUTURA_PDF.md).
-
-### Apresentação acadêmica conforme o modelo
-
-Capa centralizada, folha de rosto com natureza do trabalho na metade direita em espaço simples, títulos de 12 pontos, corpo justificado com recuo inicial de 1,25 cm e entrelinha 1,5, sumário com páginas alinhadas à direita, referências em espaço simples e fontes dos diagramas. Mantidos A4, fonte serifada incorporada e margens 3/2 cm. A capa é excluída da contagem; as páginas seguintes são contadas e a numeração é exibida no alto à direita desde a introdução, como no modelo fornecido. Conferidos visualmente capa, folha de rosto e corpo; verificadas identificação, páginas do sumário e presença dos 32 cenários. O ajuste segue o modelo acadêmico fornecido, sem afirmar certificação integral pelas normas institucionais do AVA.
-
-Docente informada pela autora: Prof. Me. Luciane Yanase Kanashiro.
-
-## Refatoração de responsabilidades e documentação final
-
-ApiController delega os casos de uso a RaizesService; OrderRules valida as transições de domínio. `mvn verify` passou com 20 testes, zero falhas/erros/ignorados. A feature crítica foi consolidada em docs/09_FEATURE_CRITICA.md; matriz de requisitos, diagramas técnicos, bibliografia, PDF e Word foram atualizados. Polo e cidade permanecem pendentes de informação. O PDF foi gerado separadamente por compile exec:java e seu sumário e conteúdo foram conferidos.
-
-Após a refatoração, Newman 6.2.1 aprovou 32 requisições/88 asserções; pedido e pagamento foram preservados após reinício em SQLite isolado. Não se repetiu o ensaio histórico de carga.
+Cadastro público, administração de unidades/produtos, movimentação de estoque, pontos e campanhas permanecem requisitos conceituais propostos, sem endpoint implementado. O consentimento executável é demonstrativo e não ativa fidelidade. A proposta concreta `NORDESTE10`, a regra de pontos e os limites do tratamento estão descritos no relatório e em [requisitos](01_REQUISITOS_E_ESCOPO.md) e [privacidade](03_PRIVACIDADE_E_SEGURANCA.md).

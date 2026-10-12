@@ -56,14 +56,14 @@ public class ApiController {
 
     @PostMapping("/pedidos/{id}/pagamento")
     @SecurityRequirement(name = "bearerAuth")
-    public Map<String, Object> pay(@PathVariable String id, @RequestBody(required = false) Map<String, Object> body,
+    public Map<String, Object> pay(@PathVariable("id") String id, @RequestBody(required = false) Map<String, Object> body,
                                    HttpServletRequest request) {
         return service.pay(id, body, identity(request));
     }
 
     @PatchMapping("/pedidos/{id}/status")
     @SecurityRequirement(name = "bearerAuth")
-    public Map<String, Object> changeStatus(@PathVariable String id, @RequestBody(required = false) Map<String, Object> body,
+    public Map<String, Object> changeStatus(@PathVariable("id") String id, @RequestBody(required = false) Map<String, Object> body,
                                             HttpServletRequest request) {
         return service.changeStatus(id, body, identity(request));
     }

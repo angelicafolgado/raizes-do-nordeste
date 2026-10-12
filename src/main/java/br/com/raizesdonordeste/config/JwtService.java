@@ -32,7 +32,7 @@ public class JwtService {
                       @Value("${app.jwt.issuer}") String issuer,
                       @Value("${app.jwt.audience}") String audience) {
         if (secret == null || secret.length() < 32 || secret.equals("SUBSTITUA_POR_UM_SEGREDO_ALEATORIO"))
-            throw new IllegalStateException("Configure JWT_SECRET com pelo menos 32 caracteres aleatórios.");
+            throw new IllegalStateException("A configuração de JWT_SECRET requer pelo menos 32 caracteres aleatórios.");
         this.secret = secret;
         this.expiry = expiry;
         this.issuer = issuer;

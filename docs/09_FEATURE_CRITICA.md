@@ -2,11 +2,11 @@
 
 ## Atores e responsabilidades
 
-CLIENTE cria e paga o próprio pedido; ATENDENTE/ADMIN podem criar e solicitar pagamento conforme as permissões da API; COZINHA/ADMIN atualizam status. O gateway é local simulado. O canal APP/WEB/TOTEM/BALCAO/PICKUP não concede permissões adicionais. Funcionários não são vinculados a unidades neste MVP.
+CLIENTE cria e paga o próprio pedido; ATENDENTE/ADMIN podem criar pedidos e processar pagamento permitido. ATENDENTE e COZINHA são vinculados a uma unidade pela migração V2 e consultam/operam somente pedidos dela; vínculo ausente resulta em 403. ADMIN mantém escopo da rede; COZINHA/ADMIN atualizam status dentro do respectivo escopo. O gateway é local simulado. O canal APP/WEB/TOTEM/BALCAO/PICKUP não concede permissões adicionais.
 
 ## Pré-condições
 
-API iniciada, Flyway aplicado e banco disponível. Usuário autenticado com perfil permitido; unidade e produtos existentes; canal válido; itens com IDs e quantidades inteiros positivos; saldo suficiente. Preços são lidos do banco e o titular é obtido do JWT. Para pagar, o pedido deve estar AGUARDANDO_PAGAMENTO e pertencer ao cliente quando esse perfil solicita a operação.
+API iniciada, Flyway V1/V2 aplicado e banco disponível. Usuário autenticado com perfil permitido; ATENDENTE/COZINHA com unidade vinculada; unidade e produtos existentes; canal válido; itens com IDs e quantidades inteiros positivos; saldo suficiente. Preços são lidos do banco e o titular é obtido do JWT. Para pagar, o pedido deve estar AGUARDANDO_PAGAMENTO, pertencer ao cliente quando esse perfil solicita a operação e, no caso de ATENDENTE, pertencer à sua unidade.
 
 ## Fluxo principal
 

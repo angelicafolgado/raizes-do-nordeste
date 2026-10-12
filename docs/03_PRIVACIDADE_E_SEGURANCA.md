@@ -17,16 +17,15 @@ Permanecem documentados como procedimentos/propostas: expurgo periódico, anonim
 
 ## 2. Inventário de dados e finalidade
 
-| Grupo | Dados persistidos | Finalidade | Acesso e minimização |
-|---|---|---|---|
-| Usuário | ID, nome, e-mail, hash de senha, perfil, criação e flag legada | Identificação, autenticação e autorização | Login retorna nome/e-mail/perfil do titular, nunca hash. Não são coletados CPF, endereço, telefone ou dados de cartão. |
-| Pedido e itens | Usuário, unidade, canal, produtos, quantidades, preço, total, status e datas | Executar e demonstrar atendimento | Cliente consulta seus pedidos; operação consulta a rede. Não são incluídos nome/e-mail do cliente nas listagens de pedidos. |
-| Pagamento mock | Pedido, valor, resultado, transação e data | Demonstrar aprovação/recusa e consistência de status | Nenhuma cobrança, cartão ou transmissão a provedor financeiro. |
-| Consentimento | Titular por ID, finalidade, versão, decisão, data, demonstracao | Comprovar a preferência opcional dentro da demonstração | Titular só registra/consulta seu histórico. A identidade vem do JWT. Histórico não contém cópia de nome, e-mail ou token. |
-| Auditoria | Ator por ID, ação, instante e metadados operacionais selecionados | Rastreabilidade e verificação de acesso/operações | ADMIN consulta; não há endpoint público de logs nem inclusão do objeto Usuario. Não são registrados corpo HTTP completo, IP, senha ou JWT nos logs de negócio. |
-| JWT | ID, nome, perfil, emissão e expiração no token assinado | Autenticar chamadas | O token não é gravado na auditoria. Quem usa o cliente deve protegê-lo. Não há refresh/revogação central de tokens nesta versão. |
+| Grupo | Dados persistidos | Finalidade | Base legal proposta (não parecer) | Acesso | Retenção proposta e estado |
+|---|---|---|---|---|---|
+| Conta | ID, nome, e-mail, hash de senha, perfil, criação e flag legada | Criar conta, autenticar e autorizar | Procedimentos preliminares relacionados à execução de contrato; segurança/prevenção de fraude podem exigir avaliação própria | Titular consulta seus dados; login expõe apenas nome/e-mail/perfil. ADMIN/operadores não recebem hash. | Reter enquanto a conta estiver ativa e rever após encerramento; hoje não há expurgo automatizado. |
+| Pedido/itens e pagamento mock | Usuário, unidade, canal, produtos, quantidades, preço, total, status, datas e resultado/transação simulada | Executar pedido, acompanhar preparo/entrega e demonstrar o fluxo | Execução de contrato e, conforme contexto, obrigação legal/regulatória para registros aplicáveis; confirmar com responsável jurídico | Cliente vê os próprios pedidos; ATENDENTE/COZINHA só os da unidade vinculada; ADMIN tem visão da rede. Nenhum dado do cartão é coletado. | Prazo por finalidade e eventual obrigação deve ser definido antes de produção; na demonstração, revisão manual até 30 dias após avaliação. |
+| Consentimento demonstrativo | Titular por ID, finalidade, versão, decisão, data e `demonstracao` | Registrar aceite/revogação de uma preferência ilustrativa | Consentimento específico seria hipótese a avaliar se o tratamento de fidelidade real fosse implantado; registro demonstrativo não prova base legal de outra finalidade | Titular acessa seu histórico; ADMIN não tem endpoint de consulta de consentimento individual. Identidade vem do JWT. | Preservar eventos durante a avaliação e rever ao final; sem expurgo automático. |
+| Auditoria | Ator por ID, ação, instante e metadados operacionais selecionados | Rastreabilidade e verificação de acesso/operações | Interesse legítimo/segurança ou obrigação aplicável são hipóteses a avaliar e documentar pelo controlador | ADMIN consulta a projeção permitida; perfis operacionais não acessam logs. Não se guarda corpo HTTP, IP, senha ou JWT nos logs de negócio. | Definir prazo por evento e necessidade; demonstração revisada manualmente após a avaliação. |
+| JWT | ID, nome, perfil, emissão e expiração no token assinado | Autenticar chamadas | Necessário à autenticação e à segurança do serviço; hipótese a documentar | O token não é gravado na auditoria; cliente deve protegê-lo. | O token expira em 8 horas; não há refresh/revogação central nesta versão. |
 
-O SQLite e seus backups não são cifrados por esta aplicação. A proteção local depende das permissões do sistema operacional; o banco e `.env` não devem ser publicados. Auditoria contém IDs vinculáveis, portanto não é tratada como dado anônimo.
+O SQLite e seus backups não são cifrados por esta aplicação. A proteção local depende das permissões do sistema operacional; o banco e `.env` não devem ser publicados. Auditoria contém IDs vinculáveis, portanto não é tratada como dado anônimo. Os fundamentos da tabela são hipóteses para análise e não substituem avaliação de finalidade, necessidade, controlador, operador, direitos ou obrigação concreta.
 
 ## 3. Fundamentos para o trabalho acadêmico
 
@@ -82,7 +81,7 @@ O titular pode consultar e revogar a preferência pelo próprio token. Para aces
 
 ## 8. Migração e verificação
 
-O esquema Java está na migração [V1__initial_schema.sql](../src/main/resources/db/migration/V1__initial_schema.sql), incluindo consentimentos com FK. Flyway registra versões/checksums; baseline 0 permite incorporar o histórico em bases da versão anterior sem apagar registros. Antes de atualizar uma base existente, faça backup e valide a migração em uma cópia. Migrações futuras devem ser adicionadas, sem alterar V1 aplicada.
+O esquema Java está nas migrações [V1__initial_schema.sql](../src/main/resources/db/migration/V1__initial_schema.sql) e [V2__vinculo_unidade_operacional.sql](../src/main/resources/db/migration/V2__vinculo_unidade_operacional.sql). V2 adiciona o vínculo operacional opcional `usuarios.unidadeId`; nulo falha fechado para perfis operacionais. Flyway registra versões/checksums; baseline 0 permite incorporar o histórico em bases da versão anterior sem apagar registros. A atualização de uma base existente requer backup prévio e validação da migração em uma cópia. Migrações futuras devem ser adicionadas, sem alterar migrações aplicadas.
 
 As verificações cobrem aviso, flag legada, idempotência, revogação, versões, isolamento por titular, bloqueio de atribuição a outro usuário, permissões ADMIN, auditoria de leituras, filtragem de dados legados, rollback de evento quando auditoria falha e sanitização de erros inesperados. O resultado final está registrado no plano de testes da etapa 4.
 

@@ -1,6 +1,6 @@
 # Raízes do Nordeste
 
-API REST acadêmica para pedidos multicanal, estoque por unidade, pagamento simulado, autenticação por perfil, auditoria e registro opcional de consentimento.
+Projeto desenvolvido pela aluna Angelica Dias Folgado. A API REST acadêmica contempla pedidos multicanal, estoque por unidade, pagamento simulado, autenticação por perfil, auditoria e registro opcional de consentimento.
 
 Repositório público: <https://github.com/angelicafolgado/raizes-do-nordeste>
 
@@ -42,7 +42,7 @@ $env:SEED_ENABLED = 'true'
 mvn spring-boot:run
 ```
 
-Use o mesmo segredo local em reinícios quando quiser preservar a validade dos tokens. Nunca o publique. O [.env.example](.env.example) lista as variáveis; Spring **não carrega esse arquivo automaticamente**, portanto exporte os valores no processo que inicia Java. `JWT_SECRET` deve ter pelo menos 32 caracteres aleatórios; o placeholder do exemplo é rejeitado.
+A preservação da validade dos tokens em reinícios depende da reutilização do mesmo segredo local, que deve permanecer privado. O [.env.example](.env.example) lista as variáveis; Spring **não carrega esse arquivo automaticamente**, portanto os valores devem ser exportados no processo que inicia Java. `JWT_SECRET` deve ter pelo menos 32 caracteres aleatórios; o placeholder do exemplo é rejeitado.
 
 | Variável | Padrão / finalidade |
 |---|---|
@@ -50,15 +50,15 @@ Use o mesmo segredo local em reinícios quando quiser preservar a validade dos t
 | `SPRING_DATASOURCE_URL` | `jdbc:sqlite:raizes.db`, caminho do banco |
 | `JWT_SECRET` | Obrigatório; segredo externo |
 | `JWT_EXPIRES_IN` | `8h`, validade do JWT |
-| `SEED_ENABLED` | `true`, dados fictícios idempotentes; use `false` para não inserir |
+| `SEED_ENABLED` | `true`, dados fictícios idempotentes; `false` impede a inserção |
 
 ### Banco e migrações
 
 Flyway executa as migrações em [src/main/resources/db/migration](src/main/resources/db/migration) antes de usar o banco. Não é preciso criar tabelas manualmente. `V1__initial_schema.sql` cria as nove tabelas de domínio e seus índices; `flyway_schema_history` registra versões/checksums.
 
-Para bases da versão anterior sem histórico Flyway, o baseline `0` permite executar V1 sem apagar registros, pois as criações são idempotentes. Faça backup consistente antes de atualizar uma base existente, confirme que o esquema corresponde à versão anterior e teste a atualização em uma cópia. Bases com divergências de estrutura precisam de avaliação específica; não são corrigidas automaticamente por V1.
+Para bases da versão anterior sem histórico Flyway, o baseline `0` permite executar V1 sem apagar registros, pois as criações são idempotentes. A atualização de uma base existente requer backup consistente, conferência do esquema da versão anterior e teste prévio em uma cópia. Bases com divergências de estrutura precisam de avaliação específica; não são corrigidas automaticamente por V1.
 
-Para evoluir o banco, acrescente uma nova migração `V2__descricao.sql`, mantendo V1 intacta depois de aplicada. Checksums são validados no início; não use `clean` ou `repair` para contornar divergências sem diagnóstico. O seed não substitui contas, catálogo ou saldo existentes e não repõe estoque consumido.
+Para evoluir o banco, uma nova migração deve ser acrescentada com versão sequencial, mantendo intactas as migrações já aplicadas. Checksums são validados no início; o uso de `clean` ou `repair` para contornar divergências requer diagnóstico prévio. O seed não substitui contas, catálogo ou saldo existentes e não repõe estoque consumido.
 
 Swagger: <http://localhost:3000/api-docs>; contrato: `/api-docs.json`; saúde: `/api/health`. A raiz `/` redireciona ao Swagger. O contrato servido contém schemas, campos obrigatórios, exemplos, permissões e respostas de erro. Sua fonte é [openapi-contract.json](src/main/resources/openapi-contract.json), aplicada às rotas descobertas pelo Spring.
 
@@ -68,7 +68,7 @@ Para compilar e empacotar:
 mvn package
 ```
 
-Depois execute `java -jar target/raizes-do-nordeste-api-1.0.0.jar` com as variáveis exportadas. Compilação e testes usam um banco separado e não exigem o segredo da API local.
+Em seguida, a execução utiliza `java -jar target/raizes-do-nordeste-api-1.0.0.jar` com as variáveis exportadas. Compilação e testes usam um banco separado e não exigem o segredo da API local.
 
 ## Contas locais de demonstração
 
@@ -82,7 +82,7 @@ Todas usam a senha `123456`. São contas fictícias para desenvolvimento e teste
 | `cozinha@raizes.com` | COZINHA |
 | `admin@raizes.com` | ADMIN |
 
-Não use essas credenciais em ambientes publicados. Em produção, configure `SEED_ENABLED=false`, use um `JWT_SECRET` secreto e aleatório e forneça um banco gerenciado.
+As credenciais de demonstração são restritas ao desenvolvimento. Em produção, a configuração requer `SEED_ENABLED=false`, um `JWT_SECRET` secreto e aleatório e um banco gerenciado.
 
 ## Endpoints
 
@@ -122,6 +122,8 @@ O usuário é obtido do token; o preço é lido do banco. Canais aceitos: `APP`,
 - `INDISPONIVEL` e `TIMEOUT` simulam, respectivamente, respostas 503 e 504; não há cobrança externa nem espera real.
 - A cozinha avança `EM_PREPARO → PRONTO → ENTREGUE`. Um pedido não pago pode ser cancelado uma vez e devolve o estoque.
 - Consentimento é opcional, demonstrativo e não ativa pontos ou benefícios reais.
+- ATENDENTE e COZINHA ficam vinculados a uma unidade: consultam e operam apenas os pedidos dela. ADMIN mantém acesso à rede; CLIENTE vê os próprios pedidos. Perfil operacional sem vínculo recebe 403.
+- Migração V2 acrescenta `usuarios.unidadeId`; as contas de seed para operação são vinculadas à unidade de Recife apenas quando não possuem vínculo.
 
 ## Build e testes
 
@@ -130,16 +132,16 @@ mvn test
 mvn package
 ```
 
-Os testes de integração usam SQLite separado em `target/test-api.db` e cobrem login/JWT, paginação, reserva e rollback, pagamento, transições, privacidade, auditoria, limite do corpo HTTP, OpenAPI, concorrência e 20 consultas simultâneas. A suíte contém 20 testes: 16 de integração, 2 do gateway e 2 de migração de banco. A validação de 11/10/2026 passou sem falhas, erros ou testes ignorados. Os testes de migração verificam base nova, repetibilidade e preservação de registros de uma base existente.
+Os testes de integração usam SQLite separado em `target/test-api.db` e cobrem login/JWT, paginação, reserva e rollback, pagamento, transições, privacidade, auditoria, limite do corpo HTTP, OpenAPI, concorrência, consultas simultâneas e isolamento por unidade. Na revisão de 12/10/2026, `mvn test` executou 21 testes (17 integração, 2 migração e 2 gateway), todos aprovados. Os testes de migração verificam base nova, repetibilidade e preservação de registros de uma base existente.
 
 ### Coleção Postman/Insomnia
 
-A [coleção com 32 cenários](postman/raizes_nordeste_clean_collection.json) está organizada em 9 pastas. Consulte o [plano T01–T32](docs/04_PLANO_DE_TESTES.md) para pré-condições, entradas, saídas e evidências.
+A [coleção com 32 cenários](postman/raizes_nordeste_clean_collection.json) está organizada em 9 pastas. As informações constam no [plano T01–T32](docs/04_PLANO_DE_TESTES.md) para pré-condições, entradas, saídas e evidências.
 
-1. Inicie a API com seed em uma base de demonstração separada. Use um caminho SQLite novo para cada avaliação repetida, preservando bases existentes.
-2. Importe a coleção no Postman e configure `baseUrl` (padrão `http://localhost:3000`).
-3. Execute todas as pastas na ordem apresentada. Os logins capturam `token_cliente`, `token_cozinha` e `token_admin`; T05 captura `pedidoId`. Não é preciso preencher tokens manualmente.
-4. O fluxo cria, paga e entrega um pedido, consumindo uma unidade do produto 1. O seed não repõe estoque. Não exporte tokens preenchidos.
+1. A API é iniciada com seed em uma base de demonstração separada. Cada avaliação repetida utiliza um caminho SQLite novo, preservando as bases existentes.
+2. A coleção é importada no Postman, com `baseUrl` configurada (padrão `http://localhost:3000`).
+3. As pastas são executadas na ordem apresentada. Os logins capturam `token_cliente`, `token_cozinha` e `token_admin`; T05 captura `pedidoId`. Não é preciso preencher tokens manualmente.
+4. O fluxo cria, paga e entrega um pedido, consumindo uma unidade do produto 1. O seed não repõe estoque. Os tokens preenchidos devem permanecer fora das exportações.
 
 Opcionalmente, com Node/npm disponíveis **somente para o runner externo**:
 
@@ -147,11 +149,11 @@ Opcionalmente, com Node/npm disponíveis **somente para o runner externo**:
 npx --yes newman@6.2.1 run postman/raizes_nordeste_clean_collection.json --env-var baseUrl=http://127.0.0.1:3000
 ```
 
-Resultado em 11/10/2026: **32 requisições, 88 asserções, zero falhas**, com 17 cenários 2xx e 15 de erro. A coleção é executada separadamente de `mvn test`. [Evidências e limites](docs/04_RESULTADO_VALIDACAO.md).
+Execução anterior em 11/10/2026: **32 requisições, 88 asserções**, com 17 cenários 2xx e 15 de erro. Newman não foi repetido na revisão de 12/10/2026. A coleção é executada separadamente de `mvn test`. [Evidências e limites](docs/04_RESULTADO_VALIDACAO.md).
 
 ### Ensaio operacional de carga
 
-Com a API Java em execução, use o gerador incluído:
+Com a API Java em execução, o gerador incluído realiza o ensaio:
 
 ```powershell
 $argsMaven = @(
@@ -164,11 +166,11 @@ $argsMaven = @(
 mvn.cmd @argsMaven
 ```
 
-Ele executa consultas públicas de produtos e unidades com clientes concorrentes e imprime métricas medidas, classificando qualquer falha. A meta local é p95 abaixo de 1.000 ms, zero erros e menos de 1% de respostas 5xx. Consulte [correção e limites do ensaio](docs/06_CORRECAO_DESEMPENHO.md) e [resultado medido](docs/06_RESULTADOS_OPERACIONAIS.json).
+Ele executa consultas públicas de produtos e unidades com clientes concorrentes e imprime métricas medidas, classificando qualquer falha. A meta local é p95 abaixo de 1.000 ms, zero erros e menos de 1% de respostas 5xx. As informações constam em [correção e limites do ensaio](docs/06_CORRECAO_DESEMPENHO.md) e [resultado medido](docs/06_RESULTADOS_OPERACIONAIS.json).
 
 ### Gerar o PDF acadêmico
 
-Com Maven e JDK 21 instalados, gere o PDF identificado pelo RU:
+Com Maven e JDK 21 instalados, o PDF identificado pelo RU é gerado pelo comando:
 
 ```powershell
 $pdfArgs = @(
@@ -180,16 +182,16 @@ $pdfArgs = @(
 mvn.cmd @pdfArgs
 ```
 
-O arquivo é criado em `output/pdf/4937552_Projeto_Back_End.pdf`, acompanhado de uma versão textual Markdown. O documento identifica a autora e o RU, contém diagramas atuais, sumário paginado e evidências. Usa A4, margens esquerda/superior de 3 cm, direita/inferior de 2 cm e fonte Liberation Serif incorporada, tamanho 12 no corpo. Curso e período foram preenchidos conforme informado; o polo permanece “a informar” por orientação da autora; conferir as normas efetivas do AVA antes da entrega.
+O arquivo é criado em `output/pdf/4937552_Projeto_Back_End.pdf`, acompanhado de uma versão textual Markdown; ambos permanecem locais. O documento identifica a autora e o RU, inclui sumário paginado, evidências e fontes dos diagramas. Usa A4, margens esquerda/superior de 3 cm, direita/inferior de 2 cm e fonte Liberation Serif incorporada, tamanho 12 no corpo. Polo e cidade estão indicados como não informados. A apresentação foi conferida em relação às referências acadêmicas consultadas, sem afirmar certificação ABNT integral.
 
 ## Linguagem e escopo
 
-A API, os testes automatizados e as ferramentas de execução, carga e geração do PDF são implementados em Java 21. O código legado TypeScript/Node.js e os utilitários Python/JavaScript foram removidos após a substituição pelo projeto Java. Arquivos de documentação, configuração, SQL e a coleção Postman continuam em seus formatos próprios; a coleção Postman é executada separadamente de `mvn test` e foi validada com Newman nesta revisão.
+A API, os testes automatizados e as ferramentas de execução, carga e geração do PDF são implementados em Java 21. O código legado TypeScript/Node.js e os utilitários Python/JavaScript foram removidos após a substituição pelo projeto Java. Arquivos de documentação, configuração, SQL e a coleção Postman continuam em seus formatos próprios; a coleção Postman é executada separadamente de `mvn test` e sua última execução registrada é de 11/10/2026.
 
-O roteiro do AVA fornecido para a entrega é uma cópia adaptada para estudo; requisitos acadêmicos devem ser conferidos com o roteiro oficial disponibilizado no AVA.
+O roteiro consultado para a entrega é uma versão adaptada para estudo; requisitos acadêmicos devem ser conferidos com o roteiro oficial disponibilizado no AVA.
 
-A organização do relatório segue capa, folha de rosto, sumário, oito capítulos e apêndices com contratos, cenários, evidências e diagramas próprios. Consulte a [comparação documental e os limites da referência estrutural](docs/08_COMPARACAO_E_ESTRUTURA_PDF.md).
+A organização do relatório segue capa, folha de rosto, sumário, oito capítulos e apêndices com contratos, cenários, evidências e diagramas próprios. As informações constam na [comparação documental e os limites da referência estrutural](docs/08_COMPARACAO_E_ESTRUTURA_PDF.md).
 
-Docente informada pela autora: Prof. Me. Luciane Yanase Kanashiro.
+Docente: Prof. Me. Luciane Yanase Kanashiro.
 
 A [feature crítica](docs/09_FEATURE_CRITICA.md) consolida atores, pré/pós-condições, fluxo, exceções e limites de idempotência. ApiController delega a RaizesService; OrderRules concentra as transições de domínio.

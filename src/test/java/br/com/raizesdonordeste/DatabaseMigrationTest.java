@@ -14,19 +14,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DatabaseMigrationTest {
     @TempDir Path directory;
 
-    private Flyway flyway(String url) {
-        return Flyway.configure().dataSource(url, null, null)
+    private int migrate(String url) {
+        Flyway migration = Flyway.configure().dataSource(url, null, null)
                 .locations("classpath:db/migration")
                 .baselineOnMigrate(true).baselineVersion("0").load();
+        int executed = migration.migrate().migrationsExecuted;
+        migration.validate();
+        return executed;
     }
 
     @Test
     void newDatabaseMigratesOnceAndValidatesChecksumsOnRestart() throws Exception {
         String url = "jdbc:sqlite:" + directory.resolve("new.db");
-        Flyway migration = flyway(url);
-        assertThat(migration.migrate().migrationsExecuted).isEqualTo(1);
-        assertThat(migration.migrate().migrationsExecuted).isZero();
-        migration.validate();
+        assertThat(migrate(url)).isEqualTo(2);
+        assertThat(migrate(url)).isZero();
         try (var connection = DriverManager.getConnection(url);
              var result = connection.createStatement().executeQuery(
                      "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN " +
@@ -44,15 +45,15 @@ class DatabaseMigrationTest {
             connection.createStatement().executeUpdate(
                     "INSERT INTO usuarios(nome,email,senha) VALUES('Existente','existing@test.local','hash-preservado')");
         }
-        Flyway migration = flyway(url);
-        assertThat(migration.migrate().migrationsExecuted).isEqualTo(1);
-        assertThat(migration.migrate().migrationsExecuted).isZero();
-        migration.validate();
+        assertThat(migrate(url)).isEqualTo(2);
+        assertThat(migrate(url)).isZero();
         try (var connection = DriverManager.getConnection(url);
-             var result = connection.createStatement().executeQuery("SELECT nome,senha FROM usuarios WHERE email='existing@test.local'")) {
+             var result = connection.createStatement().executeQuery(
+                     "SELECT nome,senha,unidadeId FROM usuarios WHERE email='existing@test.local'")) {
             assertThat(result.next()).isTrue();
             assertThat(result.getString("nome")).isEqualTo("Existente");
             assertThat(result.getString("senha")).isEqualTo("hash-preservado");
+            assertThat(result.getObject("unidadeId")).isNull();
         }
     }
 }

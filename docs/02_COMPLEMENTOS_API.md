@@ -1,6 +1,6 @@
 # Etapa 2 — Complementos da API
 
-Esta etapa implementa RF10, RF11 e RF16 definidos no documento de requisitos. Os resultados usam pedidos, pagamentos e auditoria; o esquema agora é controlado por Flyway V1.
+Esta etapa implementa RF10, RF11 e RF16 definidos no documento de requisitos. Os resultados usam pedidos, pagamentos e auditoria; o esquema é controlado por Flyway V1/V2, sendo V2 o vínculo operacional por unidade.
 
 ## Gateway de pagamento desacoplado
 
@@ -52,7 +52,7 @@ Cada consulta usa ordenação estável por ID. Total e dados são consultas sepa
 
 O contrato OpenAPI servido documenta schemas, campos obrigatórios, parâmetros, perfis, exemplos e códigos HTTP, incluindo 502/503/504. A fonte é src/main/resources/openapi-contract.json, aplicada somente às operações descobertas pelo Spring.
 
-A suíte Java/Flyway possui 20 testes; a coleção Postman separada possui 32 cenários em nove pastas, executados com 88 asserções sem falhas. O resultado final e os comandos estão em [validação](04_RESULTADO_VALIDACAO.md).
+A suíte Java/Flyway possui 21 testes aprovados em 12/10/2026. A execução histórica da coleção Postman tem 32 cenários em nove pastas e 88 asserções (11/10/2026); ela não foi repetida nesta revisão. O resultado e os comandos estão em [validação](04_RESULTADO_VALIDACAO.md).
 
 ## Situação do planejamento
 

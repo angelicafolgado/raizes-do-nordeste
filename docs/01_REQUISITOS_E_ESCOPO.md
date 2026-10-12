@@ -2,15 +2,15 @@
 
 Projeto: Raízes do Nordeste — API Back-end  
 Versão: 1.0 — 11/10/2026  
-Situação: matriz revisada de requisitos e decisões de escopo. Para o estado implementado e suas evidências atuais, consulte [rastreabilidade](06_RASTREABILIDADE.md) e [resultado de validação](04_RESULTADO_VALIDACAO.md).
+Situação: matriz revisada de requisitos e decisões de escopo. O estado implementado e suas evidências atuais constam em [rastreabilidade](06_RASTREABILIDADE.md) e [resultado de validação](04_RESULTADO_VALIDACAO.md).
 
 ## 1. Objetivo e contexto
 
 A rede Raízes do Nordeste precisa consolidar pedidos de diferentes canais e acompanhar o atendimento em suas unidades. Cada unidade mantém seu próprio estoque; a API deve impedir vendas sem disponibilidade, registrar pagamentos simulados e controlar a preparação e a entrega.
 
-O objetivo da entrega é demonstrar uma API REST reproduzível, com persistência real, autenticação, autorização, regras transacionais e documentação acadêmica coerente com o código. A matriz administra a visão da rede, enquanto as unidades representam os locais de atendimento e armazenamento de estoque. O modelo atual não contém uma entidade Matriz nem vinculação de funcionários a uma unidade: o perfil ADMIN representa a administração da rede e os perfis operacionais têm acesso global. Restrição de funcionários por unidade é uma evolução proposta.
+O objetivo da entrega é demonstrar uma API REST reproduzível, com persistência real, autenticação, autorização, regras transacionais e documentação acadêmica coerente com o código. Não há uma entidade Matriz: ADMIN representa a administração da rede. Desde a migração V2, cada ATENDENTE e COZINHA deve ter vínculo com uma unidade; esses perfis só consultam e operam pedidos daquela unidade. ADMIN mantém visão de rede. A atribuição operacional ainda é feita por provisionamento/seed, não por endpoint administrativo.
 
-Por orientação da discente, os PDFs fornecidos pela discente foram usados como referência de conteúdo e não são distribuídos neste repositório. Os próprios arquivos se identificam como versões editadas para estudo, com conteúdo omitido e prevalência do original; não se afirma que a procedência oficial no AVA foi autenticada.
+A aluna Angelica Dias Folgado desenvolveu o projeto com base no estudo de caso Raízes do Nordeste e no roteiro da trilha Back-end. Os documentos de referência não são distribuídos neste repositório. As versões consultadas são adaptadas para estudo, com conteúdo omitido; os documentos institucionais do AVA prevalecem para a conferência dos requisitos.
 
 ## 2. Decisão de escopo
 
@@ -37,8 +37,8 @@ As prioridades são decisões do projeto. Não representam pesos oficiais de ava
 | Ator | Responsabilidade no escopo |
 |---|---|
 | Cliente (App/Web/Totem) | Autenticar, consultar unidades/cardápio, criar e consultar seus pedidos e solicitar pagamento mock. |
-| Atendente (Balcão) | Criar pedidos em seu próprio usuário operacional, consultar pedidos da rede e processar pagamento mock. Vincular o pedido a um cliente atendido é proposta futura. |
-| Cozinha | Consultar pedidos e executar transições operacionais; cancelar pedido ainda não pago. |
+| Atendente (Balcão) | Criar pedidos associados à sua unidade, consultar pedidos da unidade e processar pagamento mock dos pedidos nela criados. Vincular o pedido a um cliente atendido é proposta futura. |
+| Cozinha | Consultar pedidos da unidade vinculada, executar transições operacionais e cancelar pedido ainda não pago daquela unidade. |
 | Gerente/Administrador | Representado pelo perfil ADMIN, com as permissões operacionais implementadas. Cadastros administrativos são propostas. |
 | Gateway externo de pagamento (simulado) | Receber solicitação e produzir resultado de aprovação, recusa ou falha técnica, sem cobrança real. |
 
@@ -54,7 +54,7 @@ As prioridades são decisões do projeto. Não representam pesos oficiais de ava
 | RF06 | Criar pedido com itens e valores calculados no servidor. | P1 / Implementado | Pedido válido retorna 201; itens repetidos são agrupados; IDs/quantidades inválidos são rejeitados; preço enviado pelo consumidor não controla o total. |
 | RF07 | Registrar e filtrar o canal de origem do pedido. | P1 / Implementado | Exigir APP, TOTEM, BALCAO, PICKUP ou WEB; ausência/valor inválido retorna 400/422; filtro retorna somente pedidos do canal solicitado. |
 | RF08 | Reservar estoque da unidade transacionalmente. | P1 / Implementado | Falta de saldo retorna 409; falha em qualquer item reverte toda a reserva; pedidos concorrentes não tornam o saldo negativo. |
-| RF09 | Consultar pedidos com paginação e isolamento por cliente. | P1 / Implementado | Validar page/limit, limitar a 100 itens por página e retornar metadados; cliente vê apenas seus pedidos; perfis operacionais consultam a rede. |
+| RF09 | Consultar pedidos com paginação e isolamento por cliente/unidade. | P1 / Implementado | Validar page/limit, limitar a 100 itens por página e retornar metadados; cliente vê apenas seus pedidos; ATENDENTE/COZINHA veem apenas a unidade vinculada; ADMIN consulta a rede. Perfil operacional sem unidade recebe 403. |
 | RF10 | Solicitar e registrar pagamento mock por contrato de gateway. | P1 / Implementado | Preservar aprovação/recusa atuais; mover simulação para adaptador da infraestrutura, acessado por interface da aplicação; comprovar envio, retorno e correlação com o pedido. |
 | RF11 | Tratar recusa, falha técnica e repetição de pagamento. | P1 / Implementado | Recusa mantém pedido aguardando pagamento; nova tentativa é permitida; pedido aprovado não é cobrado novamente. Falha técnica simulada retorna erro padronizado e não aprova pedido nem grava pagamento aprovado. |
 | RF12 | Atualizar status respeitando a sequência operacional. | P1 / Implementado | Permitir EM_PREPARO → PRONTO → ENTREGUE apenas a COZINHA/ADMIN; rejeitar saltos/regressões com 409. |
@@ -101,18 +101,21 @@ RF15 não implica implementar o programa de pontos: nesta entrega, o consentimen
 | RN09 | A cozinha não pula pagamento ou etapas operacionais. Cancelamento só é permitido antes da aprovação; não há estorno de pedido pago neste escopo. |
 | RN10 | Cancelamento restitui os itens à mesma unidade, exatamente uma vez. Reservas não expiram automaticamente; expiração é evolução futura. |
 | RN11 | Aceitar uma finalidade opcional não é condição para fazer pedidos. Seu registro não comprova, por si só, conformidade jurídica de todo o sistema. |
+| RN12 | ATENDENTE e COZINHA precisam de `unidadeId` ativo; consultas, pagamento operacional, criação e mudanças de status são limitadas à mesma unidade. ADMIN mantém escopo de rede; CLIENTE mantém escopo dos próprios pedidos. Vínculos legados nulos falham fechados com 403. |
 
 ## 7. Funcionalidades propostas: especificação conceitual
 
 ### 7.1 Cadastro e gestão administrativa
 
-Cadastro de cliente receberia nome, e-mail e senha, normalizaria o e-mail, impediria duplicidade e nunca aceitaria ADMIN como papel escolhido pelo consumidor. A adesão opcional teria campo separado. Perfis operacionais seriam criados por administrador autorizado. Produtos/unidades seriam inativados em vez de apagados quando tivessem vínculo histórico.
+**Cadastro de cliente (proposto, não implementado).** Ator: visitante não autenticado. Entradas: nome, e-mail, senha e confirmação de senha; o papel seria sempre atribuído pelo servidor como `CLIENTE`, sem aceitar role, unidade ou consentimento no payload. Validar campos obrigatórios, limites de tamanho, formato/normalização de e-mail e política de senha; duplicidade após normalização retorna conflito sem revelar credenciais. Hash BCrypt, resposta sem senha/hash e evento de auditoria minimizado. Resultado esperado: nova conta CLIENTE pronta para autenticação; falha de validação/duplicidade não cria conta. Consentimento para fidelidade deve ser uma decisão separada e opcional.
+
+**Gestão de unidades e produtos (proposta, não implementada).** Atores: ADMIN cria/edita/inativa; perfis operacionais apenas consultam dados autorizados e não alteram cadastros. Unidade receberia nome, cidade, endereço operacional estritamente necessário e situação; validar campos obrigatórios, tamanhos e unicidade da chave operacional. Produto receberia nome, descrição, preço em centavos não negativo, situação e, quando aplicável, categorias; validar nome, preço, moeda e IDs de unidade/produto. Desativação não apaga referências históricas; produto inativo não entra em novo pedido. Resultado esperado: catálogo atualizado e visível nas consultas permitidas, com alterações administrativas auditadas. Mudança de preço não reescreve o preço histórico dos itens já pedidos.
 
 Rotas candidatas, **não implementadas**: `POST /api/usuarios`, `POST /api/unidades`, `PATCH /api/unidades/{id}`, `POST /api/produtos` e `PATCH /api/produtos/{id}`. Funcionários por unidade exigiriam vínculo de autorização adicional no modelo.
 
 ### 7.2 Movimentação administrativa de estoque
 
-Modelo proposto: MovimentacaoEstoque com produtoId, unidadeId, tipo (ENTRADA/SAIDA/AJUSTE), quantidade, motivo, usuarioId e criadoEm. Saldo e lançamento seriam atualizados na mesma transação, sem saldo negativo. Ajuste usaria variação assinada e justificativa obrigatória, mantendo o saldo anterior rastreável.
+**Movimentação administrativa de estoque (proposta, não implementada).** Ator: ADMIN; empregado só poderia movimentar a própria unidade se uma permissão adicional fosse formalmente definida. Entradas: `unidadeId`, `produtoId`, tipo (`ENTRADA`, `SAIDA` ou `AJUSTE`), quantidade inteira positiva e motivo obrigatório; `usuarioId`/data viriam da identidade e relógio do servidor. Validar unidade/produto ativos, IDs positivos, quantidade, motivo não vazio e saldo suficiente para saída; ajuste exigiria valor final não negativo e justificativa. Regra: gravar evento imutável e alterar o saldo na mesma transação; falha em qualquer dos dois reverte ambos. Resultado esperado: novo saldo consultável e lançamento auditável com saldo anterior/posterior; sem movimento silencioso nem saldo negativo.
 
 Rotas candidatas, **não implementadas**: `POST /api/estoques/movimentacoes` e `GET /api/estoques/movimentacoes?unidadeId=...`. O extrato seria paginado e restrito a administradores autorizados.
 
@@ -120,17 +123,17 @@ Rotas candidatas, **não implementadas**: `POST /api/estoques/movimentacoes` e `
 
 Política de demonstração proposta, não exigência literal do roteiro: conceder 1 ponto por R$ 1,00 efetivamente pago em pedido entregue, descartando a fração. Para R$ 38,50, conceder 38 pontos. Só acumular após adesão opcional ativa; não conceder pontos por pedidos recusados ou cancelados.
 
-Resgate proposto: blocos de 100 pontos concedem R$ 5,00 de desconto, limitados ao saldo disponível e a 20% do subtotal elegível. Se o subtotal for R$ 20,00, um bloco de R$ 5,00 não cabe no limite e não será aplicado. Débito e reserva dos pontos devem ocorrer transacionalmente; cancelamento anterior ao pagamento devolve os pontos reservados uma única vez.
+Resgate proposto: blocos de 100 pontos concedem R$ 5,00 de desconto, limitados ao saldo disponível e a 20% do subtotal elegível antes de descontos. Se o subtotal elegível for R$ 20,00, o teto é R$ 4,00; o bloco de R$ 5,00 não cabe e não será aplicado. O cliente escolhe o resgate; o servidor recalcula elegibilidade e valor, reserva pontos na criação do pedido e confirma o débito apenas no pagamento aprovado, tudo transacionalmente. Falha técnica/recusa libera ou mantém a reserva conforme a decisão transacional; cancelamento antes do pagamento devolve pontos reservados uma única vez. Não acumular pontos sobre parcela paga com resgate.
 
-Modelo proposto: ContaFidelidade e LancamentoPontos (crédito, débito, devolução), com pedido de origem e proteção contra crédito duplicado. O acúmulo incide sobre o valor efetivamente pago após desconto. Revogar adesão impede novos créditos e resgates; tratamento do saldo e retenção deve ser explicitado na política proposta, sem exclusão indiscriminada do histórico de pedidos.
+Modelo proposto: ContaFidelidade e LancamentoPontos (crédito, reserva, débito e devolução), com pedido de origem e proteção contra crédito duplicado. O acúmulo ocorre somente quando o pedido chega a ENTREGUE, desde que pago e com adesão ativa; incide sobre o valor efetivamente pago após desconto, excluindo a parcela coberta por pontos, e arredonda para baixo em reais inteiros. Não creditar em pedido recusado, cancelado ou apenas pago ainda não entregue. Revogar adesão impede créditos/resgates novos e congela o saldo existente; não apaga histórico de pedidos nem converte pontos em dinheiro. Antes de pagar, cancelamento devolve a reserva de pontos uma única vez; para cancelamento após pagamento, que o MVP não oferece, a futura política deverá reverter pontos/benefícios junto do estorno antes de concluir o cancelamento.
 
 Rotas candidatas, **não implementadas**: `GET /api/fidelidade/saldo`, `GET /api/fidelidade/extrato` e solicitação de resgate durante criação de pedido. O próprio cliente acessaria seu saldo/extrato; o resgate seria recalculado pelo servidor.
 
 ### 7.4 Promoções e campanhas
 
-Modelo proposto: Campanha com nome, início/fim, situação, unidades/canais elegíveis, produtos aplicáveis e desconto fixo ou percentual. O servidor validaria a vigência e calcularia o desconto em centavos, sem total negativo, gravando a campanha e o desconto efetivamente aplicados no pedido.
+Regra concreta de exemplo (**proposta; nenhuma campanha está implementada**): campanha `NORDESTE10`, válida de 01/11/2026 00:00 a 31/12/2026 23:59 UTC, aplica 10% aos itens ativos do produto elegível “Tapioca” em pedidos dos canais APP/WEB nas unidades explicitamente habilitadas. A API valida intervalo semiaberto de vigência, situação ativa, unidade, canal, produto e subtotal elegível; não há desconto sobre taxa/itens inelegíveis. O cálculo usa centavos inteiros e arredondamento para baixo por item; o pedido persiste campanha, valor e itens abrangidos para preservar histórico. Campanha expirada, desativada ou inelegível não concede desconto e produz erro de negócio.
 
-Para reduzir ambiguidades na primeira versão proposta, permitir apenas uma campanha por pedido e não acumulá-la com resgate de pontos. Registrar o desconto no pedido evita que edição futura da campanha altere pedidos anteriores. Datas seriam armazenadas em UTC e apresentadas no fuso da operação.
+Permitir no máximo uma campanha por pedido. **Não combinar campanha e resgate de pontos** na proposta inicial: se o pedido aplicar `NORDESTE10`, não aceita resgate; a resposta deve indicar essa incompatibilidade antes da confirmação. Essa escolha evita descontos encadeados e simplifica conferência; poderá ser revista como decisão de negócio futura. Datas seriam armazenadas em UTC e apresentadas no fuso da operação.
 
 Rotas candidatas, **não implementadas**: gestão de `/api/campanhas` por ADMIN e campo de campanha na criação de pedido. Campanha inexistente, expirada ou inelegível produziria erro de negócio documentado.
 
@@ -157,9 +160,9 @@ Rotas candidatas, **não implementadas**: gestão de `/api/campanhas` por ADMIN 
 | RF09 | `ApiController`, `RaizesStore`, listagem paginada e testes de isolamento por cliente. |
 | RF10–RF11, RN06–RN08, RNF11 | `PaymentGateway`, `MockPaymentGateway`, `ApiController` e testes Java de recusa/nova tentativa/concorrência. |
 | RF12–RF13, RN09–RN10 | `ApiController`, `RaizesStore` e testes Java de transições/cancelamento. |
-| RF14–RF15, RNF04 | `RaizesStore`, rotas de auditoria/consentimento e testes Java; consulte [privacidade](03_PRIVACIDADE_E_SEGURANCA.md). |
+| RF14–RF15, RNF04 | `RaizesStore`, rotas de auditoria/consentimento e testes Java; conforme [privacidade](03_PRIVACIDADE_E_SEGURANCA.md). |
 | RF03, RF17–RF20 | Seção 7 deste documento; sem endpoints executáveis ou testes de funcionalidade nesta versão. |
-| RNF06–RNF08, ENT04/ENT06 | `/api-docs.json`, `postman/raizes_nordeste_clean_collection.json`, testes em `src/test/java` e `README.md`. A coleção foi validada contra Java: 32 requisições, 88 asserções sem falhas. |
+| RNF06–RNF08, ENT04/ENT06 | `/api-docs.json`, `postman/raizes_nordeste_clean_collection.json`, testes em `src/test/java` e `README.md`. `mvn test` passou com 21 testes em 12/10/2026. Newman tem evidência histórica de 32 requisições/88 asserções em 11/10/2026; não foi repetido nesta revisão. |
 
 ## 10. Dependências e decisões para as próximas etapas
 
@@ -181,12 +184,11 @@ Rotas candidatas, **não implementadas**: gestão de `/api/campanhas` por ADMIN 
 - [x] Fidelização, promoções, cadastro e gestão especificados conceitualmente.
 - [x] Entregáveis e dependências das etapas 2 a 8 definidos.
 
-Esta matriz foi atualizada após a implementação dos complementos RF10, RF11, RF14, RF15 e RF16. Permanecem propostas as capacidades administrativas, de pontos, campanhas e produção explicitamente identificadas.
+Esta matriz foi atualizada após os complementos de pedido/pagamento, privacidade, paginação e escopo por unidade. Permanecem propostas as capacidades administrativas, de pontos, campanhas e produção explicitamente identificadas.
 
 ## Referências locais
 
 - `UNINTER_Roteiro_Back_End_Copia_Adaptada_Estudo.pdf`: páginas físicas 5–6 (RF/RNF), 6–9 (diagramas, contratos e privacidade), 9–13 (entregáveis e testes) e 18 (tabela consolidada), conforme leitura registrada na análise de aderência.
-- [Análise de aderência](../ANALISE_ADERENCIA_UNINTER.md).
 - [README e funcionalidades atuais](../README.md).
 - [Schema SQL implementado](../src/main/resources/db/migration/V1__initial_schema.sql).
 - [Testes Java](../src/test/java/br/com/raizesdonordeste/ApiIntegrationTest.java).

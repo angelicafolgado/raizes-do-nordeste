@@ -51,8 +51,8 @@ class ApiIntegrationTest {
         jdbc.update("DELETE FROM pedidos");
         jdbc.update("DELETE FROM estoques_unidades");
         jdbc.update("DELETE FROM produtos");
-        jdbc.update("DELETE FROM unidades");
         jdbc.update("DELETE FROM usuarios");
+        jdbc.update("DELETE FROM unidades");
         jdbc.update("DELETE FROM sqlite_sequence");
         String hash = new BCryptPasswordEncoder().encode("123456");
         jdbc.update("INSERT INTO usuarios(nome,email,senha,role) VALUES('Maria','maria@test.local',?,'CLIENTE')", hash);
@@ -61,10 +61,14 @@ class ApiIntegrationTest {
         jdbc.update("INSERT INTO usuarios(nome,email,senha,role) VALUES('Cozinha','cozinha@test.local',?,'COZINHA')", hash);
         jdbc.update("INSERT INTO usuarios(nome,email,senha,role) VALUES('Admin','admin@test.local',?,'ADMIN')", hash);
         jdbc.update("INSERT INTO unidades(nome,cidade) VALUES('Recife','Recife')");
+        jdbc.update("INSERT INTO unidades(nome,cidade) VALUES('João Pessoa','João Pessoa')");
+        jdbc.update("UPDATE usuarios SET unidadeId=1 WHERE id IN (3,4)");
         jdbc.update("INSERT INTO produtos(nome,descricao,preco) VALUES('Baião','Prato',38.50)");
         jdbc.update("INSERT INTO produtos(nome,descricao,preco) VALUES('Tapioca','Lanche',24.00)");
         jdbc.update("INSERT INTO estoques_unidades(unidadeId,produtoId,quantidade) VALUES(1,1,4)");
         jdbc.update("INSERT INTO estoques_unidades(unidadeId,produtoId,quantidade) VALUES(1,2,3)");
+        jdbc.update("INSERT INTO estoques_unidades(unidadeId,produtoId,quantidade) VALUES(2,1,4)");
+        jdbc.update("INSERT INTO estoques_unidades(unidadeId,produtoId,quantidade) VALUES(2,2,3)");
         maria = token("maria@test.local");
         jose = token("jose@test.local");
         atendente = token("atendente@test.local");
@@ -135,7 +139,7 @@ class ApiIntegrationTest {
                 .andExpect(jsonPath("$.total").value(115.5))
                 .andReturn();
         long orderId = mapper.readTree(created.getResponse().getContentAsString()).get("id").asLong();
-        assertThat(jdbc.queryForObject("SELECT quantidade FROM estoques_unidades WHERE produtoId=1", Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT quantidade FROM estoques_unidades WHERE unidadeId=1 AND produtoId=1", Integer.class)).isEqualTo(1);
         mvc.perform(get("/api/pedidos").header("Authorization", bearer(maria))
                         .param("canalPedido", "TOTEM"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.dados.length()").value(0));
@@ -155,7 +159,7 @@ class ApiIntegrationTest {
                 .andExpect(jsonPath("$.itens[0].quantidade").value(2))
                 .andReturn();
         long orderId = mapper.readTree(created.getResponse().getContentAsString()).get("id").asLong();
-        assertThat(jdbc.queryForObject("SELECT quantidade FROM estoques_unidades WHERE produtoId=1", Integer.class)).isEqualTo(2);
+        assertThat(jdbc.queryForObject("SELECT quantidade FROM estoques_unidades WHERE unidadeId=1 AND produtoId=1", Integer.class)).isEqualTo(2);
 
         mvc.perform(get("/api/pedidos").header("Authorization", bearer(jose)))
                 .andExpect(status().isOk())
@@ -184,7 +188,7 @@ class ApiIntegrationTest {
                         .contentType("application/json")
                         .content("{\"unidadeId\":1,\"canalPedido\":\"APP\",\"itens\":[{\"produtoId\":1,\"quantidade\":1},{\"produtoId\":2,\"quantidade\":99}]}"))
                 .andExpect(status().isConflict());
-        assertThat(jdbc.queryForObject("SELECT quantidade FROM estoques_unidades WHERE produtoId=1", Integer.class)).isEqualTo(4);
+        assertThat(jdbc.queryForObject("SELECT quantidade FROM estoques_unidades WHERE unidadeId=1 AND produtoId=1", Integer.class)).isEqualTo(4);
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM pedidos", Integer.class)).isZero();
 
         MvcResult created = mvc.perform(post("/api/pedidos").header("Authorization", bearer(maria))
@@ -198,7 +202,7 @@ class ApiIntegrationTest {
         mvc.perform(patch("/api/pedidos/" + orderId + "/status").header("Authorization", bearer(cozinha))
                         .contentType("application/json").content("{\"status\":\"CANCELADO\"}"))
                 .andExpect(status().isConflict());
-        assertThat(jdbc.queryForObject("SELECT quantidade FROM estoques_unidades WHERE produtoId=1", Integer.class)).isEqualTo(4);
+        assertThat(jdbc.queryForObject("SELECT quantidade FROM estoques_unidades WHERE unidadeId=1 AND produtoId=1", Integer.class)).isEqualTo(4);
     }
 
     @Test
@@ -293,7 +297,7 @@ class ApiIntegrationTest {
                 .isEqualTo("AGUARDANDO_PAGAMENTO");
         assertThat(jdbc.queryForObject("SELECT status FROM pagamentos WHERE pedidoId=?", String.class, orderId))
                 .isEqualTo("RECUSADO");
-        assertThat(jdbc.queryForObject("SELECT quantidade FROM estoques_unidades WHERE produtoId=1", Integer.class))
+        assertThat(jdbc.queryForObject("SELECT quantidade FROM estoques_unidades WHERE unidadeId=1 AND produtoId=1", Integer.class))
                 .isEqualTo(3);
     }
 
@@ -386,6 +390,54 @@ class ApiIntegrationTest {
                 .andExpect(status().isCreated());
         mvc.perform(get("/api/pedidos").header("Authorization", bearer(atendente)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.dados.length()").value(1));
+    }
+
+    @Test
+    void operationalUsersAreRestrictedToTheirAssignedUnit() throws Exception {
+        MvcResult recifeOrder = mvc.perform(post("/api/pedidos").header("Authorization", bearer(maria))
+                        .contentType("application/json")
+                        .content("{\"unidadeId\":1,\"canalPedido\":\"APP\",\"itens\":[{\"produtoId\":1,\"quantidade\":1}]}"))
+                .andExpect(status().isCreated()).andReturn();
+        long recifeOrderId = mapper.readTree(recifeOrder.getResponse().getContentAsString()).get("id").asLong();
+        MvcResult joaoPessoaOrder = mvc.perform(post("/api/pedidos").header("Authorization", bearer(jose))
+                        .contentType("application/json")
+                        .content("{\"unidadeId\":2,\"canalPedido\":\"APP\",\"itens\":[{\"produtoId\":1,\"quantidade\":1}]}"))
+                .andExpect(status().isCreated()).andReturn();
+        long joaoPessoaOrderId = mapper.readTree(joaoPessoaOrder.getResponse().getContentAsString()).get("id").asLong();
+
+        mvc.perform(get("/api/pedidos").header("Authorization", bearer(atendente)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dados.length()").value(1))
+                .andExpect(jsonPath("$.dados[0].unidadeId").value(1));
+        mvc.perform(get("/api/pedidos").header("Authorization", bearer(cozinha)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dados.length()").value(1))
+                .andExpect(jsonPath("$.dados[0].unidadeId").value(1));
+        mvc.perform(get("/api/pedidos").header("Authorization", bearer(admin)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.dados.length()").value(2));
+
+        mvc.perform(post("/api/pedidos").header("Authorization", bearer(atendente))
+                        .contentType("application/json")
+                        .content("{\"unidadeId\":2,\"canalPedido\":\"BALCAO\",\"itens\":[{\"produtoId\":1,\"quantidade\":1}]}"))
+                .andExpect(status().isForbidden()).andExpect(jsonPath("$.error").value("ACESSO_NEGADO"));
+        mvc.perform(post("/api/pedidos/" + joaoPessoaOrderId + "/pagamento")
+                        .header("Authorization", bearer(atendente)).contentType("application/json")
+                        .content("{\"statusSimulado\":\"APROVADO\"}"))
+                .andExpect(status().isForbidden()).andExpect(jsonPath("$.error").value("ACESSO_NEGADO"));
+        mvc.perform(patch("/api/pedidos/" + joaoPessoaOrderId + "/status")
+                        .header("Authorization", bearer(cozinha)).contentType("application/json")
+                        .content("{\"status\":\"CANCELADO\"}"))
+                .andExpect(status().isForbidden()).andExpect(jsonPath("$.error").value("ACESSO_NEGADO"));
+        mvc.perform(post("/api/pedidos/" + recifeOrderId + "/pagamento")
+                        .header("Authorization", bearer(atendente)).contentType("application/json")
+                        .content("{\"statusSimulado\":\"APROVADO\"}"))
+                .andExpect(status().isOk());
+
+        jdbc.update("UPDATE usuarios SET unidadeId=NULL WHERE id=3");
+        mvc.perform(get("/api/pedidos").header("Authorization", bearer(atendente)))
+                .andExpect(status().isForbidden()).andExpect(jsonPath("$.error").value("ACESSO_NEGADO"));
+        assertThat(jdbc.queryForObject("SELECT status FROM pedidos WHERE id=?", String.class, joaoPessoaOrderId))
+                .isEqualTo("AGUARDANDO_PAGAMENTO");
     }
 
     @Test

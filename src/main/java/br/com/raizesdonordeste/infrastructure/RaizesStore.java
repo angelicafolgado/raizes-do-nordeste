@@ -52,6 +52,15 @@ public class RaizesStore {
         return one("SELECT * FROM usuarios WHERE id = ?", USER, id);
     }
 
+    public Optional<Long> assignedUnit(long userId) {
+        List<Long> units = jdbc.query("SELECT unidadeId FROM usuarios WHERE id=?",
+                (rs, row) -> {
+                    long unitId = rs.getLong("unidadeId");
+                    return rs.wasNull() ? null : unitId;
+                }, userId);
+        return units.stream().filter(java.util.Objects::nonNull).findFirst();
+    }
+
     public Optional<Map<String, Object>> unit(long id) {
         return one("SELECT * FROM unidades WHERE id = ?", UNIT, id);
     }
@@ -127,11 +136,13 @@ public class RaizesStore {
         });
     }
 
-    public Page orders(Identity identity, String channel, int page, int limit) {
-        boolean operational = !identity.role().equals("CLIENTE");
-        StringBuilder where = new StringBuilder(operational ? " WHERE 1=1 " : " WHERE usuarioId=? ");
+    public Page orders(Identity identity, Long assignedUnitId, String channel, int page, int limit) {
+        boolean client = identity.role().equals("CLIENTE");
+        boolean unitScoped = !client && !identity.role().equals("ADMIN");
+        StringBuilder where = new StringBuilder(client ? " WHERE usuarioId=? " : unitScoped ? " WHERE unidadeId=? " : "");
         List<Object> args = new ArrayList<>();
-        if (!operational) args.add(identity.id());
+        if (client) args.add(identity.id());
+        else if (unitScoped) args.add(assignedUnitId);
         if (channel != null) { where.append(" AND canalPedido=? "); args.add(channel); }
         long total = jdbc.queryForObject("SELECT COUNT(*) FROM pedidos" + where, Long.class, args.toArray());
         List<Object> pageArgs = new ArrayList<>(args);

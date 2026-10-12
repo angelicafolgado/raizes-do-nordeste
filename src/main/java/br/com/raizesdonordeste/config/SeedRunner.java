@@ -38,6 +38,8 @@ public class SeedRunner implements CommandLineRunner {
 
         long recifeId = addUnit("Raízes Recife", "Recife");
         long joaoPessoaId = addUnit("Raízes João Pessoa", "João Pessoa");
+        assignUnitIfMissing("atendente@raizes.com", recifeId);
+        assignUnitIfMissing("cozinha@raizes.com", recifeId);
         long baiaoId = addProduct("Baião de dois", "Arroz, feijão-verde e temperos nordestinos", 38.50);
         long tapiocaId = addProduct("Tapioca", "Tapioca recheada preparada na hora", 24.00);
         long sucoId = addProduct("Suco de cajá", "Suco natural de cajá", 14.50);
@@ -59,5 +61,10 @@ public class SeedRunner implements CommandLineRunner {
         jdbc.update("INSERT INTO produtos(nome,descricao,preco) SELECT ?,?,? WHERE NOT EXISTS (SELECT 1 FROM produtos WHERE nome=?)",
                 name, description, price, name);
         return jdbc.queryForObject("SELECT id FROM produtos WHERE nome=?", Long.class, name);
+    }
+
+    private void assignUnitIfMissing(String email, long unitId) {
+        jdbc.update("UPDATE usuarios SET unidadeId=? WHERE email=? AND role IN ('ATENDENTE','COZINHA') " +
+                "AND unidadeId IS NULL", unitId, email);
     }
 }

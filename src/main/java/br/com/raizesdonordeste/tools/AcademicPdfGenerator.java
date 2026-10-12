@@ -84,6 +84,7 @@ public final class AcademicPdfGenerator {
             section("Sumário", List.of(
                     contents("1. Introdução e objetivos"),
                     contents("2. Análise e requisitos"),
+                    contents("2.2 Requisitos conceituais propostos (não implementados)"),
                     contents("3. Modelagem e arquitetura"),
                     contents("4. API e contratos"),
                     contents("5. LGPD, privacidade, segurança e auditoria"),
@@ -108,9 +109,9 @@ public final class AcademicPdfGenerator {
                     "O objetivo é demonstrar o fluxo Pedido -> Pagamento simulado -> Status com banco real, "
                             + "autenticação e regras de autorização. Os canais APP, WEB, TOTEM, BALCAO e PICKUP "
                             + "são atributos do pedido.",
-                    "A matriz acompanha a rede; cada unidade mantém saldo próprio por produto. ADMIN representa "
-                            + "a administração da rede. O sistema não implementa interface gráfica nem integração "
-                            + "financeira externa.",
+                    "ADMIN representa a administração da rede. ATENDENTE e COZINHA têm vínculo obrigatório "
+                            + "com uma unidade para operar pedidos; clientes veem os próprios pedidos. O sistema "
+                            + "não implementa interface gráfica nem integração financeira externa.",
                     "Foi escolhido o Fluxo A do material de referência: criar pedido, validar itens e saldo, "
                             + "registrar resultado de pagamento mock e atualizar status. O preço vem do banco, "
                             + "itens repetidos são agregados e o titular do pedido vem do JWT.",
@@ -120,8 +121,9 @@ public final class AcademicPdfGenerator {
             closePage();
             section("2. Análise e requisitos", List.of(
                     "A API autentica usuários por e-mail e senha e emite JWT. Senhas são armazenadas com BCrypt.",
-                    "As permissões distinguem CLIENTE, ATENDENTE, COZINHA e ADMIN. Clientes consultam apenas "
-                            + "seus pedidos; operações de cozinha e administração seguem regras de perfil.",
+                    "As permissões distinguem CLIENTE, ATENDENTE, COZINHA e ADMIN. CLIENTE consulta os próprios "
+                            + "pedidos; ATENDENTE e COZINHA consultam/operam somente a unidade vinculada; ADMIN "
+                            + "mantém visão da rede. Perfil operacional sem unidade recebe 403.",
                     "O catálogo informa produtos e estoque da unidade selecionada. Listagens são paginadas, "
                             + "com limite máximo de 100 registros por página.",
                     "Criar pedido, reservar estoque e registrar auditoria ocorre em transação. Itens repetidos "
@@ -136,6 +138,28 @@ public final class AcademicPdfGenerator {
                     "Migrações Flyway versionadas inicializam bancos novos e registram a atualização de bases existentes sem apagar dados. Checksums são validados ao iniciar.",
                     "Requisitos propostos: cadastro, CRUD administrativo de catálogo, movimentação de estoque, "
                             + "fidelidade por pontos, promoções e persistência distribuída multiwriter."
+            ));
+            section("2.2 Requisitos conceituais propostos (não implementados)", List.of(
+                    "Cadastro: visitante informa nome, e-mail, senha e confirmação; servidor normaliza e valida "
+                            + "e-mail, rejeita duplicidade, aplica BCrypt e atribui exclusivamente CLIENTE. Papel, "
+                            + "unidade e consentimento não são aceitos como autoridade do cliente. Erro não cria conta; "
+                            + "sucesso não retorna senha/hash. Consentimento de fidelidade permanece separado.",
+                    "Catálogo: ADMIN cria, edita e inativa unidades/produtos; empregados podem consultar mas não "
+                            + "administrar. Validar campos obrigatórios, tamanhos, chave única, preço não negativo "
+                            + "em centavos e referência a unidade/produto existente. Inativação preserva histórico; "
+                            + "preços atuais nunca reescrevem itens de pedidos antigos.",
+                    "Estoque: ADMIN informa unidade, produto, ENTRADA/SAIDA/AJUSTE, quantidade positiva e motivo; "
+                            + "identidade/data vêm do servidor. Validar ativos e saldo para saída; ajuste exige "
+                            + "justificativa e saldo final não negativo. Saldo e lançamento imutável com saldo "
+                            + "anterior/posterior são gravados na mesma transação; falha reverte ambos.",
+                    "Fidelidade: proposta de 1 ponto por real efetivamente pago após descontos quando o pedido "
+                            + "chega a ENTREGUE, arredondando para baixo; sem crédito por recusa/cancelamento ou "
+                            + "sem adesão ativa. Resgate: 100 pontos = R$ 5,00, até 20% do subtotal elegível. "
+                            + "Reserva no pedido, débito no pagamento e devolução única ao cancelar antes de pagar.",
+                    "Promoção: exemplo proposto NORDESTE10, 10% em Tapioca nos canais APP/WEB e unidades habilitadas, "
+                            + "entre 01/11/2026 e 31/12/2026 UTC. Servidor valida vigência, unidade, canal e produto; "
+                            + "registra desconto e itens elegíveis no pedido. Na proposta inicial, uma campanha no "
+                            + "máximo e sem combinação com resgate de pontos. Não há campanha/endpoints implementados."
             ));
             closePage();
             section("2.1 Feature crítica: pedido, pagamento e status", List.of(
@@ -154,7 +178,8 @@ public final class AcademicPdfGenerator {
                     "O banco tem nove tabelas: usuarios, unidades, produtos, estoques_unidades, pedidos, "
                             + "itens_pedido, pagamentos, audit_logs e consentimentos. O par unidade/produto do "
                             + "estoque é único; pedidos têm usuário e unidade; itens referenciam pedido e produto; "
-                            + "há no máximo um pagamento por pedido.",
+                            + "há no máximo um pagamento por pedido. A migração V2 adiciona `usuarios.unidadeId` "
+                            + "opcional para associar perfis operacionais; perfis sem unidade não operam pedidos.",
                     "O código Java usa mapas JDBC e records pontuais; não possui classes Java de entidade para "
                             + "todo o domínio. O diagrama conceitual representa os dados projetados por JDBC; o apêndice "
                             + "de arquitetura Java registra as classes técnicas da implementação atual.",
@@ -173,11 +198,11 @@ public final class AcademicPdfGenerator {
                             + "- públicos; listagens paginadas com limite máximo de 100.",
                     "POST /api/pedidos - CLIENTE, ATENDENTE ou ADMIN; cria pedido e reserva estoque; 201 em "
                             + "sucesso; 400/401/403/404/409/422 em erros conforme o caso.",
-                    "GET /api/pedidos?canalPedido=TOTEM&page=1&limit=10 - autenticado; cliente vê apenas "
-                            + "pedidos próprios; perfis operacionais consultam a rede.",
-                    "POST /api/pedidos/{id}/pagamento - titular, ATENDENTE ou ADMIN; resultado aprovado ou "
-                            + "recusado; falhas simuladas retornam 503 (INDISPONIVEL) ou 504 (TIMEOUT).",
-                    "PATCH /api/pedidos/{id}/status - COZINHA ou ADMIN; transições permitidas de preparo/entrega.",
+                    "GET /api/pedidos?canalPedido=TOTEM&page=1&limit=10 - autenticado; CLIENTE vê os próprios "
+                            + "pedidos; ATENDENTE/COZINHA veem somente a unidade vinculada; ADMIN vê a rede.",
+                    "POST /api/pedidos/{id}/pagamento - CLIENTE titular, ATENDENTE da unidade do pedido ou ADMIN; "
+                            + "resultado aprovado ou recusado; falhas simuladas retornam 503/504.",
+                    "PATCH /api/pedidos/{id}/status - COZINHA da unidade do pedido ou ADMIN; transições permitidas.",
                     "GET /api/privacidade/aviso; PUT /api/privacidade/consentimentos/fidelidade; "
                             + "GET /api/privacidade/consentimentos - aviso e histórico do próprio titular.",
                     "GET /api/auditoria?acao=CONSULTA_PEDIDOS - ADMIN. GET /api-docs.json serve o contrato "
@@ -187,7 +212,7 @@ public final class AcademicPdfGenerator {
                             + "\"itens\": [{\"produtoId\": 1, \"quantidade\": 1}]}. O servidor calcula o preço.",
                     "Trecho de response 201: {\"id\": 1, \"canalPedido\": \"APP\", "
                             + "\"status\": \"AGUARDANDO_PAGAMENTO\", \"total\": 38.5}. O contrato completo inclui itens, titular, unidade e datas.",
-                    "Pagamento recusado: envie {\"statusSimulado\": \"RECUSADO\"}. Response 200 inclui "
+                    "Pagamento recusado: a requisição contém {\"statusSimulado\": \"RECUSADO\"}. Response 200 inclui "
                             + "{\"sucesso\": false, \"statusPedido\": \"AGUARDANDO_PAGAMENTO\"}; a reserva permanece e nova tentativa é permitida.",
                     "Erro de estoque, HTTP 409: {\"error\": \"ESTOQUE_INSUFICIENTE\", "
                             + "\"message\": \"Estoque insuficiente para Baião de dois.\", \"details\": [], "
@@ -201,15 +226,28 @@ public final class AcademicPdfGenerator {
                     "O pagamento não captura dados de cartão nem contata adquirente. O consentimento de "
                             + "fidelidade apenas registra uma preferência de demonstração; não há pontos ou "
                             + "envio de marketing.",
+                    "Inventário e hipóteses propostas: conta (ID, nome, e-mail, hash; autenticação; execução "
+                            + "de contrato a avaliar; titular/admin conforme função; retenção enquanto ativa e "
+                            + "revisão manual); pedido/itens (titular, unidade, canal, itens, preço, status; "
+                            + "execução do pedido/obrigação aplicável a confirmar; cliente próprio, empregados "
+                            + "da unidade e ADMIN; prazos de produção ainda não definidos).",
+                    "Consentimento guarda titular por ID, finalidade, versão, decisão e data; uma finalidade "
+                            + "real de fidelidade exigiria análise específica da hipótese de consentimento. "
+                            + "Auditoria guarda ator/ação/metadados; interesse legítimo/segurança ou obrigação "
+                            + "são apenas hipóteses a avaliar. Titular consulta e revoga sua decisão; revogar "
+                            + "não apaga pedidos automaticamente. Dados fictícios são revistos manualmente até "
+                            + "30 dias após avaliação; não há expurgo automático, anonimização ou canal de direitos.",
                     "A aplicação não implementa expurgo periódico, anonimização automatizada ou operação "
                             + "comercial de direitos do titular. O SQLite local e seus backups não são cifrados "
                             + "pela aplicação; segredos e bancos não devem ser publicados.",
-                    "A discussão de privacidade é acadêmica e não representa certificação jurídica ou parecer."
+                    "A discussão de privacidade é acadêmica e não representa certificação jurídica ou parecer. "
+                            + "O SQLite e seus backups não são cifrados pela aplicação; IDs de auditoria são "
+                            + "pseudônimos/vinculáveis, não dados anônimos."
             ));
             closePage();
             section("6. Plano de testes e evidências", List.of(
-                    "A validação Maven executada em 11/10/2026 concluiu com BUILD SUCCESS: 20 testes "
-                            + "aprovados, sem falhas, erros ou testes ignorados.",
+                    "Na execução desta revisão, `mvn test` em JDK 21.0.10 terminou com BUILD SUCCESS: 21 "
+                            + "testes, zero falhas/erros/ignorados (17 integração, 2 migração, 2 gateway).",
                     "Casos positivos cobrem token de autenticação usado nos testes, listagens, pedido criado "
                             + "com itens agrupados, aprovação de pagamento, avanço para PRONTO, consentimento "
                             + "idempotente, seed idempotente e consultas concorrentes.",
@@ -218,49 +256,47 @@ public final class AcademicPdfGenerator {
                             + "e conflito de estado (409), gateway (503/504), corpo excessivo (413) e rollback "
                             + "quando falha auditoria.",
                     "O reinício local foi validado: pedido e pagamento permaneceram consultáveis em SQLite. Migrações e seed são repetíveis. Restauração de backup não foi ensaiada nesta revisão.",
-                    "A evidência é JUnit: 16 métodos de integração em ApiIntegrationTest e 2 testes do gateway "
-                            + "em MockPaymentGatewayTest, mais 2 testes de migrações Flyway em DatabaseMigrationTest. "
-                            + "A coleção Postman executou 32 requisições e 88 asserções, sem falhas."
+                    "O teste de isolamento por unidade verifica consulta, criação, pagamento e status entre "
+                            + "Recife e João Pessoa, ADMIN em escopo de rede e negação quando o vínculo é removido.",
+                    "A coleção Postman/Newman e a medição de carga são evidências históricas do projeto e não "
+                            + "foram repetidas nesta revisão; não são apresentadas como validação atual."
             ));
             closePage();
             section("7. Entrega técnica", List.of(
                     "O README documenta JDK, Maven, variáveis, banco/seed, início da API, Swagger, testes e "
-                            + "geração do PDF. O OpenAPI é servido pela aplicação. A cópia limpa de uma revisão anterior foi "
-                            + "validada sem target ou banco herdado, usando dependências já disponíveis no Maven local.",
-                    "Repositório público: https://github.com/angelicafolgado/raizes-do-nordeste. A branch main "
-                            + "tem histórico publicado em nome de Angelica Dias Folgado. O material indicado "
-                            + "recomenda cinco commits de evolução real; esta revisão registra correções efetivas, sem fabricar histórico.",
-                    "A coleção Postman foi validada com Newman 6.2.1: 32 requisições e 88 asserções aprovadas; "
-                            + "17 cenários 2xx e 15 cenários de erro, organizados em nove pastas.",
-                    "Os materiais fornecidos foram adotados como referência por instrução da discente, embora os próprios "
-                            + "PDFs indiquem edição para estudo, omissões e prevalência do original. A adoção "
+                            + "geração do PDF. O OpenAPI é servido pela aplicação. A pasta output permanece local e ignorada pelo Git.",
+                    "Nenhuma alteração desta revisão foi enviada ao GitHub. A coleção Postman/Newman documentada "
+                            + "em execução anterior não foi repetida nesta revisão.",
+                    "A aluna desenvolveu o projeto com base no estudo de caso e no roteiro da trilha Back-end. Os "
+                            + "PDFs consultados indicam edição para estudo, omissões e prevalência do original. A adoção "
                             + "não autentica a procedência do material no AVA."
             ));
             closePage();
             section("8. Conclusão", List.of(
                     "A implementação Java entrega o fluxo acadêmico de pedidos, reserva de estoque, pagamento "
-                            + "simulado e acompanhamento operacional. Os testes e a medição documentam somente "
-                            + "o comportamento observado no ambiente local.",
-                    "O código executável da API, testes e ferramentas mantidas está em Java 21. O repositório "
-                            + "público contém a entrega Java. A coleção Postman foi validada: 32 requisições e 88 asserções "
-                            + "aprovadas. Curso, período e identificação do trabalho foram fornecidos pela discente. O polo permanece "
-                            + "marcado como a informar. A referência fornecida foi usada conforme orientação "
-                            + "da discente, preservada a ressalva indicada pelos próprios arquivos."
+                            + "simulado e acompanhamento operacional, com escopo de empregados por unidade. "
+                            + "As propostas administrativas, de pontos e de campanhas não são funcionalidades executáveis.",
+                    "A aluna implementou a API, os testes e as ferramentas em Java 21. Curso, período e "
+                            + "identificação do trabalho constam nos elementos acadêmicos do relatório. Polo e cidade permanecem "
+                            + "não informados. As referências foram utilizadas na elaboração do projeto, "
+                            + "preservadas as ressalvas indicadas pelos próprios documentos."
             ));
             closePage();
             section("Referências", List.of(
-                    "UNINTER. Projeto Multidisciplinar: estudo de caso - Raízes do Nordeste. 2026. Versão editada para estudo fornecida pela discente; original institucional prevalece.",
-                    "UNINTER. Projeto Multidisciplinar: trilha Back-End. 2026. Versão editada para estudo fornecida pela discente; original institucional prevalece.",
+                    "UNINTER. Projeto Multidisciplinar: estudo de caso - Raízes do Nordeste. 2026. Versão adaptada para estudo consultada na elaboração do projeto; original institucional prevalece.",
+                    "UNINTER. Projeto Multidisciplinar: trilha Back-End. 2026. Versão adaptada para estudo consultada na elaboração do projeto; original institucional prevalece.",
                     "FOLGADO, Angelica Dias. Raízes do Nordeste: documentação técnica, requisitos e evidências. 2026. Disponível em: https://github.com/angelicafolgado/raizes-do-nordeste. Acesso em: 11 out. 2026.",
                     "ORACLE. Java Platform, Standard Edition 21: documentação técnica. [s. d.]. Disponível em: https://docs.oracle.com/en/java/javase/21/. Referência técnica da versão utilizada.",
                     "SPRING. Spring Boot: reference documentation. [s. d.]. Disponível em: https://docs.spring.io/spring-boot/reference/. Referência técnica do framework utilizado.",
                     "BRASIL. Lei nº 13.709, de 14 de agosto de 2018. Lei Geral de Proteção de Dados Pessoais. Brasília, DF: Presidência da República, 2018. Disponível em: https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709compilado.htm. Referência normativa; não representa parecer jurídico."
+                    ,"ASSOCIAÇÃO BRASILEIRA DE NORMAS TÉCNICAS. ABNT NBR 14724:2024: informação e documentação — trabalhos acadêmicos — apresentação. Rio de Janeiro: ABNT, 2024. Referência para conferência da apresentação acadêmica; a edição institucional aplicável orienta a entrega."
+                    ,"ASSOCIAÇÃO BRASILEIRA DE NORMAS TÉCNICAS. ABNT NBR 6027:2012: informação e documentação — sumário — apresentação. Rio de Janeiro: ABNT, 2012. Referência para conferência da apresentação acadêmica; a edição institucional aplicável orienta a entrega."
             ));
             contractAppendix();
             testAppendix();
             closePage();
             section("Apêndice C - Evidências de execução", List.of(
-                    "Evidências próprias: docs/04_RESULTADO_VALIDACAO.md e docs/07_EVIDENCIAS_CORRECOES.json. A execução registrada aprovou 20 testes Java e 88 asserções Postman. Esta reorganização documental não é uma nova execução da API.",
+                    "Evidências próprias: docs/04_RESULTADO_VALIDACAO.md e docs/07_EVIDENCIAS_CORRECOES.json. Os resultados referem-se apenas aos comandos registrados nessa atualização; Newman não foi executado novamente.",
                     "A medição de desempenho abaixo é anterior às correções recentes e não foi repetida; os valores são históricos, relativos ao projeto de Angelica."
             ));
             section("C.1 Ensaio de desempenho anterior", List.of(
@@ -284,10 +320,10 @@ public final class AcademicPdfGenerator {
                     "Classes reais e suas dependências. PaymentGateway.process é implementado por MockPaymentGateway.");
             addImagePage("Apêndice G - Diagrama entidade-relacionamento",
                     Path.of("docs", "diagramas", "01_der.png"),
-                    "Nove tabelas de domínio e relacionamentos. V1__initial_schema.sql é a migração Flyway; flyway_schema_history mantém versões e checksums.");
+                    "Nove tabelas de domínio. V1__initial_schema.sql define a estrutura-base; V2__vinculo_unidade_operacional.sql acrescenta usuarios.unidadeId (FK opcional): uma unidade pode vincular vários empregados e um empregado pode ter zero ou uma unidade. A imagem é a renderização anterior a V2; a relação está na fonte docs/diagramas/01_der.dot e deve ser renderizada para a entrega gráfica final. flyway_schema_history mantém versões e checksums.");
             addImagePage("Apêndice H - Atividade do fluxo crítico",
                     Path.of("docs", "diagramas", "04_sequencia.png"),
-                    "Atividade da implementação Java atual: transações JDBC, aprovação/recusa, falhas técnicas, cancelamento e status.");
+                    "Fluxo crítico Java: transações JDBC, aprovação/recusa, falhas técnicas, cancelamento e status; a autorização por unidade está detalhada neste relatório e no requisito RN12.");
             closePage();
             document.save(output.toFile());
         } finally {
@@ -353,17 +389,19 @@ public final class AcademicPdfGenerator {
                 .append("Projeto acadêmico: API REST para pedidos multicanal, estoque por unidade e pagamento simulado. ")
                 .append("Relatório técnico da implementação Java 21 e Spring Boot 3.5.\n\n")
                 .append("Trabalho: Projeto: Desenvolvimento Back-end (898968)  \n")
-                .append("Curso: CST Análise e desenvolvimento de sistemas  \nPolo: a informar  \nSemestre: B fase II 2026 - regular  \nDocente: Prof. Me. Luciane Yanase Kanashiro\n\n");
+                .append("Curso: CST Análise e desenvolvimento de sistemas  \nPolo: não informado  \nCidade: não informada  \n")
+                .append("Semestre: B fase II 2026 - regular  \nDocente: Prof. Me. Luciane Yanase Kanashiro\n\n");
         centered("CENTRO UNIVERSITÁRIO INTERNACIONAL UNINTER", BOLD, 12, 750);
         centered("CURSO: CST Análise e desenvolvimento de sistemas", BODY, 12, 723);
         centered("ANGELICA DIAS FOLGADO", BOLD, 12, 650);
         centered("RU: 4937552", BODY, 12, 628);
         centered("RAÍZES DO NORDESTE", BOLD, 12, 465);
         centered("PROJETO: DESENVOLVIMENTO BACK-END (898968)", BOLD, 12, 435);
-        centered("Polo de apoio: a informar", BODY, 12, 345);
-        centered("Semestre/período: B fase II 2026 - regular", BODY, 12, 323);
-        centered("Docente: Prof. Me. Luciane Yanase Kanashiro", BODY, 12, 301);
-        centered("A INFORMAR", BODY, 12, 105);
+        centered("Polo: não informado", BODY, 12, 355);
+        centered("Cidade: não informada", BODY, 12, 333);
+        centered("Semestre/período: B fase II 2026 - regular", BODY, 12, 311);
+        centered("Docente: Prof. Me. Luciane Yanase Kanashiro", BODY, 12, 289);
+        centered("CIDADE NÃO INFORMADA", BODY, 12, 105);
         centered("2026", BODY, 12, 83);
         closePage();
     }
@@ -388,7 +426,7 @@ public final class AcademicPdfGenerator {
             textAt(line, BODY, 12, noteX, baseline);
             baseline -= 12;
         }
-        centered("A INFORMAR", BODY, 12, 105);
+        centered("Polo: não informado · Cidade: não informada", BODY, 12, 105);
         centered("2026", BODY, 12, 83);
         markdown.append("## Folha de rosto\n\nAngelica Dias Folgado — RU 4937552\n\n")
                 .append(note).append("\n\n");
@@ -578,11 +616,13 @@ public final class AcademicPdfGenerator {
                     || !extracted.contains("100% Java")
                     || !extracted.contains("https://github.com/angelicafolgado/raizes-do-nordeste")
                     || !extracted.contains("CURSO: CST Análise e desenvolvimento de sistemas")
-                    || !extracted.contains("Polo de apoio: a informar")
+                    || !extracted.contains("Polo: não informado")
+                    || !extracted.contains("Cidade: não informada")
                     || !extracted.contains("Semestre/período: B fase II 2026 - regular")
                     || !extracted.replaceAll("\\s+", " ").contains("Prof. Me. Luciane Yanase Kanashiro")
                     || !extracted.contains("Plano de testes e evidências")
-                    || !extracted.contains("88 asserções")
+                    || !extracted.contains("NORDESTE10")
+                    || !extracted.contains("não foram repetidas nesta revisão")
                     || !extracted.contains("Flyway")) {
                 throw new IOException("O PDF gerado não contém as seções ou evidências acadêmicas esperadas.");
             }

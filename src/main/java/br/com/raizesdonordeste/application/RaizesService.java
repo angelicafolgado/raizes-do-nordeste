@@ -82,7 +82,9 @@ public class RaizesService {
         long unitId = positive(body.get("unidadeId"), "unidadeId");
         Object rawChannel = body.get("canalPedido");
         if (!(rawChannel instanceof String channel) || !CHANNELS.contains(channel))
-            throw new ApiException("CANAL_INVALIDO", "Canal inválido. Use APP, TOTEM, BALCAO, PICKUP ou WEB.", 400);
+            throw new ApiException("CANAL_INVALIDO", "Canal inválido. Os valores aceitos são APP, TOTEM, BALCAO, PICKUP e WEB.", 400);
+        if (identity.role().equals("ATENDENTE") && assignedUnit(identity) != unitId)
+            throw new ApiException("ACESSO_NEGADO", "Atendente não pode criar pedidos para outra unidade.", 403);
         if (!(body.get("itens") instanceof List<?> rawItems) || rawItems.isEmpty() || rawItems.size() > 100)
             throw new ApiException("ITENS_INVALIDOS", "Informe entre 1 e 100 itens.", 422);
         Map<Long, Integer> grouped = new LinkedHashMap<>();
@@ -129,11 +131,13 @@ public class RaizesService {
         if (channel != null && !CHANNELS.contains(channel))
             throw new ApiException("CANAL_INVALIDO", "Filtro de canal inválido.", 400);
         return store.transaction(status -> {
-            RaizesStore.Page result = store.orders(identity, channel, page, limit);
+            Long assignedUnitId = unitScopedRole(identity) ? assignedUnit(identity) : null;
+            RaizesStore.Page result = store.orders(identity, assignedUnitId, channel, page, limit);
             Map<String, Object> audit = new LinkedHashMap<>();
             audit.put("pagina", page); audit.put("limite", limit); audit.put("canalPedido", channel);
             audit.put("quantidadeRetornada", result.dados().size());
-            audit.put("escopo", identity.role().equals("CLIENTE") ? "PROPRIOS" : "REDE");
+            audit.put("escopo", identity.role().equals("CLIENTE") ? "PROPRIOS"
+                    : identity.role().equals("ADMIN") ? "REDE" : "UNIDADE");
             store.audit("CONSULTA_PEDIDOS", audit, identity.id());
             return result.asMap();
         });
@@ -154,6 +158,7 @@ public class RaizesService {
                     () -> new ApiException("PEDIDO_NAO_ENCONTRADO", "Pedido não encontrado.", 404));
             if (identity.role().equals("CLIENTE") && ((Number) order.get("usuarioId")).longValue() != identity.id())
                 throw new ApiException("ACESSO_NEGADO", "Este pedido pertence a outro cliente.", 403);
+            requireOrderUnitAccess(order, identity);
             if (!"AGUARDANDO_PAGAMENTO".equals(order.get("status")))
                 throw new ApiException("ESTADO_INVALIDO", "Pedido não está aguardando pagamento.", 409);
             PaymentGateway.Response gatewayResult = paymentGateway.process(new PaymentGateway.Request(
@@ -201,6 +206,21 @@ public class RaizesService {
 
     private record PaymentResult(String failure, String correlationId, Map<String, Object> body) {}
 
+    private static boolean unitScopedRole(Identity identity) {
+        return identity.role().equals("ATENDENTE") || identity.role().equals("COZINHA");
+    }
+
+    private long assignedUnit(Identity identity) {
+        return store.assignedUnit(identity.id()).orElseThrow(
+                () -> new ApiException("ACESSO_NEGADO", "Perfil operacional sem unidade vinculada.", 403));
+    }
+
+    private void requireOrderUnitAccess(Map<String, Object> order, Identity identity) {
+        if (unitScopedRole(identity) &&
+                ((Number) order.get("unidadeId")).longValue() != assignedUnit(identity))
+            throw new ApiException("ACESSO_NEGADO", "Pedido pertence a outra unidade.", 403);
+    }
+
     public Map<String, Object> changeStatus(String id, Map<String, Object> body,
                                             Identity identity) {
         requireRole(identity, "COZINHA", "ADMIN");
@@ -211,6 +231,7 @@ public class RaizesService {
         return store.transaction(status -> {
             Map<String, Object> order = store.order(orderId).orElseThrow(
                     () -> new ApiException("PEDIDO_NAO_ENCONTRADO", "Pedido não encontrado.", 404));
+            requireOrderUnitAccess(order, identity);
             String previous = String.valueOf(order.get("status"));
             br.com.raizesdonordeste.domain.OrderRules.validateTransition(previous, next);
             if (!store.changeOrderStatus(orderId, previous, next))
@@ -238,19 +259,19 @@ public class RaizesService {
                 "titulo", "Preferência de fidelidade — demonstração acadêmica",
                 "descricao", "Registrar sua decisão opcional sobre participação na demonstração de fidelidade. Esta versão apenas registra a preferência: não acumula pontos, não concede benefícios e não envia mensagens. Um programa real exigirá novo aviso e nova decisão.",
                 "dados", List.of("Identificador do usuário autenticado", "Decisão de aceitar ou revogar", "Versão do aviso", "Data e hora da decisão"),
-                "revogacao", "Envie {\"aceito\":false} para PUT /api/privacidade/consentimentos/fidelidade. Pedidos e login permanecem disponíveis.",
-                "retencao", "O histórico é mantido para demonstrar as decisões durante o projeto. Não há expurgo automático; consulte a política de privacidade da entrega para o procedimento de encerramento.",
+                "revogacao", "A revogação ocorre com {\"aceito\":false} em PUT /api/privacidade/consentimentos/fidelidade. Pedidos e login permanecem disponíveis.",
+                "retencao", "O histórico é mantido para demonstrar as decisões durante o projeto. Não há expurgo automático; o procedimento de encerramento consta na política de privacidade da entrega.",
                 "compartilhamento", "Nenhum provedor externo recebe os dados de consentimento nesta demonstração.");
     }
 
     public Map<String, Object> updateConsent(Map<String, Object> body, Identity identity) {
         if (body == null || !Set.of("aceito", "versaoAviso").containsAll(body.keySet()) ||
                 !(body.get("aceito") instanceof Boolean accepted))
-            throw new ApiException("DADOS_INVALIDOS", "Use apenas aceito (booleano) e versaoAviso. A identidade vem do token.", 422);
+            throw new ApiException("DADOS_INVALIDOS", "Os campos aceitos são aceito (booleano) e versaoAviso. A identidade vem do token.", 422);
         if (body.containsKey("versaoAviso") && !(body.get("versaoAviso") instanceof String))
             throw new ApiException("DADOS_INVALIDOS", "versaoAviso deve ser texto.", 422);
         if (accepted && !NOTICE_VERSION.equals(body.get("versaoAviso")))
-            throw new ApiException("VERSAO_AVISO_INVALIDA", "Consulte o aviso atual antes de aceitar.", 422);
+            throw new ApiException("VERSAO_AVISO_INVALIDA", "O aceite requer a consulta prévia ao aviso atual.", 422);
         return store.transaction(status -> {
             Optional<Map<String, Object>> previous = store.latestConsent(identity.id(), PURPOSE);
             if (previous.isPresent() && Boolean.TRUE.equals(previous.get().get("aceito")) == accepted &&

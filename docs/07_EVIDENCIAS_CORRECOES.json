@@ -1,84 +1,83 @@
 {
-  "date": "2026-10-11",
-  "base_commit": "b4eaa4adb809f59d7d6c472d4af09d81d94ed837",
-  "workflow": "Java 21 / Spring Boot / SQLite / Flyway",
-  "maven": {
-    "command": "mvn verify",
+  "date": "2026-10-12",
+  "scope": "Revisao academica, escopo operacional por unidade e atualizacao do PDF",
+  "runtime": {
+    "jdk": "21.0.10",
+    "maven": "3.9.9",
+    "command": "mvn test",
     "exit_code": 0,
-    "tests": 20,
+    "result": "BUILD SUCCESS",
+    "tests": 21,
+    "integration_tests": 17,
+    "migration_tests": 2,
+    "gateway_tests": 2,
     "failures": 0,
     "errors": 0,
     "skipped": 0
   },
-  "postman": {
-    "runner": "Newman 6.2.1",
-    "requests": 32,
-    "assertions": 88,
-    "failures": 0,
-    "positive_2xx": 17,
-    "negative_errors": 15,
-    "folders": 9
-  },
-  "openapi": {
-    "schema_examples_validated": 76,
-    "real_public_responses_validated": 4,
-    "required_fields_enums_error_responses_checked": true
+  "unit_access": {
+    "operational_profiles_require_unit": true,
+    "cross_unit_order_access_denied": true,
+    "network_admin_scope_preserved": true,
+    "missing_unit_fails_closed": true,
+    "test": "ApiIntegrationTest.operationalUsersAreRestrictedToTheirAssignedUnit"
   },
   "database": {
-    "existing_database_migrated": true,
-    "baseline_version": "0",
-    "migration_version": "1",
-    "existing_orders_preserved": 2,
-    "new_database_and_repeatability_tested": true
+    "migrations": [
+      "V1__initial_schema.sql",
+      "V2__vinculo_unidade_operacional.sql"
+    ],
+    "new_database_test": "passed",
+    "legacy_database_test": "passed",
+    "repeat_migration_validation": "passed",
+    "legacy_user_preserved": true,
+    "operational_unit_field_added": "usuarios.unidadeId"
   },
   "pdf": {
     "file": "output/pdf/4937552_Projeto_Back_End.pdf",
-    "pages": 45,
+    "generated": true,
+    "pages": 46,
     "format": "A4",
-    "embedded_font": "Liberation Serif (SIL OFL 1.1)",
+    "embedded_font": "Liberation Serif",
     "body_size_pt": 12,
-    "line_spacing": 1.5,
+    "line_spacing_pt": 18,
     "left_top_margin_pt": 85,
     "right_bottom_margin_pt": 57,
-    "numbered_contents": true,
-    "visual_review": true,
-    "academic_fields": "Curso: CST Análise e desenvolvimento de sistemas; período: B fase II 2026 - regular; trabalho: Projeto: Desenvolvimento Back-end (898968); docente: Prof. Me. Luciane Yanase Kanashiro; polo: a informar",
-    "structural_revision": {
-      "date": "2026-10-11",
-      "own_content_only": true,
-      "chapters": 8,
-      "appendices": 8,
-      "test_scenarios_included": 32,
-      "api_tests_rerun": false
+    "text_validation": "passed in AcademicPdfGenerator",
+    "visual_review": "browser screenshot confirmed cover; extracted text and generator validation confirmed identification, contents and sections; no page-by-page visual inspection",
+    "diagrams": "PNG/SVG remain previous render; PDF caption discloses this and refers to updated DOT source",
+    "name": "Angelica Dias Folgado",
+    "ru": "4937552",
+    "polo": "nao informado",
+    "city": "nao informada"
+  },
+  "historical_not_rerun": {
+    "newman": {
+      "last_run_date": "2026-10-11",
+      "requests": 32,
+      "assertions": 88,
+      "status": "not rerun in this review"
     },
-    "academic_layout": {
-      "reference": "modelo estrutural fornecido pela discente",
-      "centered_cover": true,
-      "title_page_right_half_note": true,
-      "justified_body": true,
-      "first_line_indent_cm": 1.25,
-      "numbering": "capa excluída da contagem; número exibido no alto à direita a partir da introdução",
-      "contents_right_aligned_numbers": true,
-      "full_institutional_abnt_certification": false
+    "load_test": {
+      "last_run_date": "2026-10-11",
+      "clients": 20,
+      "duration_seconds": 60.01,
+      "requests": 228399,
+      "p95_ms": 11.76,
+      "status": "not rerun after unit-scope changes"
     }
   },
   "not_run": [
-    "Ensaio de carga de 60 segundos após as correções",
-    "Restauração de backup",
-    "Alta disponibilidade em produção",
-    "Certificação ABNT contra normas do AVA"
+    "OpenAPI batch example validation",
+    "Newman collection",
+    "Load test",
+    "HTTP restart/persistence check",
+    "Backup restore",
+    "Full ABNT certification",
+    "GitHub push"
   ],
-  "architecture_revision": {
-    "api": "ApiController: HTTP e identidade",
-    "application": "RaizesService: casos de uso e transações",
-    "domain": "OrderRules: transições de estado",
-    "feature": "docs/09_FEATURE_CRITICA.md",
-    "tests": 20,
-    "failures": 0,
-    "newman_requests": 32,
-    "newman_assertions": 88,
-    "newman_failures": 0,
-    "restart_orders_preserved": 1,
-    "restart_payments_preserved": 1
+  "repository": {
+    "changes_pushed": false,
+    "output_directory_ignored_by_git": true
   }
 }
